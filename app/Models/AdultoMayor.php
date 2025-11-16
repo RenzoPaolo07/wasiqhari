@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB; // ✅ Agregar esta línea
+use Illuminate\Support\Facades\DB;
 
 class AdultoMayor extends Model
 {
@@ -12,6 +12,7 @@ class AdultoMayor extends Model
 
     protected $table = 'adultos_mayores';
     
+    // Asegúrate de tener todas tus columnas de la migración aquí
     protected $fillable = [
         'fecha_registro',
         'dni',
@@ -31,7 +32,10 @@ class AdultoMayor extends Model
         'estado_salud',
         'actividad_calle',
         'necesidades',
-        'observaciones'
+        'observaciones',
+        'nivel_riesgo', // De la migración que hicimos
+        'lat',          // De la migración que hicimos
+        'lon'           // De la migración que hicimos
     ];
 
     protected $dates = [
@@ -41,6 +45,7 @@ class AdultoMayor extends Model
 
     /**
      * Obtener todas las visitas del adulto mayor
+     * ¡Corregido! Le decimos que la llave foránea en la otra tabla es 'adulto_id'.
      */
     public function visitas()
     {
@@ -108,7 +113,8 @@ class AdultoMayor extends Model
      */
     public function getAdultosCriticos()
     {
-        return $this->where('estado_salud', 'Critico')->count();
+        // Tu controlador busca 'nivel_riesgo' == 'Alto'
+        return $this->where('nivel_riesgo', 'Alto')->count();
     }
 
     /**
@@ -116,7 +122,7 @@ class AdultoMayor extends Model
      */
     public function getDistribucionPorDistrito()
     {
-        return $this->select('distrito', DB::raw('COUNT(*) as cantidad')) // ✅ Ahora DB está definido
+        return $this->select('distrito', DB::raw('COUNT(*) as cantidad'))
                     ->groupBy('distrito')
                     ->get()
                     ->toArray();
@@ -129,25 +135,21 @@ class AdultoMayor extends Model
     {
         $estadisticas = [];
         
-        // Total por estado de salud
-        $estadisticas['estado_salud'] = $this->select('estado_salud', DB::raw('COUNT(*) as cantidad')) // ✅
+        $estadisticas['estado_salud'] = $this->select('estado_salud', DB::raw('COUNT(*) as cantidad'))
                                             ->groupBy('estado_salud')
                                             ->get()
                                             ->toArray();
         
-        // Total por actividad en calle
-        $estadisticas['actividad_calle'] = $this->select('actividad_calle', DB::raw('COUNT(*) as cantidad')) // ✅
+        $estadisticas['actividad_calle'] = $this->select('actividad_calle', DB::raw('COUNT(*) as cantidad'))
                                                ->groupBy('actividad_calle')
                                                ->get()
                                                ->toArray();
         
-        // Total por distrito
-        $estadisticas['distritos'] = $this->select('distrito', DB::raw('COUNT(*) as cantidad')) // ✅
+        $estadisticas['distritos'] = $this->select('distrito', DB::raw('COUNT(*) as cantidad'))
                                          ->groupBy('distrito')
                                          ->get()
                                          ->toArray();
         
-        // Promedio de edad
         $estadisticas['promedio_edad'] = round($this->avg('edad'), 1);
         
         return $estadisticas;

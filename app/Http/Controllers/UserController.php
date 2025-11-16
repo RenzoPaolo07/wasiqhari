@@ -82,7 +82,13 @@ class UserController extends Controller
                 'direccion' => '',
                 'distrito' => '',
                 'habilidades' => '',
-                'disponibilidad' => '',
+                
+                // ================== LA CORRECCIÓN ==================
+                // En lugar de '', ponemos un valor válido del ENUM.
+                // 'Flexible' es una buena opción por defecto.
+                'disponibilidad' => 'Flexible',
+                // ===================================================
+
                 'zona_cobertura' => '',
                 'estado' => 'Activo',
                 'fecha_registro' => now()

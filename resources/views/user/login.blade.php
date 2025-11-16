@@ -1,21 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'WasiQhari - Iniciar Sesión' }}</title>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Estilos CSS -->
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-</head>
-<body>
-    <!-- Solo el contenido de auth, sin header/footer -->
+@extends('layouts.app')
+
+{{-- Definimos el título específico para esta página --}}
+@section('title', $title ?? 'WasiQhari - Iniciar Sesión')
+
+{{-- Esta sección es el contenido que se inyectará en @yield('content') --}}
+@section('content')
     <section class="auth-section">
         <div class="auth-container">
             <div class="auth-card">
@@ -111,15 +100,25 @@
             </div>
         </div>
     </section>
+@endsection
 
-    <style>
+{{-- Empujamos los estilos específicos de esta página al <head> --}}
+@push('styles')
+<style>
     .auth-section {
-        min-height: 100vh;
+        /* Ajustamos el min-height para que no sea 100vh sino que se adapte al contenido 
+           o le restamos la altura del header si la sabemos. 
+           O mejor, lo dejamos como estaba pero con un padding-top para el header.
+           ¡Vamos a probar algo mejor!
+        */
+        padding-top: 100px; /* Ajusta este valor a la altura de tu header */
+        min-height: 100vh; /* Mantenemos el 100vh para el fondo degradado */
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding-bottom: 20px; /* Añadimos padding abajo */
+        box-sizing: border-box; /* Importante para que el padding-top no sume al height */
     }
 
     .auth-container {
@@ -405,6 +404,5 @@
             align-items: flex-start;
         }
     }
-    </style>
-</body>
-</html>
+</style>
+@endpush

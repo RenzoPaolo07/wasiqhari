@@ -11,8 +11,12 @@ class Visita extends Model
 
     protected $table = 'visitas';
     
+    /**
+     * ¡Corregido! 
+     * Ahora usa 'adulto_id' como dijiste.
+     */
     protected $fillable = [
-        'adulto_id',
+        'adulto_id', // <-- CORREGIDO
         'voluntario_id',
         'fecha_visita',
         'tipo_visita',
@@ -23,33 +27,43 @@ class Visita extends Model
         'emergencia'
     ];
 
+    /**
+     * ¡Corregido! 
+     * Eliminado 'fecha_registro' que no estaba en tu $fillable.
+     */
     protected $dates = [
         'fecha_visita',
-        'fecha_registro'
+    ];
+
+    protected $casts = [
+        'fecha_visita' => 'datetime',
+        'emergencia' => 'boolean'
     ];
 
     /**
      * Obtener el adulto mayor de la visita
+     * ¡Corregido! Ahora apunta a la columna 'adulto_id'.
      */
-    public function adulto()
+    public function adultoMayor()
     {
         return $this->belongsTo(AdultoMayor::class, 'adulto_id');
     }
 
     /**
-     * Obtener el voluntario que realizó la visita
+     * Obtener el voluntario de la visita
      */
     public function voluntario()
     {
-        return $this->belongsTo(User::class, 'voluntario_id');
+        return $this->belongsTo(Voluntario::class);
     }
 
     /**
      * Obtener todas las visitas con relaciones
+     * ¡Corregido! Usamos la relación 'adultoMayor', no 'adulto'.
      */
     public function getAllVisitas()
     {
-        return $this->with(['adulto', 'voluntario'])
+        return $this->with(['adultoMayor', 'voluntario'])
                     ->orderBy('fecha_visita', 'DESC')
                     ->get()
                     ->toArray();
@@ -73,10 +87,11 @@ class Visita extends Model
 
     /**
      * Obtener últimas visitas
+     * ¡Corregido! Usamos la relación 'adultoMayor', no 'adulto'.
      */
     public function getUltimasVisitas($limit = 5)
     {
-        return $this->with(['adulto', 'voluntario'])
+        return $this->with(['adultoMayor', 'voluntario'])
                     ->orderBy('fecha_visita', 'DESC')
                     ->limit($limit)
                     ->get()
@@ -85,10 +100,11 @@ class Visita extends Model
 
     /**
      * Obtener visitas por voluntario
+     * ¡Corregido! Usamos la relación 'adultoMayor', no 'adulto'.
      */
     public function getVisitasPorVoluntario($voluntario_id)
     {
-        return $this->with('adulto')
+        return $this->with('adultoMayor')
                     ->where('voluntario_id', $voluntario_id)
                     ->orderBy('fecha_visita', 'DESC')
                     ->get()

@@ -1,27 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'WasiQhari - Inicio' }}</title>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Driver.js -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.min.js"></script>
-    
-    <!-- Estilos CSS -->
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-</head>
-<body>
-    @include('header')
+@extends('layouts.app')
 
-    <!-- Hero Section -->
+{{-- Definimos el título específico para esta página --}}
+@section('title', $title ?? 'WasiQhari - Inicio')
+
+{{-- Esta sección es el contenido que se inyectará en @yield('content') --}}
+@section('content')
+
     <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
@@ -55,7 +39,6 @@
         </div>
     </section>
 
-    <!-- Estadísticas -->
     <section class="stats">
         <div class="container">
             <div class="stats-grid">
@@ -83,7 +66,6 @@
         </div>
     </section>
 
-    <!-- Características -->
     <section id="features" class="features">
         <div class="container">
             <h2 class="section-title">Nuestros Servicios</h2>
@@ -135,7 +117,6 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
     <section class="cta">
         <div class="container">
             <div class="cta-content">
@@ -153,8 +134,10 @@
         </div>
     </section>
 
-    @include('footer')
+@endsection
 
+{{-- Empujamos los scripts específicos de esta página al final del <body> --}}
+@push('scripts')
     <script>
     // Tour Virtual con Driver.js
     document.getElementById('startTour')?.addEventListener('click', function() {
@@ -235,5 +218,4 @@
         observer.observe(el);
     });
     </script>
-</body>
-</html>
+@endpush
