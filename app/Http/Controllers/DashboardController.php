@@ -2,27 +2,25 @@
 
 namespace App\Http\Controllers;
 
+// ¡IMPORTANTE! Asegúrate de importar todos los modelos que vamos a usar
 use App\Models\AdultoMayor;
 use App\Models\Visita;
 use App\Models\Voluntario;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // ¡Importante! Añade esto.
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     /**
      * Muestra la vista principal del dashboard con todas las estadísticas.
+     * (Esta función ya la teníamos bien)
      */
     public function index()
     {
-        // --- ¡AQUÍ ESTÁ LA MAGIA! ---
-
         // 1. Obtenemos las últimas 5 visitas
-        // Usamos with() para traer al adulto y voluntario en una sola consulta. ¡Es más rápido!
-        // Nota: cargamos 'voluntario.user' como lo pide tu vista.
         $ultimasVisitas = Visita::with(['adultoMayor', 'voluntario.user'])
-                                ->latest() // Ordena por fecha (la más nueva primero)
-                                ->take(5)    // Trae solo 5
+                                ->latest('fecha_visita') // Ordena por fecha de visita
+                                ->take(5)
                                 ->get();
 
         // 2. Obtenemos los adultos mayores para el mapa
@@ -31,10 +29,9 @@ class DashboardController extends Controller
                                       ->get(['nombres', 'apellidos', 'lat', 'lon', 'nivel_riesgo']);
 
         // 3. Datos para el gráfico de Salud
-        // Contamos cuántos hay de cada estado de salud
         $saludData = AdultoMayor::select('estado_salud', DB::raw('count(*) as total'))
                          ->groupBy('estado_salud')
-                         ->pluck('total', 'estado_salud'); // Devuelve un array como ['Bueno' => 10, 'Regular' => 5]
+                         ->pluck('total', 'estado_salud');
 
         // 4. Datos para el gráfico de Actividades en Calle
         $actividadesData = AdultoMayor::select('actividad_calle', DB::raw('count(*) as total'))
@@ -54,7 +51,7 @@ class DashboardController extends Controller
             'total_adultos' => AdultoMayor::count(),
             'total_voluntarios' => Voluntario::count(),
             'total_visitas' => Visita::count(),
-            'adultos_criticos' => AdultoMayor::where('nivel_riesgo', 'Alto')->count(), // Mapeamos 'Alto' a 'Crítico'
+            'adultos_criticos' => AdultoMayor::where('nivel_riesgo', 'Alto')->count(), 
             'ultimas_visitas' => $ultimasVisitas,
             'distribucion_distritos' => $distribucionDistritos
         ];
@@ -63,52 +60,85 @@ class DashboardController extends Controller
         $data = [
             'title' => 'Dashboard - WasiQhari',
             'page' => 'dashboard',
-            'stats' => $stats, // El array grande que tu vista usa
-            'adultosParaMapa' => $adultosParaMapa, // Para el script del mapa
-            'saludData' => $saludData, // Para el gráfico de salud
-            'actividadesData' => $actividadesData, // Para el gráfico de actividades
+            'stats' => $stats,
+            'adultosParaMapa' => $adultosParaMapa,
+            'saludData' => $saludData,
+            'actividadesData' => $actividadesData,
         ];
         
         return view('dashboard.index', $data);
     }
 
-    // --- EL RESTO DE TUS FUNCIONES (sin cambios) ---
+    // --- ¡AQUÍ VIENEN LAS CORRECCIONES! ---
 
+    /**
+     * Muestra la página de Gestión de Adultos
+     */
     public function adultos()
     {
+        // ¡ARREGLADO! Ahora buscamos los adultos y los pasamos a la vista.
+        $adultos = AdultoMayor::latest('fecha_registro')->get(); // Obtenemos todos los adultos
+        
         $data = [
             'title' => 'Gestión de Adultos - WasiQhari',
-            'page' => 'adultos'
+            'page' => 'adultos',
+            'adultos' => $adultos // <-- ¡LA VARIABLE QUE FALTABA!
         ];
+        
         return view('dashboard.adultos', $data);
     }
 
     public function storeAdulto(Request $request)
     {
         // Lógica para guardar adulto
+        // (Asegúrate de que esta lógica esté implementada)
     }
 
+    /**
+     * Muestra la página de Gestión de Voluntarios
+     */
     public function voluntarios()
     {
+        // ¡ARREGLADO! Ahora buscamos los voluntarios y los pasamos a la vista.
+        $voluntarios = Voluntario::with('user')->get(); // Obtenemos voluntarios con su info de user
+        
         $data = [
             'title' => 'Gestión de Voluntarios - WasiQhari',
-            'page' => 'voluntarios'
+            'page' => 'voluntarios',
+            'voluntarios' => $voluntarios // <-- ¡LA VARIABLE QUE FALTABA!
         ];
+        
         return view('dashboard.voluntarios', $data);
     }
 
+    /**
+     * Muestra la página de Gestión de Visitas
+     */
     public function visitas()
     {
+        // ¡ARREGLADO! Buscamos visitas, adultos y voluntarios.
+        $visitas = Visita::with(['adultoMayor', 'voluntario.user'])
+                         ->latest('fecha_visita')
+                         ->get();
+                         
+        $adultos = AdultoMayor::all(['id', 'nombres', 'apellidos']); // Para el dropdown
+        $voluntarios = Voluntario::with('user')->get(); // Para el dropdown
+        
         $data = [
             'title' => 'Gestión de Visitas - WasiQhari',
-            'page' => 'visitas'
+            'page' => 'visitas',
+            'visitas' => $visitas,         // <-- Variable para la tabla
+            'adultos' => $adultos,         // <-- Variable para el formulario
+            'voluntarios' => $voluntarios  // <-- ¡LA VARIABLE QUE FALTABA!
         ];
+        
         return view('dashboard.visitas', $data);
     }
 
     public function storeVisita(Request $request)
     {
         // Lógica para guardar visita
+        // (Asegúrate de que esta lógica esté implementada)
     }
 
     public function ai()
@@ -120,7 +150,7 @@ class DashboardController extends Controller
         return view('dashboard.ai', $data);
     }
 
-    public function reporters() // (Tenías 'reporters', quizás quisiste decir 'reportes')
+    public function reporters()
     {
         $data = [
             'title' => 'Reportes - WasiQhari',
