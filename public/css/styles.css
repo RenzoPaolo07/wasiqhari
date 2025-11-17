@@ -1468,3 +1468,518 @@ textarea:focus {
 body {
     padding-top: 70px; /* Altura aproximada del header */
 }
+
+/* =================================================================== */
+/* =                ESTILOS MEJORADOS PARA EL DASHBOARD              = */
+/* =================================================================== */
+
+/* ----- Fuente Global ----- */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f7f6; /* Un gris muy claro */
+}
+
+/* ----- Layout del Dashboard ----- */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+}
+
+.sidebar-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebar-header .nav-logo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color, #e74c3c);
+    text-decoration: none;
+}
+.sidebar-header .nav-logo i {
+    margin-right: 10px;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 20px 15px;
+    overflow-y: auto;
+}
+
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    text-decoration: none;
+    color: #5a6a7b; /* Color de texto base */
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.sidebar-nav .nav-link i {
+    width: 20px;
+    margin-right: 15px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: var(--primary-color, #e74c3c);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.sidebar-footer {
+    padding: 20px 15px;
+    border-top: 1px solid #f0f0f0;
+}
+.sidebar-footer .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #5a6a7b;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.sidebar-footer .nav-link:hover {
+    background-color: #f8f9fa;
+}
+.sidebar-footer .nav-link i {
+    width: 20px;
+    margin-right: 15px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+.sidebar-footer .logout-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    color: #e74c3c; /* Rojo para logout */
+}
+.sidebar-footer .logout-btn:hover {
+    background-color: #ffe6e6;
+}
+
+
+.main-content {
+    flex: 1;
+    margin-left: 260px; /* Mismo ancho que el sidebar */
+    padding: 30px;
+    background-color: #f4f7f6;
+}
+
+/* ----- Contenido del Dashboard (Header, Cards) ----- */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-content h1 {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-size: 1.8rem; /* Más limpio */
+    font-weight: 600;
+}
+
+.header-content p {
+    color: #7f8c8d;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.header-actions .btn {
+    padding: 10px 20px; /* Ligeramente más pequeño */
+    font-size: 0.95rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    transition: all 0.3s ease;
+}
+.header-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+}
+
+/* ----- Tarjeta de Contenido Mejorada ----- */
+.content-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05); /* Sombra más suave */
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fdfdfd; /* Casi blanco */
+}
+
+.card-header h3 {
+    margin: 0;
+    color: #34495e;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+/* ----- Tabla Mejorada ----- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table th, .table td {
+    padding: 16px 20px; /* Más espacio */
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+}
+.table th {
+    background: #f8f9fa;
+    color: #6c757d;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.table td {
+    color: #34495e; /* Texto más oscuro */
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+.table tr:last-child td {
+    border-bottom: none;
+}
+.table tr:hover {
+    background-color: #f8f9fa;
+}
+.text-center {
+    text-align: center;
+}
+
+/* Botones de Acción de la Tabla */
+.btn-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-right: 8px;
+    padding: 8px;
+    border-radius: 50%; /* Círculo */
+    width: 36px;
+    height: 36px;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+.btn-action.btn-ver { color: #3498db; }
+.btn-action.btn-ver:hover { background: #eaf3ff; color: #2980b9; }
+.btn-action.btn-eliminar { color: #e74c3c; }
+.btn-action.btn-eliminar:hover { background: #ffe6e6; color: #c0392b; }
+
+/* Badges Mejorados */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-bueno, .badge-riesgo-bajo { background: #e6ffe6; color: #27ae60; }
+.badge-regular, .badge-riesgo-medio { background: #fff8e9; color: #f39c12; }
+.badge-malo, .badge-riesgo-alto { background: #ffe6e6; color: #e74c3c; }
+.badge-critico { background: #c0392b; color: white; }
+
+/* Paginación Mejorada */
+.pagination-container {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+}
+/* (Aquí faltarían los estilos de .pagination, Laravel los pone por defecto) */
+
+/* ----- Modal Mejorado ----- */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1050; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); 
+    backdrop-filter: blur(5px);
+}
+.modal-content {
+    background-color: white;
+    margin: 3% auto; /* Más arriba */
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    animation: modalSlideIn 0.3s ease-out;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+}
+.modal-lg {
+    max-width: 800px;
+}
+@keyframes modalSlideIn {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.modal-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+.modal-header h3 {
+    margin: 0;
+    color: #34495e;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+.close {
+    color: #888;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.close:hover {
+    color: #000;
+}
+.modal-body {
+    padding: 30px;
+    max-height: 70vh; /* Para que el contenido sea scrollable */
+    overflow-y: auto;
+}
+
+/* ----- Formulario Mejorado ----- */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+    gap: 25px;
+    margin-bottom: 20px;
+}
+.form-group {
+    margin-bottom: 0;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #5a6a7b;
+}
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da; /* Borde más sutil */
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa; /* Fondo ligero */
+    box-sizing: border-box; 
+    font-family: 'Poppins', sans-serif;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color, #e74c3c);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+    /* Para que ocupe más espacio */
+    grid-column: span 2;
+}
+.form-group[data-span="3"] {
+    grid-column: span 3;
+}
+.form-group textarea[name="necesidades"] {
+    grid-column: span 1;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 25px;
+}
+.error-text {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: block;
+}
+
+/* ----- Alertas ----- */
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 1rem;
+    border: 1px solid transparent;
+}
+.alert-success {
+    background-color: #e6ffe6;
+    border-color: #ccffcc;
+    color: #27ae60;
+}
+.alert-danger {
+    background-color: #ffe6e6;
+    border-color: #ffcccc;
+    color: #e74c3c;
+}
+
+/* ----- Responsive del Dashboard ----- */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        /* (Se necesitaría JS para un botón de menú hamburguesa) */
+        /* Por ahora, lo dejamos visible pero ajustamos el main */
+        width: 220px;
+    }
+    .main-content {
+        margin-left: 220px;
+        padding: 20px;
+    }
+    .form-grid {
+        grid-template-columns: 1fr 1fr; /* 2 columnas */
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        /* Ocultamos el sidebar en móvil */
+        display: none;
+    }
+    .main-content {
+        margin-left: 0; /* Ocupa todo el ancho */
+        padding: 15px;
+    }
+    .form-grid {
+        grid-template-columns: 1fr; /* 1 columna */
+    }
+    .form-group textarea {
+        grid-column: span 1; /* Ocupa 1 col */
+    }
+}
+
+/* =================================================================== */
+/* =      ESTILOS PARA LA PAGINACIÓN (AÑADIR AL FINAL)           = */
+/* =================================================================== */
+
+.pagination-container {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pagination {
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+    border-radius: 0.25rem;
+}
+
+.page-item {
+    margin: 0 3px;
+}
+
+.page-link {
+    position: relative;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    line-height: 1.25;
+    color: var(--primary-color, #e74c3c);
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px; /* Bordes redondeados */
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.page-link:hover {
+    z-index: 2;
+    color: #c0392b;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: var(--primary-color, #e74c3c);
+    border-color: var(--primary-color, #e74c3c);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+    opacity: 0.7;
+}

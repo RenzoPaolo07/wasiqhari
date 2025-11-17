@@ -25,9 +25,19 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    // Gestión de adultos
+    // ============ GESTIÓN DE ADULTOS (¡ESTAS SON LAS RUTAS QUE FALTABAN!) ============
     Route::get('/dashboard/adultos', [DashboardController::class, 'adultos'])->name('adultos');
     Route::post('/dashboard/adultos', [DashboardController::class, 'storeAdulto'])->name('adultos.store');
+    
+    // ¡¡ESTA ES LA RUTA QUE ARREGLA EL BOTÓN DEL OJO!!
+    Route::get('/dashboard/adultos/{adulto}', [DashboardController::class, 'show'])->name('adultos.show'); 
+    
+    // ¡¡ESTA ES LA RUTA QUE ARREGLA LA EDICIÓN!!
+    Route::put('/dashboard/adultos/{adulto}', [DashboardController::class, 'update'])->name('adultos.update');
+    
+    // ¡¡ESTA ES LA RUTA QUE ARREGLA EL TACHO!!
+    Route::delete('/dashboard/adultos/{adulto}', [DashboardController::class, 'destroy'])->name('adultos.destroy');
+    // =================================================================================
     
     // Gestión de voluntarios
     Route::get('/dashboard/voluntarios', [DashboardController::class, 'voluntarios'])->name('voluntarios');

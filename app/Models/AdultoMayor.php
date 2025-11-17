@@ -12,7 +12,6 @@ class AdultoMayor extends Model
 
     protected $table = 'adultos_mayores';
     
-    // Asegúrate de tener todas tus columnas de la migración aquí
     protected $fillable = [
         'fecha_registro',
         'dni',
@@ -33,52 +32,58 @@ class AdultoMayor extends Model
         'actividad_calle',
         'necesidades',
         'observaciones',
-        'nivel_riesgo', // De la migración que hicimos
-        'lat',          // De la migración que hicimos
-        'lon'           // De la migración que hicimos
-    ];
-
-    protected $dates = [
-        'fecha_registro',
-        'fecha_nacimiento'
+        'nivel_riesgo',
+        'lat',
+        'lon'
     ];
 
     /**
+     * ==========================================================
+     * ¡AQUÍ ESTÁ LA CORRECCIÓN!
+     * ==========================================================
+     * Reemplazamos $dates por $casts.
+     * Esto le dice a Laravel que trate estas columnas como objetos de fecha (Carbon).
+     */
+    protected $casts = [
+        'fecha_registro' => 'datetime',
+        'fecha_nacimiento' => 'date', // 'date' es suficiente si no guardas la hora
+    ];
+
+    /**
+     * La propiedad $dates está deprecada, la reemplazamos arriba.
+     * protected $dates = [
+     * 'fecha_registro',
+     * 'fecha_nacimiento'
+     * ];
+     */
+
+
+    /**
      * Obtener todas las visitas del adulto mayor
-     * ¡Corregido! Le decimos que la llave foránea en la otra tabla es 'adulto_id'.
+     * (Esto ya estaba bien de la vez pasada)
      */
     public function visitas()
     {
         return $this->hasMany(Visita::class, 'adulto_id');
     }
 
-    /**
-     * Obtener todos los adultos mayores
-     */
+    // --- El resto de tus funciones (ya estaban bien) ---
+
     public function getAllAdultos()
     {
         return $this->orderBy('fecha_registro', 'DESC')->get();
     }
 
-    /**
-     * Obtener adulto por ID
-     */
     public function getAdultoById($id)
     {
         return $this->find($id);
     }
 
-    /**
-     * Crear nuevo adulto mayor
-     */
     public function createAdulto($data)
     {
         return $this->create($data);
     }
 
-    /**
-     * Actualizar adulto mayor
-     */
     public function updateAdulto($id, $data)
     {
         $adulto = $this->find($id);
@@ -88,9 +93,6 @@ class AdultoMayor extends Model
         return false;
     }
 
-    /**
-     * Eliminar adulto mayor
-     */
     public function deleteAdulto($id)
     {
         $adulto = $this->find($id);
@@ -100,26 +102,16 @@ class AdultoMayor extends Model
         return false;
     }
 
-    /**
-     * Obtener total de adultos mayores
-     */
     public function getTotalAdultos()
     {
         return $this->count();
     }
 
-    /**
-     * Obtener adultos en estado crítico
-     */
     public function getAdultosCriticos()
     {
-        // Tu controlador busca 'nivel_riesgo' == 'Alto'
         return $this->where('nivel_riesgo', 'Alto')->count();
     }
 
-    /**
-     * Obtener distribución por distrito
-     */
     public function getDistribucionPorDistrito()
     {
         return $this->select('distrito', DB::raw('COUNT(*) as cantidad'))
@@ -128,9 +120,6 @@ class AdultoMayor extends Model
                     ->toArray();
     }
 
-    /**
-     * Obtener estadísticas completas
-     */
     public function getEstadisticasCompletas()
     {
         $estadisticas = [];
@@ -155,9 +144,6 @@ class AdultoMayor extends Model
         return $estadisticas;
     }
 
-    /**
-     * Buscar adultos con filtros
-     */
     public function buscarAdultos($filtros)
     {
         $query = $this->query();
