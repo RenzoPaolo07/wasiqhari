@@ -1,12 +1,4 @@
-@extends('layouts.app')
-
-{{-- Definimos el título específico para esta página --}}
-@section('title', $title ?? 'WasiQhari - Inicio')
-
-{{-- Esta sección es el contenido que se inyectará en @yield('content') --}}
-@section('content')
-
-    <section class="hero">
+@include('header') <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="hero-title animate-fade-in">
@@ -17,9 +9,15 @@
                     y organizaciones sociales, promoviendo el cuidado, la compañía y la acción solidaria.
                 </p>
                 <div class="hero-buttons animate-slide-up">
-                    <a href="{{ route('register') }}" class="btn btn-primary">
-                        <i class="fas fa-hands-helping"></i> Únete como Voluntario
-                    </a>
+                    @guest
+                        <a href="{{ route('register') }}" class="btn btn-primary">
+                            <i class="fas fa-hands-helping"></i> Únete como Voluntario
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> Ir al Dashboard
+                        </a>
+                    @endguest
                     <a href="#features" class="btn btn-secondary">
                         <i class="fas fa-info-circle"></i> Conoce Más
                     </a>
@@ -123,9 +121,15 @@
                 <h2>¿Listo para marcar la diferencia?</h2>
                 <p>Únete a nuestra comunidad solidaria y ayuda a construir un futuro mejor para nuestros adultos mayores.</p>
                 <div class="cta-buttons">
-                    <a href="{{ route('register') }}" class="btn btn-large btn-primary">
-                        <i class="fas fa-user-plus"></i> Regístrate Ahora
-                    </a>
+                    @guest
+                        <a href="{{ route('register') }}" class="btn btn-large btn-primary">
+                            <i class="fas fa-user-plus"></i> Regístrate Ahora
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="btn btn-large btn-primary">
+                            <i class="fas fa-arrow-right"></i> Ir al Panel
+                        </a>
+                    @endguest
                     <button id="startTour" class="btn btn-large btn-secondary">
                         <i class="fas fa-play-circle"></i> Tour Virtual
                     </button>
@@ -134,11 +138,9 @@
         </div>
     </section>
 
-@endsection
+@include('footer')
 
-{{-- Empujamos los scripts específicos de esta página al final del <body> --}}
-@push('scripts')
-    <script>
+<script>
     // Tour Virtual con Driver.js
     document.getElementById('startTour')?.addEventListener('click', function() {
         const driver = new Driver();
@@ -217,5 +219,4 @@
     document.querySelectorAll('.animate-fade-in, .animate-slide-up, .stats').forEach(el => {
         observer.observe(el);
     });
-    </script>
-@endpush
+</script>
