@@ -22,6 +22,15 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
 // Rutas protegidas (dashboard)
 Route::middleware(['auth'])->group(function () {
+    // Vista principal del panel de reportes
+    Route::get('/dashboard/reportes', [DashboardController::class, 'reporters'])->name('reportes');
+    // Rutas de descarga REALES (Excel)
+    Route::get('/reportes/exportar/general', [App\Http\Controllers\ReporteController::class, 'exportarGeneralExcel'])->name('reportes.excel.general');
+    Route::get('/reportes/exportar/visitas', [App\Http\Controllers\ReporteController::class, 'exportarVisitasExcel'])->name('reportes.excel.visitas');
+    Route::get('/reportes/exportar/voluntarios', [App\Http\Controllers\ReporteController::class, 'exportarVoluntariosExcel'])->name('reportes.excel.voluntarios');
+    // Rutas de impresión REALES (PDF)
+    Route::get('/reportes/imprimir/{tipo}', [App\Http\Controllers\ReporteController::class, 'imprimirReporte'])->name('reportes.imprimir');
+
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
