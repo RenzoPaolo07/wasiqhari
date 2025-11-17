@@ -25,22 +25,26 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    // ============ GESTIÓN DE ADULTOS (¡ESTAS SON LAS RUTAS QUE FALTABAN!) ============
+    // Gestión de Adultos
     Route::get('/dashboard/adultos', [DashboardController::class, 'adultos'])->name('adultos');
     Route::post('/dashboard/adultos', [DashboardController::class, 'storeAdulto'])->name('adultos.store');
-    
-    // ¡¡ESTA ES LA RUTA QUE ARREGLA EL BOTÓN DEL OJO!!
     Route::get('/dashboard/adultos/{adulto}', [DashboardController::class, 'show'])->name('adultos.show'); 
-    
-    // ¡¡ESTA ES LA RUTA QUE ARREGLA LA EDICIÓN!!
     Route::put('/dashboard/adultos/{adulto}', [DashboardController::class, 'update'])->name('adultos.update');
-    
-    // ¡¡ESTA ES LA RUTA QUE ARREGLA EL TACHO!!
     Route::delete('/dashboard/adultos/{adulto}', [DashboardController::class, 'destroy'])->name('adultos.destroy');
-    // =================================================================================
     
-    // Gestión de voluntarios
+    // ============ GESTIÓN DE VOLUNTARIOS (¡RUTAS AÑADIDAS!) ============
     Route::get('/dashboard/voluntarios', [DashboardController::class, 'voluntarios'])->name('voluntarios');
+    // (No creamos voluntarios desde aquí, se registran solos, así que no hay 'store')
+    
+    // Nueva ruta para OBTENER datos de un voluntario (para el modal)
+    Route::get('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'showVoluntario'])->name('voluntarios.show');
+    
+    // Nueva ruta para ACTUALIZAR un voluntario
+    Route::put('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'updateVoluntario'])->name('voluntarios.update');
+    
+    // Nueva ruta para ELIMINAR un voluntario
+    Route::delete('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'destroyVoluntario'])->name('voluntarios.destroy');
+    // ====================================================================
     
     // Gestión de visitas
     Route::get('/dashboard/visitas', [DashboardController::class, 'visitas'])->name('visitas');

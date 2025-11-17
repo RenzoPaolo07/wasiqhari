@@ -1983,3 +1983,40 @@ body {
     border-color: #dee2e6;
     opacity: 0.7;
 }
+
+/* =================================================================== */
+/* =      ESTILOS PARA BADGES DE VOLUNTARIOS (AÑADIR AL FINAL)     = */
+/* =================================================================== */
+
+.badge-estado-activo { 
+    background: #e6ffe6; 
+    color: #27ae60; 
+}
+.badge-estado-inactivo { 
+    background: #f8f9fa; 
+    color: #7f8c8d; 
+    border: 1px solid #e0e0e0; 
+}
+.badge-estado-suspendido { 
+    background: #ffe6e6; 
+    color: #e74c3c; 
+}
+
+/* Botón de Invitar */
+.btn-primary-outline {
+    background: #fff;
+    color: var(--primary-color, #e74c3c);
+    border: 2px solid var(--primary-color, #e74c3c);
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-primary-outline:hover {
+    background: var(--primary-color, #e74c3c);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}

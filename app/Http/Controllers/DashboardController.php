@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdultoMayor; // ¡Importante!
+use App\Models\AdultoMayor;
 use App\Models\Visita;
 use App\Models\Voluntario;
+use App\Models\User; // ¡Importante! Añadir User
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule; // ¡Importante! Añadir Rule
 
 class DashboardController extends Controller
 {
@@ -56,12 +58,9 @@ class DashboardController extends Controller
         return view('dashboard.index', $data);
     }
 
-    /**
-     * Muestra la página de Gestión de Adultos.
-     */
+    // --- Funciones de Adultos (ya estaban bien) ---
     public function adultos()
     {
-        // ... (Esta función ya estaba bien)
         $adultos = AdultoMayor::latest('fecha_registro')->paginate(10); 
         $data = [
             'title' => 'Gestión de Adultos - WasiQhari',
@@ -71,9 +70,6 @@ class DashboardController extends Controller
         return view('dashboard.adultos', $data);
     }
 
-    /**
-     * Guarda un nuevo Adulto Mayor.
-     */
     public function storeAdulto(Request $request)
     {
         // ... (Esta función ya estaba bien)
@@ -113,26 +109,13 @@ class DashboardController extends Controller
         return redirect()->route('adultos')->with('success', '¡Adulto mayor registrado con éxito!');
     }
 
-    /**
-     * ==============================================
-     * ¡NUEVA FUNCIÓN! Muestra datos de un adulto
-     * ==============================================
-     * Usa Route-Model Binding para encontrar al adulto automáticamente.
-     * Devuelve JSON para que JavaScript lo lea.
-     */
     public function show(AdultoMayor $adulto)
     {
         return response()->json($adulto);
     }
 
-    /**
-     * ==============================================
-     * ¡NUEVA FUNCIÓN! Actualiza un adulto
-     * ==============================================
-     */
     public function update(Request $request, AdultoMayor $adulto)
     {
-        // Validamos (el DNI debe ser único, ignorando el DNI actual)
         $validator = Validator::make($request->all(), [
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
@@ -141,7 +124,6 @@ class DashboardController extends Controller
             'fecha_nacimiento' => 'required|date',
             'edad' => 'required|integer|min:60',
             'distrito' => 'required|string|max:50',
-            // ... (añade todas las demás reglas de validación igual que en storeAdulto)
             'estado_salud' => 'required|in:Bueno,Regular,Malo,Critico',
             'nivel_riesgo' => 'required|in:Bajo,Medio,Alto',
             'lat' => 'nullable|numeric',
@@ -152,38 +134,29 @@ class DashboardController extends Controller
             return redirect()->route('adultos')
                             ->withErrors($validator)
                             ->withInput()
-                            ->with('error_form_edit', 'No se pudo actualizar. Revisa los campos.'); // Flag diferente
+                            ->with('error_form_edit', 'No se pudo actualizar. Revisa los campos.');
         }
 
-        // Actualizamos el adulto
         $adulto->update($request->all());
-
         return redirect()->route('adultos')->with('success', '¡Registro actualizado con éxito!');
     }
 
-    /**
-     * ==============================================
-     * ¡NUEVA FUNCIÓN! Elimina un adulto
-     * ==============================================
-     */
     public function destroy(AdultoMayor $adulto)
     {
         try {
             $adulto->delete();
-            // Devolvemos JSON para que SweetAlert sepa que todo salió bien
             return response()->json(['success' => true, 'message' => 'Registro eliminado con éxito.']);
         } catch (\Exception $e) {
-            // En caso de error (ej. restricción de llave foránea)
             return response()->json(['success' => false, 'message' => 'No se pudo eliminar el registro.'], 500);
         }
     }
 
 
-    // --- Funciones de Voluntarios y Visitas (ya estaban bien) ---
+    // --- Funciones de Voluntarios ---
     
     public function voluntarios()
     {
-        $voluntarios = Voluntario::with('user')->paginate(10);
+        $voluntarios = Voluntario::with('user')->paginate(10); // 'user' es la relación
         $data = [
             'title' => 'Gestión de Voluntarios - WasiQhari',
             'page' => 'voluntarios',
@@ -192,6 +165,90 @@ class DashboardController extends Controller
         return view('dashboard.voluntarios', $data);
     }
 
+    /**
+     * ===================================================
+     * ¡NUEVA FUNCIÓN! Muestra datos de un voluntario
+     * ===================================================
+     * Carga el voluntario JUNTO con su usuario.
+     */
+    public function showVoluntario(Voluntario $voluntario)
+    {
+        // Cargamos la relación 'user' y la devolvemos como JSON
+        $voluntario->load('user'); 
+        return response()->json($voluntario);
+    }
+
+    /**
+     * ===================================================
+     * ¡NUEVA FUNCIÓN! Actualiza un voluntario
+     * ===================================================
+     */
+    public function updateVoluntario(Request $request, Voluntario $voluntario)
+    {
+        // 1. Validar los datos del Voluntario
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            // Validar email único, ignorando el user_id actual
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore($voluntario->user_id),
+            ],
+            'telefono' => 'nullable|string|max:15',
+            'distrito' => 'nullable|string|max:50',
+            'disponibilidad' => 'required|in:Mañanas,Tardes,Noches,Fines de semana,Flexible',
+            'estado' => 'required|in:Activo,Inactivo,Suspendido',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('voluntarios')
+                            ->withErrors($validator)
+                            ->withInput()
+                            ->with('error_form_edit', 'No se pudo actualizar. Revisa los campos.');
+        }
+
+        // 2. Actualizar el modelo User (nombre, email)
+        $voluntario->user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        // 3. Actualizar el modelo Voluntario (el resto)
+        $voluntario->update([
+            'telefono' => $request->telefono,
+            'distrito' => $request->distrito,
+            'disponibilidad' => $request->disponibilidad,
+            'estado' => $request->estado,
+            'zona_cobertura' => $request->zona_cobertura,
+            'habilidades' => $request->habilidades,
+        ]);
+
+        return redirect()->route('voluntarios')->with('success', '¡Voluntario actualizado con éxito!');
+    }
+
+    /**
+     * ===================================================
+     * ¡NUEVA FUNCIÓN! Elimina un voluntario
+     * ===================================================
+     * Eliminar al voluntario también eliminará al usuario (por 'onDelete('cascade')' en la migración).
+     */
+    public function destroyVoluntario(Voluntario $voluntario)
+    {
+        try {
+            // Opcional: Si no tienes 'onDelete('cascade')', borra el usuario primero
+            // $voluntario->user->delete(); 
+            
+            $voluntario->delete();
+            return response()->json(['success' => true, 'message' => 'Voluntario eliminado con éxito.']);
+        } catch (\Exception $e) {
+            // Captura cualquier error (ej. si tiene visitas asignadas)
+            return response()->json(['success' => false, 'message' => 'No se pudo eliminar. Puede tener visitas asignadas.'], 500);
+        }
+    }
+
+
+    // --- Funciones de Visitas (ya estaban bien) ---
+    
     public function visitas()
     {
         $visitas = Visita::with(['adultoMayor', 'voluntario.user'])
@@ -225,6 +282,8 @@ class DashboardController extends Controller
         Visita::create($request->all());
         return redirect()->route('visitas')->with('success', '¡Visita registrada con éxito!');
     }
+    
+    // --- Resto de funciones ---
 
     public function ai()
     {

@@ -1,445 +1,321 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Gestión de Voluntarios - WasiQhari')
+@section('title', $title ?? 'Gestión de Voluntarios')
 
 @section('content')
 <div class="dashboard-container">
+    
     <div class="dashboard-header">
-        <div>
-            <h1>Gestión de Voluntarios - AyniConnect</h1>
-            <p>Administra la red solidaria de voluntarios</p>
+        <div class="header-content">
+            <h1>Gestión de Voluntarios</h1>
+            <p>Administra a los miembros de tu equipo.</p>
         </div>
         <div class="header-actions">
-            <button class="btn btn-primary" onclick="abrirModalNuevoVoluntario()">
-                <i class="fas fa-user-plus"></i> Nuevo Voluntario
-            </button>
+            <a href="{{ route('register') }}" class="btn btn-primary-outline" target="_blank">
+                <i class="fas fa-user-plus"></i> Invitar Voluntario
+            </a>
         </div>
     </div>
 
-    <!-- Estadísticas de Voluntarios -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon primary">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="stat-info">
-                <h3>{{ count($voluntarios) }}</h3>
-                <p>Total Voluntarios</p>
-            </div>
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
         </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon success">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-info">
-                <h3>{{ count(array_filter($voluntarios->toArray(), fn($v) => $v['estado'] === 'Activo')) }}</h3>
-                <p>Voluntarios Activos</p>
-            </div>
+    @endif
+    
+    @if(session('error_form_edit'))
+        <div class="alert alert-danger">
+            <strong>¡Error!</strong> {{ session('error_form_edit') }}
+             @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
         </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon warning">
-                <i class="fas fa-map-marker-alt"></i>
-            </div>
-            <div class="stat-info">
-                <h3>4</h3>
-                <p>Distritos Cubiertos</p>
-            </div>
+    @endif
+
+    <div class="content-card">
+        <div class="card-header">
+            <h3>Voluntarios Registrados</h3>
         </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon info">
-                <i class="fas fa-hands-helping"></i>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Distrito</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($voluntarios as $voluntario)
+                            <tr id="fila-voluntario-{{ $voluntario->id }}">
+                                <td>{{ $voluntario->user->name ?? 'Usuario no encontrado' }}</td>
+                                <td>{{ $voluntario->user->email ?? 'N/A' }}</td>
+                                <td>{{ $voluntario->telefono ?? 'N/A' }}</td>
+                                <td>{{ $voluntario->distrito ?? 'N/A' }}</td>
+                                <td>
+                                    <span class="badge badge-estado-{{ strtolower($voluntario->estado) }}">
+                                        {{ $voluntario->estado }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn-action btn-ver" 
+                                            data-id="{{ $voluntario->id }}" 
+                                            title="Ver / Editar">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-action btn-eliminar" 
+                                            data-id="{{ $voluntario->id }}" 
+                                            data-name="{{ $voluntario->user->name ?? 'Voluntario' }}" 
+                                            title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center">No hay voluntarios registrados todavía.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-            <div class="stat-info">
-                <h3>156</h3>
-                <p>Visitas Realizadas</p>
+            
+            <div class="pagination-container">
+                {{ $voluntarios->links() }}
             </div>
         </div>
     </div>
 
-    <!-- Lista de Voluntarios -->
-    <div class="table-container">
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Voluntario</th>
-                        <th>Contacto</th>
-                        <th>Distrito</th>
-                        <th>Habilidades</th>
-                        <th>Disponibilidad</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($voluntarios as $voluntario)
-                    <tr>
-                        <td>
-                            <div class="user-info">
-                                <div class="user-avatar">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div class="user-details">
-                                    <strong>Voluntario {{ $voluntario->id }}</strong>
-                                    <small>Registrado: {{ \Carbon\Carbon::parse($voluntario->fecha_registro)->format('d/m/Y') }}</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="contact-info">
-                                <div><i class="fas fa-phone"></i> {{ $voluntario->telefono ?: 'No especificado' }}</div>
-                                <div><i class="fas fa-map-marker-alt"></i> {{ $voluntario->distrito }}</div>
-                            </div>
-                        </td>
-                        <td>{{ $voluntario->distrito }}</td>
-                        <td>
-                            <div class="skills-tags">
-                                @php
-                                    $habilidades = explode(',', $voluntario->habilidades);
-                                @endphp
-                                @foreach($habilidades as $habilidad)
-                                <span class="skill-tag">{{ trim($habilidad) }}</span>
-                                @endforeach
-                            </div>
-                        </td>
-                        <td>
-                            <span class="disponibilidad-badge">{{ $voluntario->disponibilidad }}</span>
-                        </td>
-                        <td>
-                            <span class="status-badge status-{{ strtolower($voluntario->estado) }}">
-                                {{ $voluntario->estado }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-icon btn-view" onclick="verPerfilVoluntario({{ $voluntario->id }})">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-icon btn-edit" onclick="editarVoluntario({{ $voluntario->id }})">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-icon btn-assign" onclick="asignarCaso({{ $voluntario->id }})">
-                                    <i class="fas fa-tasks"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para Nuevo Voluntario -->
-<div id="voluntarioModal" class="modal">
-    <div class="modal-content">
+</div> <div id="modalVoluntario" class="modal">
+    <div class="modal-content modal-lg">
         <div class="modal-header">
-            <h3>Nuevo Voluntario</h3>
-            <span class="close">&times;</span>
+            <h3 id="modalTitulo">Editar Voluntario</h3>
+            <span class="close" id="closeModal">&times;</span>
         </div>
-        <form id="voluntarioForm">
-            <div class="modal-body">
-                <div class="form-grid">
+        <div class="modal-body">
+            <form id="formVoluntario" action="" method="POST">
+                @csrf
+                @method('PUT') <div class="form-grid">
                     <div class="form-group">
-                        <label for="vol_nombre">Nombre Completo *</label>
-                        <input type="text" id="vol_nombre" name="nombre" required>
+                        <label for="name">Nombre Completo *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="text" id="telefono" name="telefono" maxlength="15">
                     </div>
                     
                     <div class="form-group">
-                        <label for="vol_email">Email *</label>
-                        <input type="email" id="vol_email" name="email" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="vol_telefono">Teléfono *</label>
-                        <input type="tel" id="vol_telefono" name="telefono" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="vol_distrito">Distrito *</label>
-                        <select id="vol_distrito" name="distrito" required>
-                            <option value="">Seleccionar</option>
+                        <label for="distrito">Distrito</label>
+                        <select id="distrito" name="distrito">
+                            <option value="">Selecciona un distrito</option>
                             <option value="Cusco">Cusco</option>
                             <option value="Wanchaq">Wanchaq</option>
                             <option value="San Sebastián">San Sebastián</option>
                             <option value="Santiago">Santiago</option>
+                            <option value="San Jerónimo">San Jerónimo</option>
+                            <option value="Poroy">Poroy</option>
+                            <option value="Saylla">Saylla</option>
+                            <option value="Ccorca">Ccorca</option>
+                            <option value="Otro">Otro</option>
                         </select>
                     </div>
-                    
                     <div class="form-group">
-                        <label for="vol_direccion">Dirección</label>
-                        <input type="text" id="vol_direccion" name="direccion" placeholder="Dirección completa">
-                    </div>
-                    
-                    <div class="form-group full-width">
-                        <label for="vol_habilidades">Habilidades *</label>
-                        <div class="skills-selector">
-                            <label class="skill-checkbox">
-                                <input type="checkbox" name="habilidades[]" value="Acompañamiento"> Acompañamiento
-                            </label>
-                            <label class="skill-checkbox">
-                                <input type="checkbox" name="habilidades[]" value="Apoyo emocional"> Apoyo emocional
-                            </label>
-                            <label class="skill-checkbox">
-                                <input type="checkbox" name="habilidades[]" value="Entrega de alimentos"> Entrega de alimentos
-                            </label>
-                            <label class="skill-checkbox">
-                                <input type="checkbox" name="habilidades[]" value="Atención médica"> Atención médica
-                            </label>
-                            <label class="skill-checkbox">
-                                <input type="checkbox" name="habilidades[]" value="Logística"> Logística
-                            </label>
-                            <label class="skill-checkbox">
-                                <input type="checkbox" name="habilidades[]" value="Coordinación"> Coordinación
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="vol_disponibilidad">Disponibilidad *</label>
-                        <select id="vol_disponibilidad" name="disponibilidad" required>
-                            <option value="">Seleccionar</option>
-                            <option value="Mañanas">Mañanas (8:00 - 12:00)</option>
-                            <option value="Tardes">Tardes (14:00 - 18:00)</option>
-                            <option value="Noches">Noches (18:00 - 22:00)</option>
-                            <option value="Fines de semana">Fines de semana</option>
+                        <label for="disponibilidad">Disponibilidad *</label>
+                        <select id="disponibilidad" name="disponibilidad" required>
                             <option value="Flexible">Flexible</option>
+                            <option value="Mañanas">Mañanas</option>
+                            <option value="Tardes">Tardes</option>
+                            <option value="Noches">Noches</option>
+                            <option value="Fines de semana">Fines de semana</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado *</label>
+                        <select id="estado" name="estado" required>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                            <option value="Suspendido">Suspendido</option>
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="vol_zona">Zona de Cobertura *</label>
-                        <input type="text" id="vol_zona" name="zona_cobertura" required placeholder="Ej: Cusco, Wanchaq">
+                    <div class="form-group" data-span="3">
+                        <label for="zona_cobertura">Zonas de Cobertura (separadas por coma)</label>
+                        <input type="text" id="zona_cobertura" name="zona_cobertura" placeholder="Ej: Wanchaq, Magisterio, Marcavalle">
+                    </div>
+                    
+                    <div class="form-group" data-span="3">
+                        <label for="habilidades">Habilidades (separadas por coma)</label>
+                        <textarea id="habilidades" name="habilidades" rows="3" placeholder="Ej: Primeros auxilios, escucha activa, cocina"></textarea>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="cerrarModalVoluntario()">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Registrar Voluntario</button>
-            </div>
-        </form>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="btnCancelarModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection
 
+
 @push('styles')
 <style>
-.skills-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
+.badge-estado-activo { background: #e6ffe6; color: #27ae60; }
+.badge-estado-inactivo { background: #f8f9fa; color: #7f8c8d; border: 1px solid #e0e0e0; }
+.badge-estado-suspendido { background: #ffe6e6; color: #e74c3c; }
 
-.skill-tag {
-    background: #e3f2fd;
-    color: #1976d2;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 500;
-}
-
-.disponibilidad-badge {
-    background: #fff3e0;
-    color: #ef6c00;
-    padding: 6px 12px;
-    border-radius: 15px;
-    font-size: 0.8rem;
+.btn-primary-outline {
+    background: #fff;
+    color: var(--primary-color, #e74c3c);
+    border: 2px solid var(--primary-color, #e74c3c);
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    text-decoration: none;
     font-weight: 600;
+    transition: all 0.3s ease;
 }
-
-.contact-info div {
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-}
-
-.contact-info i {
-    width: 16px;
-    margin-right: 8px;
-    color: var(--text-light);
-}
-
-.skills-selector {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 8px;
-}
-
-.skill-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.skill-checkbox:hover {
-    background: #e9ecef;
-}
-
-.skill-checkbox input[type="checkbox"] {
-    margin: 0;
-}
-
-.voluntario-perfil {
-    text-align: center;
-}
-
-.avatar-large {
-    width: 80px;
-    height: 80px;
-    background: #e9ecef;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    margin: 0 auto 15px;
-}
-
-.perfil-info {
-    text-align: left;
-    margin-top: 15px;
-}
-
-.perfil-info p {
-    margin: 8px 0;
-    padding: 8px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.perfil-info strong {
-    color: var(--dark-color);
-}
-
-.stat-icon.info {
-    background: #3498db;
-}
-
-.btn-assign {
-    background: #e3f2fd;
-    color: #1976d2;
+.btn-primary-outline:hover {
+    background: var(--primary-color, #e74c3c);
+    color: #fff;
+    transform: translateY(-2px);
 }
 </style>
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Funciones para voluntarios
-function abrirModalNuevoVoluntario() {
-    document.getElementById('voluntarioModal').style.display = 'block';
-}
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- Referencias a Elementos ---
+    const modal = document.getElementById('modalVoluntario');
+    const closeModal = document.getElementById('closeModal');
+    const btnCancelarModal = document.getElementById('btnCancelarModal');
+    const modalTitulo = document.getElementById('modalTitulo');
+    const formVoluntario = document.getElementById('formVoluntario');
+    
+    // Token CSRF (leído desde el <meta> tag en el layout)
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-function cerrarModalVoluntario() {
-    document.getElementById('voluntarioModal').style.display = 'none';
-}
-
-function verPerfilVoluntario(id) {
-    Swal.fire({
-        title: 'Perfil del Voluntario',
-        html: `
-            <div class="voluntario-perfil">
-                <div class="perfil-header">
-                    <div class="avatar-large">👤</div>
-                    <h4>Voluntario ${id}</h4>
-                </div>
-                <div class="perfil-info">
-                    <p><strong>Distrito:</strong> Cusco</p>
-                    <p><strong>Disponibilidad:</strong> Tardes</p>
-                    <p><strong>Estado:</strong> Activo</p>
-                    <p><strong>Visitas realizadas:</strong> 12</p>
-                </div>
-            </div>
-        `,
-        confirmButtonText: 'Cerrar'
-    });
-}
-
-function editarVoluntario(id) {
-    Swal.fire({
-        title: 'Editar Voluntario',
-        text: 'Funcionalidad en desarrollo...',
-        icon: 'info'
-    });
-}
-
-function asignarCaso(id) {
-    Swal.fire({
-        title: 'Asignar Caso a Voluntario',
-        html: `
-            <div class="asignacion-form">
-                <div class="form-group">
-                    <label>Seleccionar Adulto Mayor</label>
-                    <select class="swal2-input">
-                        <option value="">Seleccionar adulto mayor...</option>
-                        <option value="1">Martina Quispe</option>
-                        <option value="2">Eulogio Mamani</option>
-                        <option value="3">Simeona Huaman</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Tipo de Asignación</label>
-                    <select class="swal2-input">
-                        <option value="visita">Visita única</option>
-                        <option value="seguimiento">Seguimiento continuo</option>
-                        <option value="emergencia">Caso de emergencia</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Fecha límite</label>
-                    <input type="date" class="swal2-input">
-                </div>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Asignar Caso',
-        preConfirm: () => {
-            return {
-                adulto: document.querySelector('.swal2-input').value,
-                tipo: document.querySelectorAll('.swal2-input')[1].value,
-                fecha: document.querySelectorAll('.swal2-input')[2].value
-            }
+    // --- CERRAR MODAL ---
+    function cerrarModal() {
+        if(modal) {
+            modal.style.display = 'none';
+            formVoluntario.reset();
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire(
-                '¡Caso Asignado!',
-                'El voluntario ha sido asignado exitosamente.',
-                'success'
-            );
-        }
-    });
-}
-
-// Cerrar modal voluntario
-document.querySelector('#voluntarioModal .close').onclick = cerrarModalVoluntario;
-window.onclick = (event) => { 
-    if (event.target == document.getElementById('voluntarioModal')) {
-        cerrarModalVoluntario();
     }
-}
-
-// Envío del formulario de voluntario
-document.getElementById('voluntarioForm').onsubmit = (e) => {
-    e.preventDefault();
-    
-    Swal.fire({
-        title: '¡Voluntario Registrado!',
-        text: 'El voluntario ha sido registrado exitosamente en el sistema.',
-        icon: 'success',
-        timer: 2000
+    if(closeModal) closeModal.addEventListener('click', cerrarModal);
+    if(btnCancelarModal) btnCancelarModal.addEventListener('click', cerrarModal);
+    window.addEventListener('click', function(event) {
+        if (event.target == modal) {
+            cerrarModal();
+        }
     });
-    
-    cerrarModalVoluntario();
-};
+
+    // --- ABRIR MODAL PARA EDITAR (Botón del Ojo) ---
+    document.querySelectorAll('.btn-ver').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            
+            fetch(`/dashboard/voluntarios/${id}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    // Rellenamos el formulario con los datos
+                    formVoluntario.reset();
+                    
+                    // Datos del User
+                    document.getElementById('name').value = data.user.name;
+                    document.getElementById('email').value = data.user.email;
+                    
+                    // Datos del Voluntario
+                    document.getElementById('telefono').value = data.telefono;
+                    document.getElementById('distrito').value = data.distrito;
+                    document.getElementById('disponibilidad').value = data.disponibilidad;
+                    document.getElementById('estado').value = data.estado;
+                    document.getElementById('zona_cobertura').value = data.zona_cobertura;
+                    document.getElementById('habilidades').value = data.habilidades;
+
+                    // Configuramos el formulario para ACTUALIZAR
+                    formVoluntario.action = `/dashboard/voluntarios/${id}`; 
+                    modalTitulo.textContent = "Editar Voluntario";
+                    
+                    modal.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error en Fetch (Ojo):', error);
+                    Swal.fire('Error', 'No se pudieron cargar los datos. Revisa tus rutas (routes/web.php).', 'error');
+                });
+        });
+    });
+
+    // --- ELIMINAR REGISTRO (Botón del Tacho) ---
+    document.querySelectorAll('.btn-eliminar').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            
+            Swal.fire({
+                title: `¿Estás seguro?`,
+                text: `¡Se eliminará a ${name}! Esto también eliminará su cuenta de usuario.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#95a5a6',
+                confirmButtonText: 'Sí, ¡bórralo!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    
+                    fetch(`/dashboard/voluntarios/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken, 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            Swal.fire('¡Eliminado!', data.message, 'success');
+                            document.getElementById(`fila-voluntario-${id}`).remove();
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error en Fetch (Tacho):', error);
+                        Swal.fire('Error', 'Ocurrió un error al eliminar. Revisa tus rutas (routes/web.php).', 'error');
+                    });
+                }
+            });
+        });
+    });
+
+    // --- MOSTRAR FORMULARIO SI HAY ERRORES DE VALIDACIÓN ---
+    @if(session('error_form_edit'))
+        if(modal) {
+            modal.style.display = 'block';
+            modalTitulo.textContent = "Editar Voluntario";
+            // (Idealmente repoblaríamos con 'old()' pero esto es más simple)
+            Swal.fire('Error de Validación', 'Revisa los campos e intenta de nuevo.', 'warning');
+        }
+    @endif
+
+});
 </script>
 @endpush
