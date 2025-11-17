@@ -64,7 +64,7 @@ class UserController extends Controller
                 'user_id' => $user->id,
                 'telefono' => $request->phone,
                 'estado' => 'Activo',
-                'disponibilidad' => 'Flexible', // Valor por defecto para evitar error
+                'disponibilidad' => 'Flexible', 
                 'fecha_registro' => now()
             ]);
         }
@@ -108,7 +108,6 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            // Validaciones para cambio de contraseña (opcional en el mismo form)
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => 'nullable|min:6|confirmed',
         ]);
@@ -119,7 +118,6 @@ class UserController extends Controller
 
         // 1. Actualizar Avatar
         if ($request->hasFile('avatar')) {
-            // Borrar avatar anterior si existe y no es default
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
@@ -131,7 +129,7 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
 
-        // 3. Actualizar Contraseña (si se envió)
+        // 3. Actualizar Contraseña
         if ($request->filled('current_password') && $request->filled('new_password')) {
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'La contraseña actual es incorrecta.']);
@@ -141,8 +139,10 @@ class UserController extends Controller
 
         $user->save();
 
-        // 4. Actualizar Datos de Voluntario
-        if ($user->role === 'voluntario') {
+        // 4. Actualizar Datos de Voluntario (SOLO SI SE ENVIARON)
+        // Esta es la corrección clave: verificamos si el formulario enviado
+        // contiene datos de voluntario antes de intentar actualizarlos.
+        if ($user->role === 'voluntario' && $request->has('disponibilidad')) {
             $voluntario = Voluntario::where('user_id', $user->id)->first();
             if ($voluntario) {
                 $voluntario->update([
@@ -156,6 +156,9 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('profile')->with('success', 'Perfil actualizado correctamente.');
+        // Mensaje personalizado según lo que se actualizó
+        $mensaje = $request->hasFile('avatar') ? 'Foto de perfil actualizada.' : 'Perfil actualizado correctamente.';
+
+        return redirect()->route('profile')->with('success', $mensaje);
     }
 }
