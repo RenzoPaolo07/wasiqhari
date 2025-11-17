@@ -24,7 +24,8 @@ class Visita extends Model
         'estado_emocional',
         'estado_fisico',
         'necesidades_detectadas',
-        'emergencia'
+        'emergencia',
+        'foto_evidencia'
     ];
 
     /**

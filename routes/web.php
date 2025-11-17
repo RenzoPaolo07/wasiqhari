@@ -32,40 +32,37 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/dashboard/adultos/{adulto}', [DashboardController::class, 'update'])->name('adultos.update');
     Route::delete('/dashboard/adultos/{adulto}', [DashboardController::class, 'destroy'])->name('adultos.destroy');
     
-    // ============ GESTIÓN DE VOLUNTARIOS (¡RUTAS AÑADIDAS!) ============
+    // Gestión de Voluntarios
     Route::get('/dashboard/voluntarios', [DashboardController::class, 'voluntarios'])->name('voluntarios');
-    // (No creamos voluntarios desde aquí, se registran solos, así que no hay 'store')
-    
-    // Nueva ruta para OBTENER datos de un voluntario (para el modal)
     Route::get('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'showVoluntario'])->name('voluntarios.show');
-    
-    // Nueva ruta para ACTUALIZAR un voluntario
     Route::put('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'updateVoluntario'])->name('voluntarios.update');
-    
-    // Nueva ruta para ELIMINAR un voluntario
     Route::delete('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'destroyVoluntario'])->name('voluntarios.destroy');
-    // ====================================================================
     
-    // Gestión de visitas
+    // ============ GESTIÓN DE VISITAS (¡RUTAS NUEVAS!) ============
     Route::get('/dashboard/visitas', [DashboardController::class, 'visitas'])->name('visitas');
     Route::post('/dashboard/visitas', [DashboardController::class, 'storeVisita'])->name('visitas.store');
     
+    // Ruta para VER una visita (Ojo)
+    Route::get('/dashboard/visitas/{visita}', [DashboardController::class, 'showVisita'])->name('visitas.show');
+    
+    // Ruta para ACTUALIZAR una visita
+    Route::put('/dashboard/visitas/{visita}', [DashboardController::class, 'updateVisita'])->name('visitas.update');
+    
+    // Ruta para ELIMINAR una visita
+    Route::delete('/dashboard/visitas/{visita}', [DashboardController::class, 'destroyVisita'])->name('visitas.destroy');
+    // =============================================================
+    
     // IA
     Route::get('/dashboard/ai', [DashboardController::class, 'ai'])->name('ai');
-    
     // Reportes
     Route::get('/dashboard/reporters', [DashboardController::class, 'reporters'])->name('reporters');
-    
     // Configuración
     Route::get('/dashboard/settings', [DashboardController::class, 'settings'])->name('settings');
-    
     // Contacto
     Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
-    
-    // Perfil de usuario
+    // Perfil
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
 });
 
-// Ruta para errores 404
 Route::fallback([ErrorController::class, 'notFound']);
