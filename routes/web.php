@@ -31,6 +31,10 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de impresión REALES (PDF)
     Route::get('/reportes/imprimir/{tipo}', [App\Http\Controllers\ReporteController::class, 'imprimirReporte'])->name('reportes.imprimir');
 
+    // ============ CALENDARIO INTERACTIVO ============
+    Route::get('/dashboard/calendario', [DashboardController::class, 'calendario'])->name('calendario');
+    Route::get('/api/eventos-calendario', [DashboardController::class, 'getEventosCalendario'])->name('api.calendario');
+
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     

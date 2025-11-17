@@ -36,6 +36,11 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
+                
+                <a href="{{ route('calendario') }}" class="nav-link {{ ($page ?? '') == 'calendario' ? 'active' : '' }}">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Calendario</span>
+                </a>
                 <a href="{{ route('adultos') }}" class="nav-link {{ ($page ?? '') == 'adultos' ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
                     <span>Adultos Mayores</span>

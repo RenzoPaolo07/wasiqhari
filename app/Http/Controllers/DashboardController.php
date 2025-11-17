@@ -190,4 +190,51 @@ class DashboardController extends Controller
     public function ai() { return view('dashboard.ai', ['title' => 'IA', 'page' => 'ai']); }
     public function reporters() { return view('dashboard.reportes', ['title' => 'Reportes', 'page' => 'reportes']); }
     public function settings() { return view('dashboard.settings', ['title' => 'Config', 'page' => 'settings']); }
+    // --- FUNCIONES DEL CALENDARIO ---
+    
+    public function calendario()
+    {
+        $data = [
+            'title' => 'Calendario de Actividades',
+            'page' => 'calendario'
+        ];
+        return view('dashboard.calendario', $data);
+    }
+
+    public function getEventosCalendario()
+    {
+        // Obtenemos las visitas
+        $visitas = Visita::with(['adultoMayor', 'voluntario.user'])->get();
+
+        // Las transformamos al formato que FullCalendar necesita
+        $eventos = $visitas->map(function($visita) {
+            
+            // Definir color según estado
+            $color = '#3788d8'; // Azul por defecto (Rutina)
+            if ($visita->emergencia) {
+                $color = '#e74c3c'; // Rojo (Emergencia)
+            } elseif ($visita->tipo_visita == 'Entrega de alimentos') {
+                $color = '#27ae60'; // Verde
+            } elseif ($visita->tipo_visita == 'Atención médica') {
+                $color = '#8e44ad'; // Morado
+            }
+
+            return [
+                'id' => $visita->id,
+                'title' => ($visita->adultoMayor->nombres ?? 'N/A') . ' - ' . ($visita->voluntario->user->name ?? 'N/A'),
+                'start' => $visita->fecha_visita->format('Y-m-d\TH:i:s'),
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'extendedProps' => [
+                    'tipo' => $visita->tipo_visita,
+                    'adulto' => $visita->adultoMayor->nombres . ' ' . $visita->adultoMayor->apellidos,
+                    'voluntario' => $visita->voluntario->user->name,
+                    'emergencia' => $visita->emergencia ? 'SI' : 'No',
+                    'observaciones' => $visita->observaciones ?? 'Sin observaciones'
+                ]
+            ];
+        });
+
+        return response()->json($eventos);
+    }
 }
