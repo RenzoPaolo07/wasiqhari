@@ -16,7 +16,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'avatar'
     ];
 
     protected $hidden = [
@@ -56,11 +57,6 @@ class User extends Authenticatable
             'role' => $role
         ]);
     }
-
-    /**
-     * Autenticar usuario (ya manejado por Laravel)
-     */
-    // Este método ya no es necesario ya que Laravel maneja la autenticación
 
     /**
      * Obtener usuario por ID

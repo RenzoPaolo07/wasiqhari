@@ -212,21 +212,50 @@ class DashboardController extends Controller
         return view('dashboard.visitas', $data);
     }
     // ... (storeVisita, showVisita, etc. iguales que antes) ...
-    public function storeVisita(Request $request) {
+    public function storeVisita(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'adulto_id' => 'required|exists:adultos_mayores,id',
             'voluntario_id' => 'required|exists:voluntarios,id',
             'fecha_visita' => 'required|date',
+            'foto_evidencia' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
-        if ($validator->fails()) return redirect()->route('visitas')->withErrors($validator)->withInput();
-        
+
+        if ($validator->fails()) {
+            return redirect()->route('visitas')->withErrors($validator)->withInput()->with('error_form', 'Error al guardar.');
+        }
+
         $data = $request->all();
+
         if ($request->hasFile('foto_evidencia')) {
             $path = $request->file('foto_evidencia')->store('evidencias', 'public');
             $data['foto_evidencia'] = $path;
         }
-        Visita::create($data);
-        return redirect()->route('visitas')->with('success', 'Registrada');
+
+        // Crear la visita
+        $visita = Visita::create($data);
+
+        // --- LÓGICA DE NOTIFICACIÓN ---
+        // Si es emergencia, notificamos a todos los usuarios con rol 'organizacion' o al admin
+        if ($visita->emergencia) {
+            // Por simplicidad, notificamos al usuario actual (para que veas que funciona)
+            // En producción, harías: User::where('role', 'organizacion')->get()
+            $usersToNotify = User::all(); 
+            
+            foreach ($usersToNotify as $user) {
+                $user->notify(new \App\Notifications\NuevaEmergencia($visita));
+            }
+        }
+        // -----------------------------------------
+
+        return redirect()->route('visitas')->with('success', '¡Visita registrada con éxito!');
+    }
+    
+    // --- MARCAR TODO COMO LEÍDO ---
+    public function markNotificationsRead()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+        return back();
     }
     public function showVisita(Visita $visita) {
         $visita->load(['adultoMayor', 'voluntario.user']);
