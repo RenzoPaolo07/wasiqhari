@@ -8,27 +8,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
     public function login()
     {
-        $data = [
-            'title' => 'Iniciar Sesión - WasiQhari',
-            'page' => 'login'
-        ];
-        
-        return view('user.login', $data);
+        return view('user.login', ['title' => 'Iniciar Sesión', 'page' => 'login']);
     }
     
     public function register()
     {
-        $data = [
-            'title' => 'Registrarse - WasiQhari',
-            'page' => 'register'
-        ];
-        
-        return view('user.register', $data);
+        return view('user.register', ['title' => 'Registrarse', 'page' => 'register']);
     }
     
     public function authenticate(Request $request)
@@ -40,13 +31,10 @@ class UserController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            
             return redirect()->intended('/dashboard');
         }
 
-        return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no son válidas.',
-        ]);
+        return back()->withErrors(['email' => 'Las credenciales no coinciden.']);
     }
 
     public function store(Request $request)
@@ -61,12 +49,9 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('register')
-                            ->withErrors($validator)
-                            ->withInput();
+            return redirect()->route('register')->withErrors($validator)->withInput();
         }
 
-        // Crear usuario
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -74,40 +59,25 @@ class UserController extends Controller
             'role' => $request->role
         ]);
 
-        // Si es voluntario, crear perfil de voluntario
         if ($request->role === 'voluntario') {
             Voluntario::create([
                 'user_id' => $user->id,
                 'telefono' => $request->phone,
-                'direccion' => '',
-                'distrito' => '',
-                'habilidades' => '',
-                
-                // ================== LA CORRECCIÓN ==================
-                // En lugar de '', ponemos un valor válido del ENUM.
-                // 'Flexible' es una buena opción por defecto.
-                'disponibilidad' => 'Flexible',
-                // ===================================================
-
-                'zona_cobertura' => '',
                 'estado' => 'Activo',
+                'disponibilidad' => 'Flexible', // Valor por defecto para evitar error
                 'fecha_registro' => now()
             ]);
         }
 
         Auth::login($user);
-
-        return redirect()->route('dashboard')
-                        ->with('success', 'Usuario registrado correctamente.');
+        return redirect()->route('dashboard')->with('success', '¡Bienvenido a WasiQhari!');
     }
     
     public function logout(Request $request)
     {
         Auth::logout();
-        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
         return redirect('/');
     }
     
@@ -137,20 +107,41 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // Validaciones para cambio de contraseña (opcional en el mismo form)
+            'current_password' => 'nullable|required_with:new_password',
+            'new_password' => 'nullable|min:6|confirmed',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('profile')
-                            ->withErrors($validator)
-                            ->withInput();
+            return redirect()->route('profile')->withErrors($validator)->withInput();
         }
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email
-        ]);
+        // 1. Actualizar Avatar
+        if ($request->hasFile('avatar')) {
+            // Borrar avatar anterior si existe y no es default
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
+        }
 
-        // Actualizar perfil de voluntario si existe
+        // 2. Actualizar Datos Básicos
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        // 3. Actualizar Contraseña (si se envió)
+        if ($request->filled('current_password') && $request->filled('new_password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'La contraseña actual es incorrecta.']);
+            }
+            $user->password = Hash::make($request->new_password);
+        }
+
+        $user->save();
+
+        // 4. Actualizar Datos de Voluntario
         if ($user->role === 'voluntario') {
             $voluntario = Voluntario::where('user_id', $user->id)->first();
             if ($voluntario) {
@@ -165,7 +156,6 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('profile')
-                        ->with('success', 'Perfil actualizado correctamente.');
+        return redirect()->route('profile')->with('success', 'Perfil actualizado correctamente.');
     }
 }
