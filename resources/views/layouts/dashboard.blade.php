@@ -53,7 +53,7 @@
                     <i class="fas fa-calendar-check"></i>
                     <span>Visitas</span>
                 </a>
-                <a href="{{ route('reporters') }}" class="nav-link {{ ($page ?? '') == 'reportes' ? 'active' : '' }}">
+                <a href="{{ route('reportes') }}" class="nav-link {{ ($page ?? '') == 'reportes' ? 'active' : '' }}">
                     <i class="fas fa-file-alt"></i>
                     <span>Reportes</span>
                 </a>

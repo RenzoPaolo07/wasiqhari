@@ -262,6 +262,13 @@ class DashboardController extends Controller
     
     // Rutas simples
     public function ai() { return view('dashboard.ai', ['title' => 'IA', 'page' => 'ai']); }
-    public function reporters() { return view('dashboard.reportes', ['title' => 'Reportes', 'page' => 'reportes']); }
+    public function reporters() 
+    {
+        $data = [
+            'title' => 'Reportes - WasiQhari',
+            'page' => 'reportes' // Esto asegura que el menú se marque como activo
+        ];
+        return view('dashboard.reportes', $data);
+    }
     public function settings() { return view('dashboard.settings', ['title' => 'Config', 'page' => 'settings']); }
 }

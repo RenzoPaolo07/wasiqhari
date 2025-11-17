@@ -50,26 +50,28 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($voluntarios as $voluntario)
-                            <tr id="fila-voluntario-{{ $voluntario->id }}">
-                                <td>{{ $voluntario->user->name ?? 'Usuario no encontrado' }}</td>
-                                <td>{{ $voluntario->user->email ?? 'N/A' }}</td>
-                                <td>{{ $voluntario->telefono ?? 'N/A' }}</td>
-                                <td>{{ $voluntario->distrito ?? 'N/A' }}</td>
+                        @forelse($voluntarios as $vol)  <tr id="fila-voluntario-{{ $vol->id }}">
+                                <td>{{ $vol->user->name ?? 'Usuario no encontrado' }}</td>
+                                <td>{{ $vol->user->email ?? 'N/A' }}</td>
+                                <td>{{ $vol->telefono ?? 'N/A' }}</td>
+                                <td>{{ $vol->distrito ?? 'N/A' }}</td>
                                 <td>
-                                    <span class="badge badge-estado-{{ strtolower($voluntario->estado) }}">
-                                        {{ $voluntario->estado }}
+                                    <span class="badge badge-estado-{{ strtolower($vol->estado) }}">
+                                        {{ $vol->estado }}
                                     </span>
                                 </td>
                                 <td>
+                                    <a href="{{ route('voluntarios.credencial', $vol->id) }}" target="_blank" class="btn-action btn-credencial" title="Descargar Credencial">
+                                        <i class="fas fa-id-card"></i>
+                                    </a>
                                     <button class="btn-action btn-ver" 
-                                            data-id="{{ $voluntario->id }}" 
+                                            data-id="{{ $vol->id }}" 
                                             title="Ver / Editar">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn-action btn-eliminar" 
-                                            data-id="{{ $voluntario->id }}" 
-                                            data-name="{{ $voluntario->user->name ?? 'Voluntario' }}" 
+                                            data-id="{{ $vol->id }}" 
+                                            data-name="{{ $vol->user->name ?? 'Voluntario' }}" 
                                             title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -90,7 +92,9 @@
         </div>
     </div>
 
-</div> <div id="modalVoluntario" class="modal">
+</div> 
+
+<div id="modalVoluntario" class="modal">
     <div class="modal-content modal-lg">
         <div class="modal-header">
             <h3 id="modalTitulo">Editar Voluntario</h3>
@@ -99,7 +103,9 @@
         <div class="modal-body">
             <form id="formVoluntario" action="" method="POST">
                 @csrf
-                @method('PUT') <div class="form-grid">
+                @method('PUT') 
+                
+                <div class="form-grid">
                     <div class="form-group">
                         <label for="name">Nombre Completo *</label>
                         <input type="text" id="name" name="name" required>
@@ -195,20 +201,18 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- Referencias a Elementos ---
     const modal = document.getElementById('modalVoluntario');
     const closeModal = document.getElementById('closeModal');
     const btnCancelarModal = document.getElementById('btnCancelarModal');
     const modalTitulo = document.getElementById('modalTitulo');
     const formVoluntario = document.getElementById('formVoluntario');
     
-    // Token CSRF (leído desde el <meta> tag en el layout)
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // --- CERRAR MODAL ---
     function cerrarModal() {
         if(modal) {
             modal.style.display = 'none';
@@ -223,7 +227,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- ABRIR MODAL PARA EDITAR (Botón del Ojo) ---
     document.querySelectorAll('.btn-ver').forEach(button => {
         button.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
@@ -234,14 +237,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     return response.json();
                 })
                 .then(data => {
-                    // Rellenamos el formulario con los datos
                     formVoluntario.reset();
                     
-                    // Datos del User
                     document.getElementById('name').value = data.user.name;
                     document.getElementById('email').value = data.user.email;
-                    
-                    // Datos del Voluntario
                     document.getElementById('telefono').value = data.telefono;
                     document.getElementById('distrito').value = data.distrito;
                     document.getElementById('disponibilidad').value = data.disponibilidad;
@@ -249,20 +248,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('zona_cobertura').value = data.zona_cobertura;
                     document.getElementById('habilidades').value = data.habilidades;
 
-                    // Configuramos el formulario para ACTUALIZAR
                     formVoluntario.action = `/dashboard/voluntarios/${id}`; 
                     modalTitulo.textContent = "Editar Voluntario";
                     
                     modal.style.display = 'block';
                 })
                 .catch(error => {
-                    console.error('Error en Fetch (Ojo):', error);
-                    Swal.fire('Error', 'No se pudieron cargar los datos. Revisa tus rutas (routes/web.php).', 'error');
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'No se pudieron cargar los datos.', 'error');
                 });
         });
     });
 
-    // --- ELIMINAR REGISTRO (Botón del Tacho) ---
     document.querySelectorAll('.btn-eliminar').forEach(button => {
         button.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
@@ -270,16 +267,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             Swal.fire({
                 title: `¿Estás seguro?`,
-                text: `¡Se eliminará a ${name}! Esto también eliminará su cuenta de usuario.`,
+                text: `¡Se eliminará a ${name}!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e74c3c',
                 cancelButtonColor: '#95a5a6',
-                confirmButtonText: 'Sí, ¡bórralo!',
-                cancelButtonText: 'Cancelar'
+                confirmButtonText: 'Sí, ¡bórralo!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    
                     fetch(`/dashboard/voluntarios/${id}`, {
                         method: 'DELETE',
                         headers: {
@@ -298,24 +293,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     })
                     .catch(error => {
-                        console.error('Error en Fetch (Tacho):', error);
-                        Swal.fire('Error', 'Ocurrió un error al eliminar. Revisa tus rutas (routes/web.php).', 'error');
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'No se pudo eliminar.', 'error');
                     });
                 }
             });
         });
     });
-
-    // --- MOSTRAR FORMULARIO SI HAY ERRORES DE VALIDACIÓN ---
-    @if(session('error_form_edit'))
-        if(modal) {
-            modal.style.display = 'block';
-            modalTitulo.textContent = "Editar Voluntario";
-            // (Idealmente repoblaríamos con 'old()' pero esto es más simple)
-            Swal.fire('Error de Validación', 'Revisa los campos e intenta de nuevo.', 'warning');
-        }
-    @endif
-
 });
 </script>
 @endpush

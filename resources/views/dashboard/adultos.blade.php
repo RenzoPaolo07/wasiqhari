@@ -20,6 +20,7 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+    
     @if(session('error_form') || session('error_form_edit'))
         <div class="alert alert-danger">
             <strong>¡Error!</strong> Revisa los campos.
@@ -35,7 +36,7 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" id="liveSearch" placeholder="Buscar por nombre, DNI o distrito..." class="search-input">
             </div>
-            </div>
+        </div>
 
         <div class="card-body">
             <div class="table-responsive">
@@ -83,7 +84,17 @@
                     <div class="form-group"><label>Fecha Nacimiento *</label><input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required></div>
                     <div class="form-group"><label>Edad *</label><input type="number" id="edad" name="edad" required min="60" readonly style="background:#f8f9fa;"></div>
                     <div class="form-group"><label>Sexo *</label><select id="sexo" name="sexo" required><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
-                    <div class="form-group"><label>Distrito *</label><select id="distrito" name="distrito" required><option value="Cusco">Cusco</option><option value="Wanchaq">Wanchaq</option><option value="San Sebastián">San Sebastián</option><option value="Santiago">Santiago</option><option value="San Jerónimo">San Jerónimo</option><option value="Poroy">Poroy</option><option value="Saylla">Saylla</option><option value="Ccorca">Ccorca</option></select></div>
+                    
+                    <div class="form-group">
+                        <label>Distrito *</label>
+                        <select id="distrito" name="distrito" required>
+                            <option value="">Selecciona...</option>
+                            @foreach(['Cusco', 'Wanchaq', 'San Sebastián', 'Santiago', 'San Jerónimo', 'Poroy', 'Saylla', 'Ccorca'] as $d)
+                                <option value="{{ $d }}">{{ $d }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
                     <div class="form-group"><label>Zona Ubicación *</label><input type="text" id="zona_ubicacion" name="zona_ubicacion" required></div>
                     <div class="form-group"><label>Dirección</label><input type="text" id="direccion" name="direccion"></div>
                     <div class="form-group"><label>Teléfono</label><input type="text" id="telefono" name="telefono" maxlength="9"></div>
@@ -99,7 +110,9 @@
                     <div class="form-group"><label>Longitud</label><input type="text" id="lon" name="lon" placeholder="-71.9673"></div>
                     <div class="form-group"><label>Riesgo *</label><select id="nivel_riesgo" name="nivel_riesgo" required><option value="Bajo">Bajo</option><option value="Medio">Medio</option><option value="Alto">Alto</option></select></div>
                 </div>
+                
                 <input type="hidden" id="fecha_registro" name="fecha_registro">
+
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="btnCancelarModal">Cancelar</button>
                     <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar Registro</button>
@@ -112,39 +125,13 @@
 
 @push('styles')
 <style>
-    /* Estilos del Buscador */
-    .card-header.search-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-    .search-container {
-        position: relative;
-        max-width: 300px;
-        width: 100%;
-    }
-    .search-input {
-        width: 100%;
-        padding: 10px 15px 10px 40px;
-        border: 1px solid #e0e0e0;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        transition: all 0.3s;
-    }
-    .search-input:focus {
-        outline: none;
-        border-color: var(--primary-color, #e74c3c);
-        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
-    }
-    .search-icon {
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #95a5a6;
-    }
+    .card-header.search-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .search-container { position: relative; max-width: 300px; width: 100%; }
+    .search-input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #e0e0e0; border-radius: 20px; font-size: 0.9rem; transition: all 0.3s; }
+    .search-input:focus { outline: none; border-color: var(--primary-color, #e74c3c); box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1); }
+    .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #95a5a6; }
+    .btn-action.btn-credencial { color: #8e44ad; }
+    .btn-action.btn-credencial:hover { background: #f3e5f5; color: #6c3483; }
 </style>
 @endpush
 
@@ -152,83 +139,66 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- LOGICA DEL BUSCADOR EN VIVO ---
+    const modal = document.getElementById('modalAdulto');
+    const formAdulto = document.getElementById('formAdulto');
+    const btnNuevo = document.getElementById('btnNuevoRegistro');
     const searchInput = document.getElementById('liveSearch');
     const tableBody = document.getElementById('tablaAdultosBody');
     const paginationContainer = document.getElementById('paginationContainer');
     let timeout = null;
 
+    // --- BUSCADOR EN VIVO ---
     if(searchInput) {
         searchInput.addEventListener('keyup', function() {
             clearTimeout(timeout);
             const term = this.value;
-
-            // Esperar 300ms antes de buscar para no saturar (Debounce)
             timeout = setTimeout(() => {
                 fetch(`{{ route('adultos') }}?search=${term}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(response => response.text())
                 .then(html => {
                     tableBody.innerHTML = html;
-                    // Actualizar funcionalidad de botones nuevos
-                    attachButtonEvents();
+                    attachButtonEvents(); // Re-conectar eventos
                     
-                    // Ocultar paginación si hay búsqueda (opcional)
-                    if(term.length > 0) {
-                        paginationContainer.style.display = 'none';
-                    } else {
-                        // Recargar página para restaurar paginación correcta
-                        // o simplemente dejarla oculta hasta borrar
-                        window.location.reload(); 
+                    // Actualizar paginación si viene en el HTML parcial
+                    const hiddenPag = document.getElementById('pagination-links-hidden');
+                    if(hiddenPag && paginationContainer) {
+                        paginationContainer.innerHTML = hiddenPag.innerHTML;
                     }
                 });
             }, 300);
         });
     }
 
-    // --- RE-ADJUNTAR EVENTOS (Para que funcionen tras la búsqueda) ---
+    // --- EVENTOS ---
     function attachButtonEvents() {
         // Ver / Editar
         document.querySelectorAll('.btn-ver').forEach(button => {
             button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                cargarDatosAdulto(id);
+                cargarDatosAdulto(this.getAttribute('data-id'));
             });
         });
 
         // Eliminar
         document.querySelectorAll('.btn-eliminar').forEach(button => {
             button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const name = this.getAttribute('data-name');
-                confirmarEliminacion(id, name);
+                confirmarEliminacion(this.getAttribute('data-id'), this.getAttribute('data-name'));
             });
         });
     }
 
-    // --- FUNCIONES ORIGINALES (Extraídas para reutilizar) ---
-    
-    // Cargar datos para editar
+    // Cargar datos
     function cargarDatosAdulto(id) {
-        const modal = document.getElementById('modalAdulto');
-        const formAdulto = document.getElementById('formAdulto');
-        const modalTitulo = document.getElementById('modalTitulo');
-        const btnGuardar = document.getElementById('btnGuardar');
-        const formMethod = document.getElementById('formMethod');
-
         fetch(`/dashboard/adultos/${id}`)
             .then(r => r.json())
             .then(data => {
-                // Llenar campos
                 document.getElementById('nombres').value = data.nombres;
                 document.getElementById('apellidos').value = data.apellidos;
                 document.getElementById('dni').value = data.dni;
                 document.getElementById('fecha_nacimiento').value = data.fecha_nacimiento.split('T')[0];
                 
-                // Trigger cálculo de edad
+                // Trigger edad
                 const evt = new Event('change');
                 document.getElementById('fecha_nacimiento').dispatchEvent(evt);
 
@@ -251,32 +221,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('fecha_registro').value = data.fecha_registro.split('T')[0];
 
                 formAdulto.action = `/dashboard/adultos/${id}`;
-                formMethod.value = "PUT";
-                modalTitulo.textContent = "Editar Adulto Mayor";
-                btnGuardar.textContent = "Guardar Cambios";
+                document.getElementById('formMethod').value = "PUT";
+                document.getElementById('modalTitulo').textContent = "Editar Adulto Mayor";
+                document.getElementById('btnGuardar').textContent = "Guardar Cambios";
                 modal.style.display = 'block';
             });
     }
 
-    // Confirmar eliminación
+    // Eliminar
     function confirmarEliminacion(id, name) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         Swal.fire({
-            title: `¿Eliminar a ${name}?`,
-            text: "Esta acción no se puede deshacer.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#e74c3c',
-            cancelButtonColor: '#95a5a6',
-            confirmButtonText: 'Sí, eliminar'
+            title: `¿Eliminar a ${name}?`, text: "No se puede deshacer.", icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#e74c3c', cancelButtonColor: '#95a5a6', confirmButtonText: 'Sí, eliminar'
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch(`/dashboard/adultos/${id}`, {
                     method: 'DELETE',
                     headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' }
-                })
-                .then(r => r.json())
-                .then(data => {
+                }).then(r => r.json()).then(data => {
                     if(data.success) {
                         Swal.fire('Eliminado', '', 'success');
                         document.getElementById(`fila-adulto-${id}`).remove();
@@ -288,13 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- INICIALIZACIÓN ---
-    const modal = document.getElementById('modalAdulto');
-    const btnNuevo = document.getElementById('btnNuevoRegistro');
-    const formAdulto = document.getElementById('formAdulto');
-    const fechaInput = document.getElementById('fecha_nacimiento');
-
-    // Abrir Modal Nuevo
+    // Abrir Modal
     if(btnNuevo) {
         btnNuevo.addEventListener('click', () => {
             formAdulto.reset();
@@ -311,8 +268,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('#closeModal, #btnCancelarModal').forEach(el => {
         el.addEventListener('click', () => modal.style.display = 'none');
     });
+    window.addEventListener('click', e => { if(e.target == modal) modal.style.display = 'none'; });
 
     // Calcular Edad
+    const fechaInput = document.getElementById('fecha_nacimiento');
     if(fechaInput) {
         fechaInput.addEventListener('change', function() {
             const hoy = new Date();
@@ -324,7 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Inicializar eventos en carga
     attachButtonEvents();
 });
 </script>

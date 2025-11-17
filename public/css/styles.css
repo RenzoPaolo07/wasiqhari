@@ -2020,3 +2020,6 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
+
+.btn-action.btn-credencial { color: #8e44ad; }
+.btn-action.btn-credencial:hover { background: #f3e5f5; color: #6c3483; }

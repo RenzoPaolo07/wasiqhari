@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReporteController; // ¡Asegúrate de importar esto!
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
@@ -22,19 +23,6 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
 // Rutas protegidas (dashboard)
 Route::middleware(['auth'])->group(function () {
-    // Vista principal del panel de reportes
-    Route::get('/dashboard/reportes', [DashboardController::class, 'reporters'])->name('reportes');
-    // Rutas de descarga REALES (Excel)
-    Route::get('/reportes/exportar/general', [App\Http\Controllers\ReporteController::class, 'exportarGeneralExcel'])->name('reportes.excel.general');
-    Route::get('/reportes/exportar/visitas', [App\Http\Controllers\ReporteController::class, 'exportarVisitasExcel'])->name('reportes.excel.visitas');
-    Route::get('/reportes/exportar/voluntarios', [App\Http\Controllers\ReporteController::class, 'exportarVoluntariosExcel'])->name('reportes.excel.voluntarios');
-    // Rutas de impresión REALES (PDF)
-    Route::get('/reportes/imprimir/{tipo}', [App\Http\Controllers\ReporteController::class, 'imprimirReporte'])->name('reportes.imprimir');
-
-    // ============ CALENDARIO INTERACTIVO ============
-    Route::get('/dashboard/calendario', [DashboardController::class, 'calendario'])->name('calendario');
-    Route::get('/api/eventos-calendario', [DashboardController::class, 'getEventosCalendario'])->name('api.calendario');
-
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
@@ -45,35 +33,39 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/dashboard/adultos/{adulto}', [DashboardController::class, 'update'])->name('adultos.update');
     Route::delete('/dashboard/adultos/{adulto}', [DashboardController::class, 'destroy'])->name('adultos.destroy');
     
+    // ============ CREDENCIALES (¡NUEVO!) ============
+    Route::get('/dashboard/adultos/{adulto}/credencial', [ReporteController::class, 'credencialAdulto'])->name('adultos.credencial');
+    Route::get('/dashboard/voluntarios/{voluntario}/credencial', [ReporteController::class, 'credencialVoluntario'])->name('voluntarios.credencial');
+    // ===============================================
+    
     // Gestión de Voluntarios
     Route::get('/dashboard/voluntarios', [DashboardController::class, 'voluntarios'])->name('voluntarios');
     Route::get('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'showVoluntario'])->name('voluntarios.show');
     Route::put('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'updateVoluntario'])->name('voluntarios.update');
     Route::delete('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'destroyVoluntario'])->name('voluntarios.destroy');
     
-    // ============ GESTIÓN DE VISITAS (¡RUTAS NUEVAS!) ============
+    // Gestión de Visitas
     Route::get('/dashboard/visitas', [DashboardController::class, 'visitas'])->name('visitas');
     Route::post('/dashboard/visitas', [DashboardController::class, 'storeVisita'])->name('visitas.store');
-    
-    // Ruta para VER una visita (Ojo)
     Route::get('/dashboard/visitas/{visita}', [DashboardController::class, 'showVisita'])->name('visitas.show');
-    
-    // Ruta para ACTUALIZAR una visita
     Route::put('/dashboard/visitas/{visita}', [DashboardController::class, 'updateVisita'])->name('visitas.update');
-    
-    // Ruta para ELIMINAR una visita
     Route::delete('/dashboard/visitas/{visita}', [DashboardController::class, 'destroyVisita'])->name('visitas.destroy');
-    // =============================================================
+
+    // Calendario
+    Route::get('/dashboard/calendario', [DashboardController::class, 'calendario'])->name('calendario');
+    Route::get('/api/eventos-calendario', [DashboardController::class, 'getEventosCalendario'])->name('api.calendario');
     
-    // IA
-    Route::get('/dashboard/ai', [DashboardController::class, 'ai'])->name('ai');
     // Reportes
-    Route::get('/dashboard/reporters', [DashboardController::class, 'reporters'])->name('reporters');
-    // Configuración
+    Route::get('/dashboard/reportes', [DashboardController::class, 'reporters'])->name('reportes');
+    Route::get('/reportes/exportar/general', [ReporteController::class, 'exportarGeneralExcel'])->name('reportes.excel.general');
+    Route::get('/reportes/exportar/visitas', [ReporteController::class, 'exportarVisitasExcel'])->name('reportes.excel.visitas');
+    Route::get('/reportes/exportar/voluntarios', [ReporteController::class, 'exportarVoluntariosExcel'])->name('reportes.excel.voluntarios');
+    Route::get('/reportes/imprimir/{tipo}', [ReporteController::class, 'imprimirReporte'])->name('reportes.imprimir');
+    
+    // Otros
+    Route::get('/dashboard/ai', [DashboardController::class, 'ai'])->name('ai');
     Route::get('/dashboard/settings', [DashboardController::class, 'settings'])->name('settings');
-    // Contacto
     Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
-    // Perfil
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
 });
