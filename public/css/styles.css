@@ -184,7 +184,7 @@ body {
 }
 
 .btn-secondary {
-    background: transparent;
+    background: #e74c3c;
     color: var(--white);
     border: 2px solid var(--white);
 }
