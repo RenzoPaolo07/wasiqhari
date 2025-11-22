@@ -69,25 +69,15 @@ Route::middleware(['auth'])->group(function () {
     
     // Ruta temporal para arreglar coordenadas
     Route::get('/fix-mapa', function() {
-    // Coordenadas base de Cusco
-    $lat_base = -13.5319; 
-    $lon_base = -71.9675; 
-    
     $adultos = \App\Models\AdultoMayor::all();
-    
-    foreach($adultos as $index => $adulto) {
-        // Generamos una pequeña variación aleatoria para que no salgan todos encimados
-        $lat = $lat_base + (mt_rand(-100, 100) / 10000);
-        $lon = $lon_base + (mt_rand(-100, 100) / 10000);
-        
-        $adulto->update([
-            'lat' => $lat,
-            'lon' => $lon
+    foreach($adultos as $a) {
+        $a->update([
+            'lat' => -13.5319 + (mt_rand(-100, 100) / 10000),
+            'lon' => -71.9675 + (mt_rand(-100, 100) / 10000)
         ]);
     }
-    
-    return "¡Coordenadas actualizadas! Ahora ve al Dashboard.";
-    });
+    return "Coordenadas generadas. Ve al dashboard.";
+});
 
     // Otros
     Route::get('/dashboard/ai', [DashboardController::class, 'ai'])->name('ai');

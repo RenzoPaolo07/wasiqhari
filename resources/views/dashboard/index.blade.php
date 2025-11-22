@@ -1,23 +1,18 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Dashboard - WasiQhari')
+@section('title', $title ?? 'Dashboard - WasiQhari')
 
 @section('content')
 <div class="dashboard-container">
-    <!-- Header del Dashboard -->
     <div class="dashboard-header">
         <div class="header-content">
             <h1>Dashboard Principal</h1>
             <p>Bienvenido, {{ Auth::user()->name }}</p>
         </div>
         <div class="header-actions">
-            <button class="btn btn-primary" onclick="iniciarAyuda()">
-                <i class="fas fa-hands-helping"></i> Quiero Ayudar
-            </button>
-        </div>
+            </div>
     </div>
 
-    <!-- Estadísticas Rápidas -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon primary">
@@ -25,7 +20,7 @@
             </div>
             <div class="stat-info">
                 <h3>{{ $stats['total_adultos'] ?? 0 }}</h3>
-                <p>Adultos Mayores Registrados</p>
+                <p>Adultos Mayores</p>
             </div>
         </div>
         
@@ -35,7 +30,7 @@
             </div>
             <div class="stat-info">
                 <h3>{{ $stats['total_voluntarios'] ?? 0 }}</h3>
-                <p>Voluntarios Activos</p>
+                <p>Voluntarios</p>
             </div>
         </div>
         
@@ -60,44 +55,32 @@
         </div>
     </div>
 
-    <!-- Sección Principal -->
     <div class="dashboard-content">
         <div class="content-grid">
-            <!-- Mapa de Distribución -->
             <div class="content-card">
                 <div class="card-header">
                     <h3>Distribución por Distritos</h3>
                 </div>
                 <div class="card-body">
                     <div class="mapa-distribucion">
-                        <div id="map" class="map-placeholder">
-                            <i class="fas fa-map-marked-alt"></i>
-                            <p>Mapa interactivo (requiere configuración)</p>
-                        </div>
+                        <div id="map" style="height: 350px; border-radius: 10px; width: 100%; z-index: 1;"></div>
                     </div>
                     <div class="distrito-stats">
-                        @if(isset($stats['distribucion_distritos']))
-                            @foreach($stats['distribucion_distritos'] as $distrito)
-                            <div class="distrito-item">
-                                <span class="distrito-name">{{ $distrito->distrito ?? $distrito['distrito'] ?? 'N/A' }}</span>
-                                <span class="distrito-count">{{ $distrito->cantidad ?? $distrito['cantidad'] ?? 0 }} personas</span>
-                            </div>
-                            @endforeach
-                        @else
-                            <div class="distrito-item">
-                                <span class="distrito-name">Cusco</span>
-                                <span class="distrito-count">0 personas</span>
-                            </div>
-                            <div class="distrito-item">
-                                <span class="distrito-name">Wanchaq</span>
-                                <span class="distrito-count">0 personas</span>
-                            </div>
-                        @endif
+                        @forelse($stats['distribucion_distritos'] as $distrito)
+                        <div class="distrito-item">
+                            <span class="distrito-name">{{ $distrito->distrito ?? 'N/A' }}</span>
+                            <span class="distrito-count">{{ $distrito->cantidad ?? 0 }} personas</span>
+                        </div>
+                        @empty
+                        <div class="distrito-item">
+                            <span class="distrito-name">Sin datos</span>
+                            <span class="distrito-count">0</span>
+                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
 
-            <!-- Últimas Visitas -->
             <div class="content-card">
                 <div class="card-header">
                     <h3>Últimas Visitas</h3>
@@ -105,28 +88,25 @@
                 </div>
                 <div class="card-body">
                     <div class="visitas-list">
-                        @if(isset($stats['ultimas_visitas']) && count($stats['ultimas_visitas']) > 0)
-                            @foreach($stats['ultimas_visitas'] as $visita)
+                        @forelse($stats['ultimas_visitas'] as $visita)
                             <div class="visita-item">
                                 <div class="visita-info">
-                                    <h4>{{ $visita->adulto->nombres ?? 'N/A' }} {{ $visita->adulto->apellidos ?? '' }}</h4>
+                                    <h4>{{ $visita->adultoMayor->nombres ?? 'N/A' }} {{ $visita->adultoMayor->apellidos ?? '' }}</h4>
                                     <p>Por: {{ $visita->voluntario->user->name ?? 'N/A' }}</p>
-                                    <small>{{ \Carbon\Carbon::parse($visita->fecha_visita)->format('d/m/Y H:i') }}</small>
+                                    <small>{{ $visita->fecha_visita->diffForHumans() }}</small>
                                 </div>
                                 <div class="visita-status {{ $visita->emergencia ? 'emergency' : 'normal' }}">
                                     {{ $visita->emergencia ? '🚨 Emergencia' : '✅ Normal' }}
                                 </div>
                             </div>
-                            @endforeach
-                        @else
+                        @empty
                             <p class="no-data">No hay visitas registradas aún</p>
-                        @endif
+                        @endforelse
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Gráficos de Estadísticas -->
         <div class="content-grid">
             <div class="content-card">
                 <div class="card-header">
@@ -148,88 +128,94 @@
         </div>
     </div>
 </div>
-
-<!-- Modal de Ayuda -->
-<div id="ayudaModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>¿En qué quieres ayudar?</h3>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="ayuda-options">
-                <div class="ayuda-option" onclick="seleccionarAyuda('visita')">
-                    <i class="fas fa-home"></i>
-                    <h4>Realizar Visita</h4>
-                    <p>Visitar a un adulto mayor para acompañamiento</p>
-                </div>
-                
-                <div class="ayuda-option" onclick="seleccionarAyuda('alimentos')">
-                    <i class="fas fa-utensils"></i>
-                    <h4>Entrega de Alimentos</h4>
-                    <p>Llevar comida o víveres a quienes lo necesitan</p>
-                </div>
-                
-                <div class="ayuda-option" onclick="seleccionarAyuda('medicina')">
-                    <i class="fas fa-briefcase-medical"></i>
-                    <h4>Apoyo Médico</h4>
-                    <p>Brindar atención básica de salud</p>
-                </div>
-                
-                <div class="ayuda-option" onclick="seleccionarAyuda('otro')">
-                    <i class="fas fa-hands"></i>
-                    <h4>Otro Tipo de Ayuda</h4>
-                    <p>Otra forma de apoyo que quieras brindar</p>
-                </div>
-            </div>
-            
-            <div id="formularioAyuda" style="display: none;">
-                <form id="ayudaForm">
-                    @csrf
-                    <div class="form-group">
-                        <label for="tipo_ayuda">Tipo de Ayuda</label>
-                        <input type="text" id="tipo_ayuda" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="disponibilidad">Tu Disponibilidad</label>
-                        <select id="disponibilidad" required>
-                            <option value="">Selecciona tu disponibilidad</option>
-                            <option value="Mañanas">Mañanas (8:00 - 12:00)</option>
-                            <option value="Tardes">Tardes (14:00 - 18:00)</option>
-                            <option value="Noches">Noches (18:00 - 22:00)</option>
-                            <option value="Fines de semana">Fines de semana</option>
-                            <option value="Flexible">Flexible</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="zona_ayuda">Zona donde puedes ayudar</label>
-                        <select id="zona_ayuda" required>
-                            <option value="">Selecciona una zona</option>
-                            <option value="Cusco">Cusco (Centro)</option>
-                            <option value="Wanchaq">Wanchaq</option>
-                            <option value="San Sebastián">San Sebastián</option>
-                            <option value="Santiago">Santiago</option>
-                            <option value="Todos">Todas las zonas</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="mensaje_ayuda">Mensaje adicional (opcional)</label>
-                        <textarea id="mensaje_ayuda" placeholder="Cuéntanos más sobre cómo quieres ayudar..."></textarea>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="cancelarAyuda()">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
+
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+@endpush
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. INICIALIZAR MAPA
+    if (document.getElementById('map')) {
+        // Coordenadas de Cusco
+        var map = L.map('map').setView([-13.5319, -71.9675], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Datos pasados desde el controlador
+        const adultosData = @json($adultosParaMapa ?? []);
+
+        // Iconos personalizados
+        var redIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+        
+        var blueIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        // Poner marcadores
+        adultosData.forEach(adulto => {
+            if(adulto.lat && adulto.lon) {
+                L.marker([adulto.lat, adulto.lon], {
+                    icon: adulto.nivel_riesgo === 'Alto' ? redIcon : blueIcon
+                })
+                .addTo(map)
+                .bindPopup(`<b>${adulto.nombres} ${adulto.apellidos}</b><br>Riesgo: ${adulto.nivel_riesgo}`);
+            }
+        });
+    }
+
+    // 2. GRÁFICOS
+    // Salud
+    const saludCtx = document.getElementById('saludChart');
+    if (saludCtx) {
+        const saludData = @json($saludData ?? []);
+        new Chart(saludCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(saludData),
+                datasets: [{
+                    data: Object.values(saludData),
+                    backgroundColor: ['#27ae60', '#f39c12', '#e74c3c', '#c0392b'],
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'right' } } }
+        });
+    }
+
+    // Actividades
+    const actCtx = document.getElementById('actividadesChart');
+    if (actCtx) {
+        const actData = @json($actividadesData ?? []);
+        new Chart(actCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(actData),
+                datasets: [{
+                    label: 'Cantidad',
+                    data: Object.values(actData),
+                    backgroundColor: '#3498db',
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+    }
+});
+</script>
+@endpush
 
 @push('styles')
 <style>
