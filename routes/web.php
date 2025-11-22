@@ -29,6 +29,8 @@ Route::middleware(['auth'])->group(function () {
     // Notificaciones
     Route::get('/notifications/mark-read', [DashboardController::class, 'markNotificationsRead'])->name('notifications.read');
     
+    Route::post('/ai/chat', [App\Http\Controllers\AIController::class, 'chat'])->name('ai.chat.process');
+    
     // Gestión de Adultos
     Route::get('/dashboard/adultos', [DashboardController::class, 'adultos'])->name('adultos');
     Route::post('/dashboard/adultos', [DashboardController::class, 'storeAdulto'])->name('adultos.store');

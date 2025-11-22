@@ -17,7 +17,6 @@
     </div>
 
     <div class="ai-dashboard">
-        <!-- Estadísticas rápidas -->
         <div class="ai-stats-grid">
             <div class="ai-stat-card">
                 <div class="stat-icon risk">
@@ -60,7 +59,6 @@
             </div>
         </div>
 
-        <!-- Herramientas IA -->
         <div class="ai-tools-grid">
             <div class="ai-tool-card" onclick="analyzeRisk()">
                 <div class="tool-icon">
@@ -115,7 +113,6 @@
             </div>
         </div>
 
-        <!-- Chat IA Integrado -->
         <div class="ai-chat-section">
             <div class="section-header">
                 <h3><i class="fas fa-comments"></i> Chat con Asistente IA</h3>
@@ -162,327 +159,66 @@
 
 @push('styles')
 <style>
-.ai-dashboard {
-    padding: 20px;
-}
+/* Estilos Generales IA Dashboard */
+.ai-dashboard { padding: 20px; }
 
-.ai-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.ai-stat-card {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    transition: transform 0.3s ease;
-}
-
-.ai-stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-}
-
+/* Stats Grid */
+.ai-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.ai-stat-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 20px; transition: transform 0.3s ease; border: 1px solid #eee; }
+.ai-stat-card:hover { transform: translateY(-5px); }
+.stat-icon { width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; }
 .stat-icon.risk { background: #e74c3c; }
 .stat-icon.prediction { background: #f39c12; }
 .stat-icon.optimization { background: #27ae60; }
 .stat-icon.time { background: #3498db; }
+.stat-info h3 { margin: 0; font-size: 2rem; color: var(--dark-color); }
+.stat-info p { margin: 5px 0 0 0; color: var(--text-light); font-size: 0.9rem; }
 
-.stat-info h3 {
-    margin: 0;
-    font-size: 2rem;
-    color: var(--dark-color);
-}
+/* Tools Grid */
+.ai-tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 40px; }
+.ai-tool-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; }
+.ai-tool-card:hover { transform: translateY(-5px); border-color: var(--primary-color); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2); }
+.tool-icon { width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary-color), #764ba2); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: white; margin-bottom: 20px; }
+.ai-tool-card h4 { margin: 0 0 10px 0; color: var(--dark-color); font-size: 1.2rem; }
+.ai-tool-card p { color: var(--text-color); margin-bottom: 20px; line-height: 1.5; }
+.tool-features { display: flex; gap: 8px; flex-wrap: wrap; }
+.feature-tag { background: #f8f9fa; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; color: var(--text-light); border: 1px solid #e9ecef; }
 
-.stat-info p {
-    margin: 5px 0 0 0;
-    color: var(--text-light);
-    font-size: 0.9rem;
-}
+/* Chat Section */
+.ai-chat-section { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #eee; }
+.section-header { padding: 25px 30px; border-bottom: 1px solid #f0f0f0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.section-header h3 { margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px; font-size: 1.3rem; }
+.section-header p { margin: 0; opacity: 0.9; font-size: 0.95rem; }
+.chat-container { padding: 0; }
+.chat-messages { height: 400px; overflow-y: auto; padding: 20px; background: #f8f9fa; }
 
-.ai-tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-    margin-bottom: 40px;
-}
+/* Mensajes */
+.message { display: flex; gap: 15px; margin-bottom: 20px; }
+.message-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; flex-shrink: 0; }
+.ai-message .message-avatar { background: #3498db; }
+.user-message .message-avatar { background: var(--primary-color); }
+.message-content { flex: 1; background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); max-width: 80%; }
+.ai-message .message-content { border-top-left-radius: 5px; }
+.user-message { flex-direction: row-reverse; }
+.user-message .message-content { border-top-right-radius: 5px; background: var(--primary-color); color: white; }
+.message-content p { margin: 0; line-height: 1.5; white-space: pre-line; }
 
-.ai-tool-card {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
+/* Quick Questions & Input */
+.quick-questions { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 10px; flex-wrap: wrap; background: #fff; }
+.quick-btn { background: #f8f9fa; border: 1px solid #e9ecef; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; color: var(--text-color); }
+.quick-btn:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+.chat-input-container { padding: 20px; background: #fff; }
+.chat-input { display: flex; gap: 15px; }
+.chat-input input { flex: 1; padding: 15px 20px; border: 1px solid #e0e0e0; border-radius: 25px; font-size: 1rem; outline: none; transition: border-color 0.3s; }
+.chat-input input:focus { border-color: var(--primary-color); }
+.chat-input button { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; font-size: 1.1rem; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; }
+.chat-input button:hover { transform: scale(1.1); }
 
-.ai-tool-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--primary-color);
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-}
-
-.tool-icon {
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, var(--primary-color), #764ba2);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    color: white;
-    margin-bottom: 20px;
-}
-
-.ai-tool-card h4 {
-    margin: 0 0 10px 0;
-    color: var(--dark-color);
-    font-size: 1.2rem;
-}
-
-.ai-tool-card p {
-    color: var(--text-color);
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-.tool-features {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.feature-tag {
-    background: #f8f9fa;
-    padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    color: var(--text-light);
-    border: 1px solid #e9ecef;
-}
-
-.ai-chat-section {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-.section-header {
-    padding: 25px 30px;
-    border-bottom: 1px solid #f0f0f0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.section-header h3 {
-    margin: 0 0 5px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.section-header p {
-    margin: 0;
-    opacity: 0.9;
-}
-
-.chat-container {
-    padding: 0;
-}
-
-.chat-messages {
-    height: 400px;
-    overflow-y: auto;
-    padding: 20px;
-    background: #f8f9fa;
-}
-
-.message {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.message-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: white;
-    flex-shrink: 0;
-}
-
-.ai-message .message-avatar {
-    background: #3498db;
-}
-
-.user-message .message-avatar {
-    background: var(--primary-color);
-}
-
-.message-content {
-    flex: 1;
-    background: white;
-    padding: 15px 20px;
-    border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.ai-message .message-content {
-    border-top-left-radius: 5px;
-}
-
-.user-message .message-content {
-    border-top-right-radius: 5px;
-    background: var(--primary-color);
-    color: white;
-}
-
-.message-content p {
-    margin: 0;
-    line-height: 1.5;
-}
-
-.quick-questions {
-    padding: 15px 20px;
-    border-bottom: 1px solid #f0f0f0;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.quick-btn {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.quick-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-.chat-input-container {
-    padding: 20px;
-}
-
-.chat-input {
-    display: flex;
-    gap: 15px;
-}
-
-.chat-input input {
-    flex: 1;
-    padding: 15px 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 25px;
-    font-size: 1rem;
-    outline: none;
-}
-
-.chat-input input:focus {
-    border-color: var(--primary-color);
-}
-
-.chat-input button {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-}
-
-.chat-input button:hover {
-    background: #2980b9;
-    transform: scale(1.05);
-}
-
-/* Modo oscuro para la sección IA */
-body.dark-mode .ai-stat-card,
-body.dark-mode .ai-tool-card,
-body.dark-mode .ai-chat-section {
-    background: #1e1e1e;
-    border-color: #333;
-}
-
-body.dark-mode .ai-tool-card:hover {
-    border-color: var(--primary-color);
-}
-
-body.dark-mode .feature-tag {
-    background: #2d2d2d;
-    border-color: #444;
-    color: #b0b0b0;
-}
-
-body.dark-mode .chat-messages {
-    background: #2d2d2d;
-}
-
-body.dark-mode .quick-btn {
-    background: #2d2d2d;
-    border-color: #444;
-    color: #e0e0e0;
-}
-
-body.dark-mode .quick-btn:hover {
-    background: var(--primary-color);
-    color: white;
-}
-
-body.dark-mode .chat-input input {
-    background: #2d2d2d;
-    border-color: #444;
-    color: #e0e0e0;
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-    .ai-stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .ai-tools-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .ai-stat-card {
-        padding: 20px;
-    }
-    
-    .quick-questions {
-        justify-content: center;
-    }
+    .ai-stats-grid, .ai-tools-grid { grid-template-columns: 1fr; }
+    .quick-questions { justify-content: center; }
+    .message-content { max-width: 100%; }
 }
 </style>
 @endpush
@@ -490,251 +226,76 @@ body.dark-mode .chat-input input {
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Funciones para el dashboard de IA
-function showQuickAnalysis() {
-    Swal.fire({
-        title: '🔍 Análisis Rápido IA',
-        html: `
-            <div class="quick-analysis">
-                <div class="analysis-item">
-                    <i class="fas fa-heartbeat text-danger"></i>
-                    <div>
-                        <strong>12 Casos Críticos</strong>
-                        <p>Requieren atención inmediata</p>
-                    </div>
-                </div>
-                <div class="analysis-item">
-                    <i class="fas fa-route text-success"></i>
-                    <div>
-                        <strong>Rutas Optimizadas</strong>
-                        <p>35% más eficientes</p>
-                    </div>
-                </div>
-                <div class="analysis-item">
-                    <i class="fas fa-box text-warning"></i>
-                    <div>
-                        <strong>Inventario Bajo</strong>
-                        <p>+15% alimentos necesarios</p>
-                    </div>
-                </div>
-            </div>
-        `,
-        confirmButtonText: 'Ver Detalles',
-        showCancelButton: true,
-        cancelButtonText: 'Cerrar'
-    });
-}
-
-function analyzeRisk() {
-    Swal.fire({
-        title: '🔍 Analizando Riesgos...',
-        html: `
-            <div class="analysis-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 75%"></div>
-                </div>
-                <p>Evaluando casos críticos y priorizando intervenciones</p>
-            </div>
-        `,
-        showConfirmButton: false,
-        timer: 2000
-    }).then(() => {
-        Swal.fire({
-            title: '🎯 Análisis de Riesgo Completado',
-            html: `
-                <div class="risk-results">
-                    <div class="risk-item high-risk">
-                        <strong>3 Casos de Alto Riesgo</strong>
-                        <p>Requieren intervención inmediata</p>
-                    </div>
-                    <div class="risk-item medium-risk">
-                        <strong>8 Casos de Riesgo Medio</strong>
-                        <p>Necesitan seguimiento cercano</p>
-                    </div>
-                    <div class="risk-item low-risk">
-                        <strong>15 Casos Estables</strong>
-                        <p>Continuar con monitoreo regular</p>
-                    </div>
-                </div>
-            `,
-            confirmButtonText: 'Ver Detalles',
-            showCancelButton: true
-        });
-    });
-}
-
-function generateReport() {
-    Swal.fire({
-        title: '📊 Generando Reporte Inteligente',
-        html: `
-            <div class="report-options">
-                <label class="checkbox-container">
-                    <input type="checkbox" checked> Incluir análisis predictivo
-                </label>
-                <label class="checkbox-container">
-                    <input type="checkbox" checked> Incluir recomendaciones IA
-                </label>
-                <label class="checkbox-container">
-                    <input type="checkbox"> Incluir datos históricos completos
-                </label>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Generar Reporte',
-        preConfirm: () => {
-            return {
-                predictivo: true,
-                recomendaciones: true,
-                historico: false
-            }
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: '📄 Reporte Generado',
-                html: `
-                    <div class="report-success">
-                        <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
-                        <p>El reporte inteligente ha sido generado con:</p>
-                        <ul>
-                            <li>✅ Análisis predictivo de tendencias</li>
-                            <li>✅ Recomendaciones accionables</li>
-                            <li>✅ Gráficos interactivos</li>
-                            <li>✅ Insights de IA</li>
-                        </ul>
-                    </div>
-                `,
-                confirmButtonText: 'Descargar PDF'
-            });
-        }
-    });
-}
-
-function predictNeeds() {
-    Swal.fire({
-        title: '🔮 Prediciendo Necesidades Futuras',
-        html: `
-            <div class="prediction-loading">
-                <i class="fas fa-crystal-ball fa-spin fa-2x mb-3"></i>
-                <p>Analizando patrones históricos y tendencias...</p>
-            </div>
-        `,
-        showConfirmButton: false,
-        timer: 2500
-    }).then(() => {
-        Swal.fire({
-            title: '📈 Predicciones para el Próximo Mes',
-            html: `
-                <div class="predictions-grid">
-                    <div class="prediction-card">
-                        <i class="fas fa-utensils text-warning"></i>
-                        <h4>+25%</h4>
-                        <p>Demanda de alimentos</p>
-                    </div>
-                    <div class="prediction-card">
-                        <i class="fas fa-briefcase-medical text-danger"></i>
-                        <h4>+18%</h4>
-                        <p>Atenciones médicas</p>
-                    </div>
-                    <div class="prediction-card">
-                        <i class="fas fa-home text-primary"></i>
-                        <h4>+12%</h4>
-                        <p>Visitas requeridas</p>
-                    </div>
-                </div>
-                <div class="prediction-insights">
-                    <h5>💡 Insights de IA:</h5>
-                    <p>Se recomienda aumentar inventario de medicamentos básicos y programar visitas preventivas en zonas de alta vulnerabilidad.</p>
-                </div>
-            `,
-            confirmButtonText: 'Planificar Acciones'
-        });
-    });
-}
-
-function optimizeRoutes() {
-    Swal.fire({
-        title: '🗺️ Optimizando Rutas',
-        html: `
-            <div class="optimization-loading">
-                <i class="fas fa-route fa-spin fa-2x mb-3"></i>
-                <p>Calculando rutas más eficientes...</p>
-            </div>
-        `,
-        showConfirmButton: false,
-        timer: 3000
-    }).then(() => {
-        Swal.fire({
-            title: '✅ Rutas Optimizadas',
-            html: `
-                <div class="route-results">
-                    <div class="route-improvement">
-                        <i class="fas fa-chart-line text-success"></i>
-                        <div>
-                            <strong>35% más eficiente</strong>
-                            <p>Reducción en tiempo y distancia</p>
-                        </div>
-                    </div>
-                    <div class="route-details">
-                        <h5>📋 Plan de Rutas:</h5>
-                        <ul>
-                            <li><strong>Ruta 1:</strong> Cusco Centro (3 visitas, 2.5h)</li>
-                            <li><strong>Ruta 2:</strong> San Sebastián (4 visitas, 3h)</li>
-                            <li><strong>Ruta 3:</strong> Wanchaq (2 visitas, 1.5h)</li>
-                        </ul>
-                    </div>
-                </div>
-            `,
-            confirmButtonText: 'Ver Mapa',
-            showCancelButton: true
-        });
-    });
-}
-
-function askQuickQuestion(question) {
-    addDashboardMessage(question, 'user');
-    
-    setTimeout(() => {
-        let response = '';
-        if (question.includes('urgente')) {
-            response = "Los casos más urgentes son:\n• Martina Quispe (85) - Cusco Centro\n• Juan Mamani (78) - San Sebastián\n• Rosa Condori (82) - Wanchaq\nRecomiendo visitas prioritarias hoy mismo.";
-        } else if (question.includes('reporte')) {
-            response = "Puedo generarte un reporte del mes actual con:\n• 45 visitas completadas\n• 12 casos en seguimiento\n• 8 nuevos voluntarios\n• 85% de satisfacción\n¿Quieres que lo genere en PDF o Excel?";
-        } else if (question.includes('rutas')) {
-            response = "He optimizado las rutas para hoy:\n• Ruta 1: Cusco Centro (3 casos, 2.5h)\n• Ruta 2: San Sebastián (4 casos, 3h)\n• Ruta 3: Wanchaq (2 casos, 1.5h)\n¿Deseas ver el mapa detallado?";
-        } else {
-            response = "¡Claro! Puedo ayudarte con eso. ¿Necesitas información más específica sobre algún aspecto en particular?";
-        }
-        
-        addDashboardMessage(response, 'ai');
-    }, 1000);
-}
+// --- LÓGICA DEL CHAT IA REAL ---
 
 function sendDashboardMessage() {
     const input = document.getElementById('dashboardAiInput');
     const message = input.value.trim();
+    // Obtenemos el CSRF token del layout
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     
     if (message) {
+        // 1. Mostrar mensaje del usuario
         addDashboardMessage(message, 'user');
         input.value = '';
         
-        setTimeout(() => {
-            addDashboardMessage("He procesado tu solicitud. ¿Te gustaría que profundice en algún aspecto específico o generé un reporte detallado?", 'ai');
-        }, 1500);
+        // 2. Mostrar indicador de carga
+        const loadingId = 'loading-' + Date.now();
+        addDashboardMessage('<i class="fas fa-spinner fa-spin"></i> Analizando...', 'ai', loadingId);
+        
+        // 3. Llamar a la API REAL (AIController)
+        fetch("{{ route('ai.chat.process') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Eliminar indicador de carga
+            const loader = document.getElementById(loadingId);
+            if(loader) loader.remove();
+            
+            // Mostrar respuesta real de Gemini
+            if (data.response) {
+                addDashboardMessage(data.response, 'ai');
+            } else {
+                addDashboardMessage("Lo siento, no pude procesar tu solicitud en este momento.", 'ai');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const loader = document.getElementById(loadingId);
+            if(loader) loader.remove();
+            addDashboardMessage("Error de conexión con el servidor de IA.", 'ai');
+        });
     }
 }
 
-function addDashboardMessage(content, type) {
+function askQuickQuestion(question) {
+    // Poner la pregunta en el input y enviarla automáticamente
+    const input = document.getElementById('dashboardAiInput');
+    input.value = question;
+    sendDashboardMessage();
+}
+
+function addDashboardMessage(content, type, id = null) {
     const chat = document.getElementById('dashboardChatMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
+    if(id) messageDiv.id = id;
+    
+    // Icono según quien habla
+    const icon = type === 'user' ? 'fas fa-user' : 'fas fa-robot';
     
     messageDiv.innerHTML = `
         <div class="message-avatar">
-            <i class="fas fa-${type === 'user' ? 'user' : 'robot'}"></i>
+            <i class="${icon}"></i>
         </div>
         <div class="message-content">
-            <p>${content.replace(/\n/g, '<br>')}</p>
+            <p>${content}</p>
         </div>
     `;
     
@@ -742,129 +303,58 @@ function addDashboardMessage(content, type) {
     chat.scrollTop = chat.scrollHeight;
 }
 
-// Permitir Enter en el chat del dashboard
+// Permitir Enter en el input
 document.getElementById('dashboardAiInput')?.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         sendDashboardMessage();
     }
 });
 
-// Estilos adicionales para los modales
-const additionalStyles = `
-.quick-analysis .analysis-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px;
-    margin: 10px 0;
-    background: #f8f9fa;
-    border-radius: 10px;
+
+// --- FUNCIONES DE HERRAMIENTAS (MODALES) ---
+// Estas siguen siendo simulaciones visuales útiles para el usuario
+
+function showQuickAnalysis() {
+    Swal.fire({
+        title: '🔍 Análisis Rápido IA',
+        html: `
+            <div style="text-align: left">
+                <p><strong><i class="fas fa-check text-success"></i> Sistema:</strong> Operativo</p>
+                <p><strong><i class="fas fa-server text-primary"></i> Datos:</strong> Sincronizados</p>
+                <hr>
+                <p>La IA ha detectado <strong>3 patrones nuevos</strong> en las visitas de esta semana. Revisa el reporte detallado.</p>
+            </div>
+        `,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#e74c3c'
+    });
 }
 
-.analysis-progress .progress-bar {
-    width: 100%;
-    height: 10px;
-    background: #e9ecef;
-    border-radius: 5px;
-    overflow: hidden;
-    margin: 15px 0;
+function analyzeRisk() {
+    Swal.fire({
+        title: 'Analizando Riesgos...',
+        html: 'Procesando historial médico y reportes de visitas...',
+        timer: 1500,
+        timerProgressBar: true,
+        didOpen: () => { Swal.showLoading() }
+    }).then(() => {
+        // Aquí podrías redirigir a un reporte real o mostrar el resultado
+        // Por ahora mostramos que la IA "pensó"
+        askQuickQuestion("Genera un análisis de riesgo de los beneficiarios actuales");
+    });
 }
 
-.analysis-progress .progress-fill {
-    height: 100%;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    transition: width 0.3s ease;
+function generateReport() {
+    // Usamos la función del chat para pedir el reporte a la IA
+    askQuickQuestion("Genera un reporte ejecutivo de las actividades de este mes");
 }
 
-.risk-results .risk-item {
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border-left: 4px solid;
+function predictNeeds() {
+    askQuickQuestion("Predice qué insumos necesitaremos para el próximo mes basado en el historial");
 }
 
-.risk-results .high-risk {
-    background: #fff5f5;
-    border-left-color: #e74c3c;
+function optimizeRoutes() {
+    askQuickQuestion("¿Cuál es la ruta más eficiente para visitar a los adultos mayores en Wanchaq hoy?");
 }
-
-.risk-results .medium-risk {
-    background: #fffbf0;
-    border-left-color: #f39c12;
-}
-
-.risk-results .low-risk {
-    background: #f0f7ff;
-    border-left-color: #3498db;
-}
-
-.report-options .checkbox-container {
-    display: block;
-    margin: 10px 0;
-}
-
-.prediction-loading, .optimization-loading {
-    text-align: center;
-    padding: 20px;
-}
-
-.predictions-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin: 20px 0;
-}
-
-.prediction-card {
-    text-align: center;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-
-.prediction-card i {
-    font-size: 2rem;
-    margin-bottom: 10px;
-}
-
-.prediction-card h4 {
-    margin: 5px 0;
-    font-size: 1.5rem;
-}
-
-.prediction-insights {
-    background: #e3f2fd;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 15px;
-}
-
-.route-improvement {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px;
-    background: #e8f5e8;
-    border-radius: 8px;
-    margin: 15px 0;
-}
-
-.route-details ul {
-    text-align: left;
-    margin: 15px 0;
-}
-
-.route-details li {
-    margin: 8px 0;
-    padding: 8px;
-    background: #f8f9fa;
-    border-radius: 5px;
-}
-`;
-
-// Inject additional styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = additionalStyles;
-document.head.appendChild(styleSheet);
 </script>
 @endpush

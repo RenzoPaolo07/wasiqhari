@@ -9,39 +9,26 @@ class AIController extends Controller
 {
     public function chat(Request $request)
     {
-        $mensajeUsuario = $request->input('message');
-        $apiKey = env('GEMINI_API_KEY');
+        $mensaje = $request->input('message');
+        // REEMPLAZA ESTO CON TU API KEY REAL DE GOOGLE GEMINI
+        $apiKey = env('GEMINI_API_KEY', 'AIzaSyB8s0JEP7Zi7yw6HD3g8AmdXf5XaLDH1TI'); 
 
-        // Prompt del sistema para darle personalidad a la IA
-        $contexto = "Eres el asistente virtual de WasiQhari, una plataforma de ayuda social en Cusco, Perú. 
-                     Tu misión es ayudar a voluntarios y coordinadores. 
-                     Responde de forma empática, breve y útil. 
-                     Si te preguntan por emergencias médicas, sugiere llamar al 106 (SAMU) o 116 (Bomberos).";
-
-        $prompt = $contexto . "\n\nUsuario: " . $mensajeUsuario . "\nAsistente:";
+        $prompt = "Eres el asistente experto de WasiQhari, una ONG de ayuda social en Cusco. 
+                   Ayudas a coordinadores y voluntarios. Responde brevemente y con empatía.
+                   Pregunta del usuario: " . $mensaje;
 
         try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
-                        ]
-                    ]
-                ]
-            ]);
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
+                    'contents' => [['parts' => [['text' => $prompt]]]]
+                ]);
 
             $data = $response->json();
-            
-            // Extraemos la respuesta de Gemini
-            $respuestaIA = $data['candidates'][0]['content']['parts'][0]['text'] ?? 'Lo siento, estoy teniendo problemas de conexión. Intenta de nuevo.';
+            $texto = $data['candidates'][0]['content']['parts'][0]['text'] ?? 'Lo siento, no pude procesar eso.';
 
-            return response()->json(['response' => $respuestaIA]);
-
+            return response()->json(['response' => $texto]);
         } catch (\Exception $e) {
-            return response()->json(['response' => 'Error al conectar con la IA: ' . $e->getMessage()], 500);
+            return response()->json(['response' => 'Error de conexión con la IA.'], 500);
         }
     }
 }

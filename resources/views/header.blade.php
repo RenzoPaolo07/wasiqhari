@@ -5,21 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'WasiQhari' }}</title>
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Driver.js -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.min.css">
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.min.js"></script>
     
-    <!-- Estilos CSS -->
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
-    <!-- Navegación -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -48,72 +45,67 @@
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                     
-                    <!-- Menú de usuario con notificaciones -->
                     <div class="header-user">
-                        <!-- Botón Modo Oscuro -->
                         <button class="btn-mode" onclick="toggleDarkMode()" title="Modo Oscuro/Claro">
                             <i class="fas fa-moon"></i>
                         </button>
                         
-                        <!-- Campana de notificaciones -->
                         <div class="notification-bell" onclick="toggleNotifications()">
                             <i class="fas fa-bell"></i>
-                            <span class="notification-count" id="notificationCount">3</span>
                             
-                            <!-- Panel de notificaciones -->
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                                <span class="notification-count" id="notificationCount">
+                                    {{ auth()->user()->unreadNotifications->count() }}
+                                </span>
+                            @endif
+                            
                             <div class="notifications-panel" id="notificationsPanel">
                                 <div class="notifications-header">
                                     <h4>Notificaciones</h4>
-                                    <button onclick="markAllAsRead()">Marcar todo leído</button>
+                                    <a href="{{ route('notifications.read') }}" style="font-size: 0.8rem; color: var(--primary-color); text-decoration: none;">
+                                        Marcar todo leído
+                                    </a>
                                 </div>
                                 <div class="notifications-list">
-                                    <div class="notification-item unread">
-                                        <div class="notification-icon">
-                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                    @forelse(auth()->user()->unreadNotifications as $notification)
+                                        <div class="notification-item unread">
+                                            <div class="notification-icon">
+                                                <i class="{{ $notification->data['icon'] ?? 'fas fa-info-circle' }}"></i>
+                                            </div>
+                                            <div class="notification-content">
+                                                <h5>{{ $notification->data['titulo'] }}</h5>
+                                                <p>{{ $notification->data['mensaje'] }}</p>
+                                                <small>{{ $notification->created_at->diffForHumans() }}</small>
+                                            </div>
                                         </div>
-                                        <div class="notification-content">
-                                            <h5>Alerta de Salud</h5>
-                                            <p>Martina Quispe requiere atención médica urgente</p>
-                                            <small>Hace 2 horas</small>
+                                    @empty
+                                        <div class="notification-item" style="justify-content: center; color: #999;">
+                                            <p style="margin: 10px 0;">No tienes notificaciones nuevas</p>
                                         </div>
-                                    </div>
-                                    <div class="notification-item unread">
-                                        <div class="notification-icon">
-                                            <i class="fas fa-calendar-check text-warning"></i>
-                                        </div>
-                                        <div class="notification-content">
-                                            <h5>Visita Pendiente</h5>
-                                            <p>Tienes una visita programada para hoy</p>
-                                            <small>Hace 5 horas</small>
-                                        </div>
-                                    </div>
-                                    <div class="notification-item">
-                                        <div class="notification-icon">
-                                            <i class="fas fa-user-plus text-success"></i>
-                                        </div>
-                                        <div class="notification-content">
-                                            <h5>Nuevo Voluntario</h5>
-                                            <p>Se ha registrado un nuevo voluntario en tu zona</p>
-                                            <small>Ayer</small>
-                                        </div>
-                                    </div>
+                                    @endforelse
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Menú de usuario -->
                         <div class="user-menu" onclick="toggleUserMenu()">
                             <div class="user-avatar">
-                                <i class="fas fa-user"></i>
+                                @if(Auth::user()->avatar)
+                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                @else
+                                    <i class="fas fa-user"></i>
+                                @endif
                             </div>
                             <span class="user-name">{{ Auth::user()->name }}</span>
                             <i class="fas fa-chevron-down"></i>
                             
-                            <!-- Submenú de usuario -->
                             <div class="user-dropdown" id="userDropdown">
                                 <div class="user-info">
                                     <div class="user-avatar-large">
-                                        <i class="fas fa-user"></i>
+                                        @if(Auth::user()->avatar)
+                                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                        @else
+                                            <i class="fas fa-user"></i>
+                                        @endif
                                     </div>
                                     <div class="user-details">
                                         <strong>{{ Auth::user()->name }}</strong>
@@ -134,7 +126,7 @@
                                 <div class="dropdown-divider"></div>
                                 <form method="POST" action="{{ route('logout') }}" class="dropdown-item logout-form">
                                     @csrf
-                                    <button type="submit" class="dropdown-item logout">
+                                    <button type="submit" class="dropdown-item logout" style="padding: 0;">
                                         <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                                     </button>
                                 </form>
@@ -160,9 +152,7 @@
         </div>
     </nav>
 
-    <!-- Overlay para panel de IA -->
     <div class="ai-overlay" id="aiOverlay" onclick="closeAIPanel()"></div>
-    <!-- Panel de IA Flotante -->
     <div class="ai-panel" id="aiPanel">
         <div class="ai-header">
             <h4>🤖 Asistente IA WasiQhari</h4>
@@ -210,189 +200,79 @@
         </div>
     </div>
 
-    <!-- El resto del JavaScript del header se mantiene igual -->
     <script>
     // Modo Oscuro
     function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
         localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-        
-        // Cambiar icono
         const icon = document.querySelector('.btn-mode i');
-        if (document.body.classList.contains('dark-mode')) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        } else {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
+        if (icon) {
+            icon.className = document.body.classList.contains('dark-mode') ? 'fas fa-sun' : 'fas fa-moon';
         }
     }
-
-    // Cargar modo oscuro si estaba activo
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
         const icon = document.querySelector('.btn-mode i');
-        if (icon) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        }
+        if (icon) icon.className = 'fas fa-sun';
     }
 
-    // Notificaciones
+    // Notificaciones y Menús
     function toggleNotifications() {
         const panel = document.getElementById('notificationsPanel');
-        const isActive = panel.classList.contains('active');
-        
-        // Cerrar otros menús
-        document.getElementById('userDropdown').classList.remove('active');
-        document.getElementById('aiPanel').classList.remove('active');
-        
-        // Toggle notificaciones
-        panel.classList.toggle('active', !isActive);
+        const userDropdown = document.getElementById('userDropdown');
+        if(userDropdown) userDropdown.classList.remove('active');
+        if(panel) panel.classList.toggle('active');
     }
-
-    function markAllAsRead() {
-        const notifications = document.querySelectorAll('.notification-item.unread');
-        notifications.forEach(notif => {
-            notif.classList.remove('unread');
-        });
-        document.getElementById('notificationCount').textContent = '0';
-    }
-
-    // Menú de usuario
     function toggleUserMenu() {
-        const dropdown = document.getElementById('userDropdown');
-        const isActive = dropdown.classList.contains('active');
-        
-        // Cerrar otros menús
-        document.getElementById('notificationsPanel').classList.remove('active');
-        document.getElementById('aiPanel').classList.remove('active');
-        
-        // Toggle menú usuario
-        dropdown.classList.toggle('active', !isActive);
+        const panel = document.getElementById('notificationsPanel');
+        const userDropdown = document.getElementById('userDropdown');
+        if(panel) panel.classList.remove('active');
+        if(userDropdown) userDropdown.classList.toggle('active');
     }
 
-    // Panel de IA - MEJORADO CON OVERLAY
-    let aiPanelOpen = false;
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', function(event) {
+        const panel = document.getElementById('notificationsPanel');
+        const userDropdown = document.getElementById('userDropdown');
+        if (panel && !event.target.closest('.notification-bell') && !event.target.closest('.notifications-panel')) {
+            panel.classList.remove('active');
+        }
+        if (userDropdown && !event.target.closest('.user-menu') && !event.target.closest('.user-dropdown')) {
+            userDropdown.classList.remove('active');
+        }
+        if (aiPanelOpen && !event.target.closest('.ai-panel') && !event.target.closest('.dropdown-item') && !event.target.matches('.ai-option') && !event.target.closest('.ai-option')) {
+            closeAIPanel();
+        }
+    });
 
+    // Panel de IA
+    let aiPanelOpen = false;
     function showAIPanel() {
         const aiPanel = document.getElementById('aiPanel');
         const aiOverlay = document.getElementById('aiOverlay');
-        
         aiPanel.classList.add('active');
         aiOverlay.classList.add('active');
         aiPanelOpen = true;
-        
-        // Cerrar otros menús
         document.getElementById('userDropdown').classList.remove('active');
         document.getElementById('notificationsPanel').classList.remove('active');
-        
-        // Mostrar las opciones principales y ocultar el chat
         document.querySelector('.ai-options').style.display = 'grid';
         document.getElementById('aiChat').style.display = 'none';
-        
-        // Limpiar el chat
-        document.getElementById('aiChatMessages').innerHTML = `
-            <div class="message ai-message">
-                <div class="message-avatar">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <div class="message-content">
-                    <p>¡Hola! Soy tu asistente IA. ¿En qué puedo ayudarte hoy?</p>
-                </div>
-            </div>
-        `;
     }
-
     function closeAIPanel() {
         const aiPanel = document.getElementById('aiPanel');
         const aiOverlay = document.getElementById('aiOverlay');
-        
         aiPanel.classList.remove('active');
         aiOverlay.classList.remove('active');
         aiPanelOpen = false;
     }
-
-    // Cerrar con Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && aiPanelOpen) {
-            closeAIPanel();
-        }
-    });
-
-    // Cerrar menús al hacer clic fuera - MEJORADO
-    document.addEventListener('click', function(event) {
-        const aiPanel = document.getElementById('aiPanel');
-        const notificationsPanel = document.getElementById('notificationsPanel');
-        const userDropdown = document.getElementById('userDropdown');
-        
-        // Solo cerrar si se hace clic fuera de los contenedores
-        if (!event.target.closest('.notification-bell') && !event.target.closest('.notifications-panel')) {
-            notificationsPanel.classList.remove('active');
-        }
-        
-        if (!event.target.closest('.user-menu') && !event.target.closest('.user-dropdown')) {
-            userDropdown.classList.remove('active');
-        }
-        
-        // Para el panel de IA, ser más específico
-        if (aiPanelOpen && 
-            !event.target.closest('.ai-panel') && 
-            !event.target.closest('.dropdown-item') &&
-            !event.target.matches('.ai-option') &&
-            !event.target.closest('.ai-option')) {
-            closeAIPanel();
-        }
-    });
-
-    // Función para abrir el chat IA
     function openAIChat() {
         document.querySelector('.ai-options').style.display = 'none';
         document.getElementById('aiChat').style.display = 'block';
     }
 
-    // Funciones de IA - CORREGIDAS
-    function analyzeRisk() {
-        console.log('Analizando riesgo...');
-        openAIChat();
-        addMessage('Iniciando análisis de riesgo para adultos mayores...', 'user');
-        
-        setTimeout(() => {
-            addMessage('He analizado los datos y encontré 12 casos de alto riesgo. Los adultos mayores en la zona de Cusco centro requieren atención inmediata. ¿Te gustaría que genere un plan de acción detallado?', 'ai');
-        }, 1500);
-    }
-
-    function generateReport() {
-        console.log('Generando reporte...');
-        openAIChat();
-        addMessage('Solicitando generación de reporte completo...', 'user');
-        
-        setTimeout(() => {
-            addMessage('Puedo generar varios tipos de reportes:\n• Reporte de riesgo mensual\n• Análisis de impacto social\n• Desempeño de voluntarios\n\n¿Sobre qué área te gustaría el reporte?', 'ai');
-        }, 1500);
-    }
-
-    function predictNeeds() {
-        console.log('Prediciendo necesidades...');
-        openAIChat();
-        addMessage('Analizando necesidades futuras...', 'user');
-        
-        setTimeout(() => {
-            addMessage('Basado en patrones históricos, predigo que necesitarás:\n• +15% de alimentos el próximo mes\n• 8 casos requerirán medicación constante\n• 20+ abrigos para temporada de frío\n\n¿Quieres que detalle las acciones recomendadas?', 'ai');
-        }, 1500);
-    }
-
-    function optimizeRoutes() {
-        console.log('Optimizando rutas...');
-        openAIChat();
-        addMessage('Optimizando rutas de visitas...', 'user');
-        
-        setTimeout(() => {
-            addMessage('He optimizado las rutas! Resultados:\n• 35% más eficiente\n• 2.5 horas ahorradas por voluntario\n• 15% menos combustible\n\n¿Deseas ver el mapa con las nuevas rutas?', 'ai');
-        }, 1500);
-    }
-
-    // Chat IA REAL con Gemini
+    // =================================================================
+    // ¡AQUÍ ESTÁ EL CÓDIGO DE IA REAL (NO SIMULADO)! 
+    // =================================================================
     function sendAIMessage() {
         const input = document.getElementById('aiInput');
         const message = input.value.trim();
@@ -407,7 +287,7 @@
             const loadingId = 'loading-' + Date.now();
             addMessage('<i class="fas fa-spinner fa-spin"></i> Pensando...', 'ai', loadingId);
             
-            // 3. Llamar al Backend
+            // 3. Llamar al Backend (AIController)
             fetch("{{ route('ai.chat.process') }}", {
                 method: "POST",
                 headers: {
@@ -423,18 +303,21 @@
                 if(loadingElement) loadingElement.remove();
 
                 // Mostrar respuesta real
-                addMessage(data.response, 'ai');
+                if(data.response) {
+                    addMessage(data.response, 'ai');
+                } else {
+                    addMessage("Lo siento, hubo un problema con la respuesta.", 'ai');
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
                 const loadingElement = document.getElementById(loadingId);
                 if(loadingElement) loadingElement.remove();
-                addMessage("Lo siento, hubo un error de conexión.", 'ai');
+                addMessage("Error de conexión con el servidor de IA.", 'ai');
             });
         }
     }
     
-    // Función auxiliar actualizada para soportar IDs (para borrar el loading)
     function addMessage(content, type, id = null) {
         const chat = document.getElementById('aiChatMessages');
         const messageDiv = document.createElement('div');
@@ -446,37 +329,36 @@
                 <i class="fas fa-${type === 'user' ? 'user' : 'robot'}"></i>
             </div>
             <div class="message-content">
-                <p>${content.replace(/\n/g, '<br>')}</p>
+                <p>${content}</p>
             </div>
         `;
         
         chat.appendChild(messageDiv);
         chat.scrollTop = chat.scrollHeight;
     }
-    // Permitir enviar mensaje con Enter
+
     document.getElementById('aiInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendAIMessage();
-        }
+        if (e.key === 'Enter') { sendAIMessage(); }
     });
+
+    // Funciones rápidas de IA (Ahora conectadas al chat real)
+    function analyzeRisk() { openAIChat(); document.getElementById('aiInput').value = "Analiza el riesgo de mis beneficiarios actuales"; sendAIMessage(); }
+    function generateReport() { openAIChat(); document.getElementById('aiInput').value = "¿Cómo puedo generar un reporte de impacto?"; sendAIMessage(); }
+    function predictNeeds() { openAIChat(); document.getElementById('aiInput').value = "Predice las necesidades para el próximo mes basado en la temporada"; sendAIMessage(); }
+    function optimizeRoutes() { openAIChat(); document.getElementById('aiInput').value = "Ayúdame a optimizar las rutas de visita"; sendAIMessage(); }
 
     // Navegación móvil
     const navToggle = document.getElementById('navToggle');
     const navMenu = document.getElementById('navMenu');
-
-    navToggle?.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-        navToggle.classList.toggle('active');
-    });
-
-    // Cerrar menú al hacer clic en un enlace
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            navMenu.classList.remove('active');
-            navToggle.classList.remove('active');
+    if(navToggle) {
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            navToggle.classList.toggle('active');
         });
-    });
+    }
     </script>
+</body>
+</html>
 
 <style>
 /* Estilos para el header mejorado */
