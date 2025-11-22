@@ -30,7 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications/mark-read', [DashboardController::class, 'markNotificationsRead'])->name('notifications.read');
     
     Route::post('/ai/chat', [App\Http\Controllers\AIController::class, 'chat'])->name('ai.chat.process');
-    
+
     // Gestión de Adultos
     Route::get('/dashboard/adultos', [DashboardController::class, 'adultos'])->name('adultos');
     Route::post('/dashboard/adultos', [DashboardController::class, 'storeAdulto'])->name('adultos.store');
@@ -42,6 +42,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/adultos/{adulto}/credencial', [ReporteController::class, 'credencialAdulto'])->name('adultos.credencial');
     Route::get('/dashboard/voluntarios/{voluntario}/credencial', [ReporteController::class, 'credencialVoluntario'])->name('voluntarios.credencial');
     // ===============================================
+    
+    // Ruta temporal para ver qué modelos tienes disponibles
+    Route::get('/debug-models', function() {
+        $apiKey = env('GEMINI_API_KEY');
+        $response = Illuminate\Support\Facades\Http::get("https://generativelanguage.googleapis.com/v1beta/models?key={$apiKey}");
+        return $response->json();
+    });
     
     // Gestión de Voluntarios
     Route::get('/dashboard/voluntarios', [DashboardController::class, 'voluntarios'])->name('voluntarios');
