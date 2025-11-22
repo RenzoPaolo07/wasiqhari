@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\AdultoMayor;
+use App\Models\Voluntario;
+use App\Models\Visita;
+use Carbon\Carbon;
 
 class AIController extends Controller
 {
@@ -17,15 +21,45 @@ class AIController extends Controller
             return response()->json(['response' => 'Error: No se encontró la API KEY en el archivo .env']);
         }
 
-        $prompt = "Eres el asistente experto de WasiQhari, una ONG de ayuda social en Cusco. 
-                   Ayudas a coordinadores y voluntarios. Responde brevemente, con empatía y en español.
-                   Pregunta del usuario: " . $mensaje;
+        // --- 1. RECOPILAR DATOS (CONTEXTO) ---
+        
+        $totalAdultos = AdultoMayor::count();
+        $totalVoluntarios = Voluntario::count();
+        $voluntariosActivos = Voluntario::where('estado', 'Activo')->count();
+        
+        // Obtenemos casos críticos reales
+        $criticos = AdultoMayor::where('nivel_riesgo', 'Alto')
+                                ->get(['nombres', 'apellidos', 'distrito', 'edad'])
+                                ->map(function($a) {
+                                    return "{$a->nombres} {$a->apellidos} ({$a->edad} años, {$a->distrito})";
+                                })->implode(', ');
+
+        $visitasSemana = Visita::where('fecha_visita', '>=', Carbon::now()->subDays(7))->count();
+
+        $datosDelSistema = "
+        DATOS ACTUALES DEL SISTEMA:
+        - Beneficiarios: {$totalAdultos}
+        - Voluntarios: {$totalVoluntarios} ({$voluntariosActivos} activos)
+        - Visitas esta semana: {$visitasSemana}
+        - CASOS CRÍTICOS (Alto Riesgo): {$criticos}
+        ";
+
+        // --- 2. PREPARAR EL PROMPT ---
+
+        $systemInstruction = "Eres el asistente experto de WasiQhari.
+                   Usa los siguientes datos reales para responder.
+                   Si preguntan por casos urgentes, menciona los de alto riesgo.
+                   Responde breve y profesionalmente.
+                   
+                   {$datosDelSistema}";
+
+        $prompt = $systemInstruction . "\n\nUsuario: " . $mensaje . "\nAsistente:";
 
         try {
-            // CAMBIO CLAVE: Usamos el modelo que vimos en tu lista
-            // "name": "models/gemini-2.0-flash-001"
-            // Y usamos la versión v1beta que es donde viven estos modelos nuevos.
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key={$apiKey}";
+            // --- 3. LLAMADA A LA API (CORREGIDA A GEMINI 2.0) ---
+            // Usamos 'gemini-2.0-flash' que es el que aparece en tu lista de modelos disponibles
+            $model = "gemini-2.0-flash";
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
             $response = Http::withHeaders(['Content-Type' => 'application/json'])
                 ->post($url, [
@@ -34,15 +68,23 @@ class AIController extends Controller
 
             $data = $response->json();
 
-            // Debugging
-            Log::info('Respuesta de Gemini:', $data);
-
+            // Si falla el 2.0, intentamos con el "latest" que suele ser un comodín seguro
             if (isset($data['error'])) {
-                $errorMsg = $data['error']['message'] ?? 'Error desconocido de Google';
-                // Si falla este, intentamos un fallback al lite
-                if (strpos($errorMsg, 'not found') !== false) {
-                     return $this->tryFallbackModel($apiKey, $prompt);
-                }
+                Log::warning('Falló Gemini 2.0, intentando con gemini-1.5-flash-latest...');
+                
+                $modelFallback = "gemini-1.5-flash-latest"; 
+                $urlFallback = "https://generativelanguage.googleapis.com/v1beta/models/{$modelFallback}:generateContent?key={$apiKey}";
+                
+                $response = Http::withHeaders(['Content-Type' => 'application/json'])
+                    ->post($urlFallback, [
+                        'contents' => [['parts' => [['text' => $prompt]]]]
+                    ]);
+                $data = $response->json();
+            }
+
+            // Verificar errores finales
+            if (isset($data['error'])) {
+                $errorMsg = $data['error']['message'] ?? 'Error desconocido';
                 return response()->json(['response' => "Error de IA: $errorMsg"]);
             }
 
@@ -51,33 +93,12 @@ class AIController extends Controller
             if ($texto) {
                 return response()->json(['response' => $texto]);
             } else {
-                return response()->json(['response' => 'La IA respondió vacío. Intenta preguntar de otra forma.']);
+                return response()->json(['response' => 'La IA no devolvió una respuesta válida.']);
             }
 
         } catch (\Exception $e) {
-            Log::error('Error de conexión IA: ' . $e->getMessage());
-            return response()->json(['response' => 'Error interno del servidor: ' . $e->getMessage()], 500);
+            Log::error('Error IA: ' . $e->getMessage());
+            return response()->json(['response' => 'Error interno del servidor.'], 500);
         }
-    }
-
-    // Función de respaldo por si acaso
-    private function tryFallbackModel($apiKey, $prompt) {
-        try {
-            // Intentamos con la versión lite que también tienes
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-001:generateContent?key={$apiKey}";
-            
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])
-                ->post($url, [
-                    'contents' => [['parts' => [['text' => $prompt]]]]
-                ]);
-                
-            $data = $response->json();
-            $texto = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
-            
-            if ($texto) return response()->json(['response' => $texto]);
-            
-        } catch (\Exception $e) {}
-        
-        return response()->json(['response' => 'Lo siento, no pude conectar con ningún modelo de IA disponible.']);
     }
 }
