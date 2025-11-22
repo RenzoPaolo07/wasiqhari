@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="hero-image animate-fade-in">
-                <img src="https://i.postimg.cc/XY7jQ7Zj/elderly-care.png" alt="Cuidado de adultos mayores" class="floating">
+                <img src="https://www.vrim.com.mx/wp-content/uploads/2021/07/cuidado-de-adultos-mayores-scaled.jpg" alt="Cuidado de adultos mayores" class="floating">
             </div>
         </div>
         

@@ -52,6 +52,7 @@ class UserController extends Controller
             return redirect()->route('register')->withErrors($validator)->withInput();
         }
 
+        // 1. Crear el Usuario
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -59,17 +60,26 @@ class UserController extends Controller
             'role' => $request->role
         ]);
 
+        // 2. Si es Voluntario, crear su perfil asociado
         if ($request->role === 'voluntario') {
             Voluntario::create([
                 'user_id' => $user->id,
                 'telefono' => $request->phone,
+                'direccion' => '',
+                'distrito' => '',
+                'habilidades' => '',
+                // --- CORRECCIÓN AQUÍ ---
+                'disponibilidad' => 'Flexible', // Ponemos un valor válido por defecto
+                // -----------------------
+                'zona_cobertura' => '',
                 'estado' => 'Activo',
-                'disponibilidad' => 'Flexible', 
                 'fecha_registro' => now()
             ]);
         }
 
+        // 3. Iniciar sesión automáticamente
         Auth::login($user);
+        
         return redirect()->route('dashboard')->with('success', '¡Bienvenido a WasiQhari!');
     }
     
@@ -116,7 +126,7 @@ class UserController extends Controller
             return redirect()->route('profile')->withErrors($validator)->withInput();
         }
 
-        // 1. Actualizar Avatar
+        // Actualizar Avatar
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
@@ -125,11 +135,11 @@ class UserController extends Controller
             $user->avatar = $path;
         }
 
-        // 2. Actualizar Datos Básicos
+        // Actualizar Datos Básicos
         $user->name = $request->name;
         $user->email = $request->email;
 
-        // 3. Actualizar Contraseña
+        // Actualizar Contraseña
         if ($request->filled('current_password') && $request->filled('new_password')) {
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'La contraseña actual es incorrecta.']);
@@ -139,9 +149,7 @@ class UserController extends Controller
 
         $user->save();
 
-        // 4. Actualizar Datos de Voluntario (SOLO SI SE ENVIARON)
-        // Esta es la corrección clave: verificamos si el formulario enviado
-        // contiene datos de voluntario antes de intentar actualizarlos.
+        // Actualizar Datos de Voluntario (SOLO SI SE ENVIARON)
         if ($user->role === 'voluntario' && $request->has('disponibilidad')) {
             $voluntario = Voluntario::where('user_id', $user->id)->first();
             if ($voluntario) {
@@ -156,9 +164,7 @@ class UserController extends Controller
             }
         }
 
-        // Mensaje personalizado según lo que se actualizó
         $mensaje = $request->hasFile('avatar') ? 'Foto de perfil actualizada.' : 'Perfil actualizado correctamente.';
-
         return redirect()->route('profile')->with('success', $mensaje);
     }
 }

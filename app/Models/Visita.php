@@ -70,6 +70,11 @@ class Visita extends Model
                     ->toArray();
     }
 
+    public function comentarios()
+    {
+        return $this->hasMany(ComentarioVisita::class)->orderBy('created_at', 'asc');
+    }
+
     /**
      * Crear nueva visita
      */

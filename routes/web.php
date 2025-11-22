@@ -53,6 +53,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/visitas/{visita}', [DashboardController::class, 'showVisita'])->name('visitas.show');
     Route::put('/dashboard/visitas/{visita}', [DashboardController::class, 'updateVisita'])->name('visitas.update');
     Route::delete('/dashboard/visitas/{visita}', [DashboardController::class, 'destroyVisita'])->name('visitas.destroy');
+    // Ruta para COMENTARIOS (Chat)
+    Route::post('/dashboard/visitas/{visita}/comentarios', [DashboardController::class, 'storeComentario'])->name('visitas.comentarios.store');
 
     // Calendario
     Route::get('/dashboard/calendario', [DashboardController::class, 'calendario'])->name('calendario');

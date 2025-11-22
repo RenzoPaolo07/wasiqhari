@@ -257,10 +257,33 @@ class DashboardController extends Controller
         auth()->user()->unreadNotifications->markAsRead();
         return back();
     }
-    public function showVisita(Visita $visita) {
-        $visita->load(['adultoMayor', 'voluntario.user']);
-        if ($visita->foto_evidencia) $visita->foto_url = asset('storage/' . $visita->foto_evidencia);
+    public function showVisita(Visita $visita)
+    {
+        // Cargamos relaciones, URL de foto Y AHORA LOS COMENTARIOS con sus usuarios
+        $visita->load(['adultoMayor', 'voluntario.user', 'comentarios.user']);
+        
+        if ($visita->foto_evidencia) {
+            $visita->foto_url = asset('storage/' . $visita->foto_evidencia);
+        }
+
         return response()->json($visita);
+    }
+
+    // 2. AGREGAR ESTA NUEVA FUNCIÓN
+    public function storeComentario(Request $request, Visita $visita)
+    {
+        $request->validate([
+            'contenido' => 'required|string|max:500'
+        ]);
+
+        $comentario = \App\Models\ComentarioVisita::create([
+            'visita_id' => $visita->id,
+            'user_id' => auth()->id(),
+            'contenido' => $request->contenido
+        ]);
+
+        // Devolvemos el comentario creado con los datos del usuario para mostrarlo al instante
+        return response()->json($comentario->load('user'));
     }
     public function updateVisita(Request $request, Visita $visita) {
         $visita->update($request->all());
