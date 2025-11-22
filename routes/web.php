@@ -25,7 +25,7 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+    Route::post('/ai/chat', [App\Http\Controllers\AIController::class, 'chat'])->name('ai.chat.process');
     // Notificaciones
     Route::get('/notifications/mark-read', [DashboardController::class, 'markNotificationsRead'])->name('notifications.read');
     
@@ -67,6 +67,28 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reportes/exportar/voluntarios', [ReporteController::class, 'exportarVoluntariosExcel'])->name('reportes.excel.voluntarios');
     Route::get('/reportes/imprimir/{tipo}', [ReporteController::class, 'imprimirReporte'])->name('reportes.imprimir');
     
+    // Ruta temporal para arreglar coordenadas
+    Route::get('/fix-mapa', function() {
+    // Coordenadas base de Cusco
+    $lat_base = -13.5319; 
+    $lon_base = -71.9675; 
+    
+    $adultos = \App\Models\AdultoMayor::all();
+    
+    foreach($adultos as $index => $adulto) {
+        // Generamos una pequeña variación aleatoria para que no salgan todos encimados
+        $lat = $lat_base + (mt_rand(-100, 100) / 10000);
+        $lon = $lon_base + (mt_rand(-100, 100) / 10000);
+        
+        $adulto->update([
+            'lat' => $lat,
+            'lon' => $lon
+        ]);
+    }
+    
+    return "¡Coordenadas actualizadas! Ahora ve al Dashboard.";
+    });
+
     // Otros
     Route::get('/dashboard/ai', [DashboardController::class, 'ai'])->name('ai');
     Route::get('/dashboard/settings', [DashboardController::class, 'settings'])->name('settings');

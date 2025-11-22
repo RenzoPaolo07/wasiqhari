@@ -136,6 +136,42 @@ class DashboardController extends Controller
         $adulto->update($request->all());
         return redirect()->route('adultos')->with('success', 'Actualizado con éxito');
     }
+
+    public function profile()
+    {
+        $user = Auth::user();
+        $voluntario = null;
+        $nivel = 'Novato';
+        $puntos = 0;
+        $proxNivel = 100;
+
+        if ($user->role === 'voluntario') {
+            $voluntario = Voluntario::where('user_id', $user->id)->first();
+            // Calcular puntos: 10 puntos por visita
+            $visitasCount = \App\Models\Visita::where('voluntario_id', $voluntario->id)->count();
+            $puntos = $visitasCount * 10;
+            
+            if ($puntos > 50) $nivel = 'Comprometido';
+            if ($puntos > 100) $nivel = 'Experto';
+            if ($puntos > 200) $nivel = 'Leyenda';
+            
+            $proxNivel = ($puntos > 200) ? 500 : (($puntos > 100) ? 200 : (($puntos > 50) ? 100 : 50));
+        }
+
+        // Pasamos estas variables a la vista
+        $data = [
+            'title' => 'Mi Perfil - WasiQhari',
+            'page' => 'profile',
+            'user' => $user,
+            'voluntario' => $voluntario,
+            'nivel' => $nivel,
+            'puntos' => $puntos,
+            'proxNivel' => $proxNivel
+        ];
+        
+        return view('user.profile', $data);
+    }
+    
     public function destroy(AdultoMayor $adulto) {
         $adulto->delete();
         return response()->json(['success' => true, 'message' => 'Eliminado con éxito']);

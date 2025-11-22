@@ -63,6 +63,20 @@
                             <span>Miembro desde</span>
                         </div>
                     </div>
+                    @if(Auth::user()->role == 'voluntario')
+                        <div class="gamification-box" style="margin-top: 20px; text-align: left;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:5px;">
+                                <strong>Nivel: {{ $nivel }}</strong>
+                                <span>{{ $puntos }} / {{ $proxNivel }} XP</span>
+                            </div>
+                            <div style="background:#eee; border-radius:10px; height:10px; width:100%; overflow:hidden;">
+                                <div style="background: linear-gradient(90deg, #e74c3c, #f39c12); height:100%; width: {{ ($puntos / $proxNivel) * 100 }}%;"></div>
+                            </div>
+                            <p style="font-size:0.75rem; color:#888; margin-top:5px; text-align:center;">
+                                ¡Realiza más visitas para subir de nivel!
+                            </p>
+                        </div>
+                    @endif
                 </div>
             </div>
 

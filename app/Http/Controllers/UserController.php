@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Voluntario;
+use App\Models\Visita; // ¡Importante! Agregamos el modelo Visita
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -52,7 +53,6 @@ class UserController extends Controller
             return redirect()->route('register')->withErrors($validator)->withInput();
         }
 
-        // 1. Crear el Usuario
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -60,26 +60,17 @@ class UserController extends Controller
             'role' => $request->role
         ]);
 
-        // 2. Si es Voluntario, crear su perfil asociado
         if ($request->role === 'voluntario') {
             Voluntario::create([
                 'user_id' => $user->id,
                 'telefono' => $request->phone,
-                'direccion' => '',
-                'distrito' => '',
-                'habilidades' => '',
-                // --- CORRECCIÓN AQUÍ ---
-                'disponibilidad' => 'Flexible', // Ponemos un valor válido por defecto
-                // -----------------------
-                'zona_cobertura' => '',
                 'estado' => 'Activo',
+                'disponibilidad' => 'Flexible', 
                 'fecha_registro' => now()
             ]);
         }
 
-        // 3. Iniciar sesión automáticamente
         Auth::login($user);
-        
         return redirect()->route('dashboard')->with('success', '¡Bienvenido a WasiQhari!');
     }
     
@@ -95,16 +86,45 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $voluntario = null;
+        
+        // Variables de Gamificación (Valores por defecto)
+        $nivel = 'Novato';
+        $puntos = 0;
+        $proxNivel = 50;
 
         if ($user->role === 'voluntario') {
             $voluntario = Voluntario::where('user_id', $user->id)->first();
+            
+            if ($voluntario) {
+                // Calcular puntos: 10 puntos por cada visita realizada
+                $visitasCount = Visita::where('voluntario_id', $voluntario->id)->count();
+                $puntos = $visitasCount * 10;
+                
+                // Lógica de Niveles
+                if ($puntos >= 200) {
+                    $nivel = 'Leyenda';
+                    $proxNivel = 500; // Meta final
+                } elseif ($puntos >= 100) {
+                    $nivel = 'Experto';
+                    $proxNivel = 200;
+                } elseif ($puntos >= 50) {
+                    $nivel = 'Comprometido';
+                    $proxNivel = 100;
+                } else {
+                    $nivel = 'Novato';
+                    $proxNivel = 50;
+                }
+            }
         }
 
         $data = [
             'title' => 'Mi Perfil - WasiQhari',
             'page' => 'profile',
             'user' => $user,
-            'voluntario' => $voluntario
+            'voluntario' => $voluntario,
+            'nivel' => $nivel,        // <--- ¡Ahora sí enviamos estas variables!
+            'puntos' => $puntos,      // <---
+            'proxNivel' => $proxNivel // <---
         ];
         
         return view('user.profile', $data);
@@ -126,7 +146,7 @@ class UserController extends Controller
             return redirect()->route('profile')->withErrors($validator)->withInput();
         }
 
-        // Actualizar Avatar
+        // 1. Actualizar Avatar
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
@@ -135,11 +155,11 @@ class UserController extends Controller
             $user->avatar = $path;
         }
 
-        // Actualizar Datos Básicos
+        // 2. Actualizar Datos Básicos
         $user->name = $request->name;
         $user->email = $request->email;
 
-        // Actualizar Contraseña
+        // 3. Actualizar Contraseña
         if ($request->filled('current_password') && $request->filled('new_password')) {
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'La contraseña actual es incorrecta.']);
@@ -149,7 +169,7 @@ class UserController extends Controller
 
         $user->save();
 
-        // Actualizar Datos de Voluntario (SOLO SI SE ENVIARON)
+        // 4. Actualizar Datos de Voluntario (SOLO SI SE ENVIARON)
         if ($user->role === 'voluntario' && $request->has('disponibilidad')) {
             $voluntario = Voluntario::where('user_id', $user->id)->first();
             if ($voluntario) {

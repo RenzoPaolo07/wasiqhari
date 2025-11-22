@@ -392,41 +392,54 @@
         }, 1500);
     }
 
-    // Chat IA mejorado
+    // Chat IA REAL con Gemini
     function sendAIMessage() {
         const input = document.getElementById('aiInput');
         const message = input.value.trim();
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         
         if (message) {
+            // 1. Mostrar mensaje del usuario
             addMessage(message, 'user');
             input.value = '';
             
-            // Simular procesamiento IA
-            setTimeout(() => {
-                let response = '';
-                
-                if (message.toLowerCase().includes('hola') || message.toLowerCase().includes('hi')) {
-                    response = "¡Hola! Soy tu asistente IA de WasiQhari. Puedo ayudarte con análisis de riesgo, reportes, predicciones y optimización de rutas. ¿En qué necesitas ayuda?";
-                } else if (message.toLowerCase().includes('riesgo') || message.toLowerCase().includes('peligro')) {
-                    response = "Actualmente tenemos 12 casos de alto riesgo identificados. Los factores principales son: edad avanzada (85+), condiciones médicas crónicas y falta de apoyo familiar. ¿Quieres que detalle los casos específicos?";
-                } else if (message.toLowerCase().includes('reporte') || message.toLowerCase().includes('informe')) {
-                    response = "Puedo generar reportes en PDF o Excel. Los tipos disponibles son: mensual, trimestral, anual, por zona geográfica, o por tipo de servicio. ¿Cuál necesitas?";
-                } else if (message.toLowerCase().includes('necesidad') || message.toLowerCase().includes('ayuda')) {
-                    response = "Basado en el análisis predictivo, las necesidades más urgentes son: alimentos no perecederos, medicamentos para presión y diabetes, y abrigos para el invierno. ¿Necesitas la lista completa?";
-                } else {
-                    response = "Entiendo que necesitas ayuda. Como asistente IA de WasiQhari, puedo analizar datos de adultos mayores, generar reportes, predecir necesidades y optimizar rutas. ¿En qué aspecto específico te puedo apoyar?";
-                }
-                
-                addMessage(response, 'ai');
-            }, 1000 + Math.random() * 1000);
+            // 2. Mostrar indicador de "Escribiendo..."
+            const loadingId = 'loading-' + Date.now();
+            addMessage('<i class="fas fa-spinner fa-spin"></i> Pensando...', 'ai', loadingId);
+            
+            // 3. Llamar al Backend
+            fetch("{{ route('ai.chat.process') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Eliminar mensaje de carga
+                const loadingElement = document.getElementById(loadingId);
+                if(loadingElement) loadingElement.remove();
+
+                // Mostrar respuesta real
+                addMessage(data.response, 'ai');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const loadingElement = document.getElementById(loadingId);
+                if(loadingElement) loadingElement.remove();
+                addMessage("Lo siento, hubo un error de conexión.", 'ai');
+            });
         }
     }
-
-    // Función auxiliar para agregar mensajes
-    function addMessage(content, type) {
+    
+    // Función auxiliar actualizada para soportar IDs (para borrar el loading)
+    function addMessage(content, type, id = null) {
         const chat = document.getElementById('aiChatMessages');
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}-message`;
+        if(id) messageDiv.id = id;
         
         messageDiv.innerHTML = `
             <div class="message-avatar">
@@ -440,7 +453,6 @@
         chat.appendChild(messageDiv);
         chat.scrollTop = chat.scrollHeight;
     }
-
     // Permitir enviar mensaje con Enter
     document.getElementById('aiInput')?.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
