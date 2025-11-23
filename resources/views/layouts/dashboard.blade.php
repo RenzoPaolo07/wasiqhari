@@ -61,6 +61,10 @@
                     <i class="fas fa-robot"></i>
                     <span>Análisis IA</span>
                 </a>
+                <a href="{{ route('auditoria') }}" class="nav-link {{ ($page ?? '') == 'auditoria' ? 'active' : '' }}">
+                    <i class="fas fa-history"></i>
+                    <span>Auditoría</span>
+                </a>
                 <a href="{{ route('settings') }}" class="nav-link {{ ($page ?? '') == 'settings' ? 'active' : '' }}">
                     <i class="fas fa-cog"></i>
                     <span>Configuración</span>

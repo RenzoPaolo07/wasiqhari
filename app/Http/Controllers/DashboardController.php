@@ -6,6 +6,8 @@ use App\Models\AdultoMayor;
 use App\Models\Visita;
 use App\Models\Voluntario;
 use App\Models\User;
+use App\Models\ActivityLog;
+use App\Models\ComentarioVisita;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -14,23 +16,33 @@ use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
-    /**
-     * Muestra la vista principal del dashboard.
-     */
+    // --- DASHBOARD PRINCIPAL ---
     public function index()
     {
-        // ... (Código del index igual que antes)
         $ultimasVisitas = Visita::with(['adultoMayor', 'voluntario.user'])
-                                ->latest('fecha_visita')->take(5)->get();
-        $adultosParaMapa = AdultoMayor::whereNotNull('lat')->whereNotNull('lon')
-                                      ->get(['nombres', 'apellidos', 'lat', 'lon', 'nivel_riesgo']);
+            ->latest('fecha_visita')
+            ->take(5)
+            ->get();
+
+        $adultosParaMapa = AdultoMayor::whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->get(['nombres', 'apellidos', 'lat', 'lon', 'nivel_riesgo']);
+
         $saludData = AdultoMayor::select('estado_salud', DB::raw('count(*) as total'))
-                         ->groupBy('estado_salud')->pluck('total', 'estado_salud');
+            ->groupBy('estado_salud')
+            ->pluck('total', 'estado_salud');
+
         $actividadesData = AdultoMayor::select('actividad_calle', DB::raw('count(*) as total'))
-                         ->groupBy('actividad_calle')->pluck('total', 'actividad_calle');
+            ->groupBy('actividad_calle')
+            ->pluck('total', 'actividad_calle');
+
         $distribucionDistritos = AdultoMayor::select('distrito', DB::raw('count(*) as cantidad'))
-                       ->whereNotNull('distrito')->where('distrito', '!=', '')
-                       ->groupBy('distrito')->orderBy('cantidad', 'desc')->get();
+            ->whereNotNull('distrito')
+            ->where('distrito', '!=', '')
+            ->groupBy('distrito')
+            ->orderBy('cantidad', 'desc')
+            ->get();
+        
         $stats = [
             'total_adultos' => AdultoMayor::count(),
             'total_voluntarios' => Voluntario::count(),
@@ -39,26 +51,34 @@ class DashboardController extends Controller
             'ultimas_visitas' => $ultimasVisitas,
             'distribucion_distritos' => $distribucionDistritos
         ];
-        $data = [
+        
+        return view('dashboard.index', [
             'title' => 'Dashboard - WasiQhari',
             'page' => 'dashboard',
             'stats' => $stats,
             'adultosParaMapa' => $adultosParaMapa,
             'saludData' => $saludData,
             'actividadesData' => $actividadesData,
-        ];
-        return view('dashboard.index', $data);
+        ]);
     }
 
-    // --- GESTIÓN DE ADULTOS (¡MEJORADO CON BÚSQUEDA!) ---
+    // --- AUDITORÍA ---
+    public function auditoria()
+    {
+        $logs = ActivityLog::with('user')->latest()->paginate(20);
+        
+        return view('dashboard.auditoria', [
+            'title' => 'Auditoría del Sistema',
+            'page' => 'auditoria',
+            'logs' => $logs
+        ]);
+    }
+
+    // --- GESTIÓN DE ADULTOS ---
     public function adultos(Request $request)
     {
-        // Usamos el scopeSearch que creamos en el Modelo
         $query = AdultoMayor::search($request->search)->latest('fecha_registro');
-        
-        $adultos = $query->paginate(10);
 
-        // 1. Búsqueda (Live Search)
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -68,122 +88,87 @@ class DashboardController extends Controller
             });
         }
 
-        // 2. Filtro por Riesgo
         if ($request->has('riesgo') && $request->riesgo != '') {
             $query->where('nivel_riesgo', $request->riesgo);
         }
 
-        // Ordenamos y paginamos (Mantenemos los filtros en los links de paginación)
-        $adultos = $query->latest('fecha_registro')->paginate(10)->withQueryString();
+        $adultos = $query->paginate(10)->withQueryString();
         
-        $data = [
-            'title' => 'Gestión de Adultos - WasiQhari',
-            'page' => 'adultos',
-            'adultos' => $adultos
-        ];
-        
-        // Si es una petición AJAX (Live Search), devolvemos solo la tabla
         if ($request->ajax()) {
             return view('dashboard.partials.tabla_adultos', compact('adultos'))->render();
         }
         
-        $data = [
+        return view('dashboard.adultos', [
             'title' => 'Gestión de Adultos - WasiQhari',
             'page' => 'adultos',
             'adultos' => $adultos
-        ];
-        
-        return view('dashboard.adultos', $data);
+        ]);
     }
 
     public function storeAdulto(Request $request)
     {
-        // ... (Tu validación original aquí) ...
         $validator = Validator::make($request->all(), [
             'fecha_registro' => 'required|date',
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
             'dni' => 'nullable|string|max:8|unique:adultos_mayores,dni',
-            'sexo' => 'required|in:M,F',
-            'fecha_nacimiento' => 'required|date',
-            'edad' => 'required|integer|min:60',
-            'distrito' => 'required|string|max:50',
-            'zona_ubicacion' => 'required|string|max:100',
-            'direccion' => 'nullable|string',
-            'telefono' => 'nullable|string|max:9',
-            'lee_escribe' => 'required|in:Si,No,Poco',
-            'nivel_estudio' => 'required|in:Ninguno,Primaria,Secundaria',
-            'apoyo_familiar' => 'required|in:Ninguno,Poco,Ocasional',
-            'estado_abandono' => 'required|in:Total,Parcial,Situación Calle',
-            'estado_salud' => 'required|in:Bueno,Regular,Malo,Critico',
-            'actividad_calle' => 'required|string',
-            'necesidades' => 'nullable|string',
-            'observaciones' => 'nullable|string',
-            'nivel_riesgo' => 'required|in:Bajo,Medio,Alto',
-            'lat' => 'nullable|numeric',
-            'lon' => 'nullable|numeric',
+            'sexo' => 'required',
+            'fecha_nacimiento' => 'required',
+            'edad' => 'required',
+            'distrito' => 'required',
+            'zona_ubicacion' => 'required',
+            'lee_escribe' => 'required',
+            'nivel_estudio' => 'required',
+            'apoyo_familiar' => 'required',
+            'estado_abandono' => 'required',
+            'estado_salud' => 'required',
+            'actividad_calle' => 'required',
+            'nivel_riesgo' => 'required'
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('adultos')->withErrors($validator)->withInput()->with('error_form', 'Error al guardar.');
+            return redirect()->route('adultos')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error_form', 'Error al guardar.');
         }
 
-        AdultoMayor::create($request->all());
+        $adulto = AdultoMayor::create($request->all());
+        
+        ActivityLog::registrar('Crear', 'Adultos', "Registró al beneficiario {$adulto->nombres} {$adulto->apellidos}");
+
         return redirect()->route('adultos')->with('success', 'Registrado con éxito');
     }
-    public function show(AdultoMayor $adulto) { return response()->json($adulto); }
-    public function update(Request $request, AdultoMayor $adulto) {
-        $adulto->update($request->all());
-        return redirect()->route('adultos')->with('success', 'Actualizado con éxito');
-    }
-
-    public function profile()
+    
+    public function show(AdultoMayor $adulto)
     {
-        $user = Auth::user();
-        $voluntario = null;
-        $nivel = 'Novato';
-        $puntos = 0;
-        $proxNivel = 100;
-
-        if ($user->role === 'voluntario') {
-            $voluntario = Voluntario::where('user_id', $user->id)->first();
-            // Calcular puntos: 10 puntos por visita
-            $visitasCount = \App\Models\Visita::where('voluntario_id', $voluntario->id)->count();
-            $puntos = $visitasCount * 10;
-            
-            if ($puntos > 50) $nivel = 'Comprometido';
-            if ($puntos > 100) $nivel = 'Experto';
-            if ($puntos > 200) $nivel = 'Leyenda';
-            
-            $proxNivel = ($puntos > 200) ? 500 : (($puntos > 100) ? 200 : (($puntos > 50) ? 100 : 50));
-        }
-
-        // Pasamos estas variables a la vista
-        $data = [
-            'title' => 'Mi Perfil - WasiQhari',
-            'page' => 'profile',
-            'user' => $user,
-            'voluntario' => $voluntario,
-            'nivel' => $nivel,
-            'puntos' => $puntos,
-            'proxNivel' => $proxNivel
-        ];
-        
-        return view('user.profile', $data);
+        return response()->json($adulto);
     }
     
-    public function destroy(AdultoMayor $adulto) {
+    public function update(Request $request, AdultoMayor $adulto)
+    {
+        $adulto->update($request->all());
+        
+        ActivityLog::registrar('Actualizar', 'Adultos', "Actualizó datos de {$adulto->nombres} {$adulto->apellidos}");
+        
+        return redirect()->route('adultos')->with('success', 'Actualizado con éxito');
+    }
+    
+    public function destroy(AdultoMayor $adulto)
+    {
+        $nombre = $adulto->nombres . ' ' . $adulto->apellidos;
         $adulto->delete();
+        
+        ActivityLog::registrar('Eliminar', 'Adultos', "Eliminó el registro de {$nombre}");
+        
         return response()->json(['success' => true, 'message' => 'Eliminado con éxito']);
     }
 
-
-    // --- GESTIÓN DE VOLUNTARIOS (¡MEJORADO CON BÚSQUEDA!) ---
+    // --- GESTIÓN DE VOLUNTARIOS ---
     public function voluntarios(Request $request)
     {
-        $query = Voluntario::with('user'); // Eager load user
+        $query = Voluntario::with('user');
 
-        // 1. Búsqueda (Nombre o Email del usuario)
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
@@ -192,62 +177,68 @@ class DashboardController extends Controller
             });
         }
 
-        // 2. Filtro por Estado
         if ($request->has('estado') && $request->estado != '') {
             $query->where('estado', $request->estado);
         }
 
         $voluntarios = $query->paginate(10)->withQueryString();
         
-        $data = [
+        return view('dashboard.voluntarios', [
             'title' => 'Gestión de Voluntarios - WasiQhari',
             'page' => 'voluntarios',
             'voluntarios' => $voluntarios
-        ];
-
-        // Si es AJAX, devolvemos solo la tabla (aunque por ahora usaremos el método de reemplazo de DOM en el JS)
-        if ($request->ajax()) {
-             // Nota: Para simplificar, usaremos el método de JS que extrae el HTML, 
-             // así no tienes que crear archivos parciales extra.
-        }
-        
-        return view('dashboard.voluntarios', $data);
+        ]);
     }
     
-    // ... (Resto de funciones de voluntarios show, update, destroy iguales que antes) ...
-    public function showVoluntario(Voluntario $voluntario) {
+    public function showVoluntario(Voluntario $voluntario)
+    {
         $voluntario->load('user');
         return response()->json($voluntario);
     }
-    public function updateVoluntario(Request $request, Voluntario $voluntario) {
-        $voluntario->user->update(['name' => $request->name, 'email' => $request->email]);
+    
+    public function updateVoluntario(Request $request, Voluntario $voluntario)
+    {
+        $voluntario->user->update([
+            'name' => $request->name,
+            'email' => $request->email
+        ]);
+        
         $voluntario->update($request->except(['name', 'email']));
+        
+        ActivityLog::registrar('Actualizar', 'Voluntarios', "Actualizó perfil de {$voluntario->user->name}");
+        
         return redirect()->route('voluntarios')->with('success', 'Actualizado con éxito');
     }
-    public function destroyVoluntario(Voluntario $voluntario) {
+    
+    public function destroyVoluntario(Voluntario $voluntario)
+    {
+        $nombre = $voluntario->user->name;
         $voluntario->delete();
+        
+        ActivityLog::registrar('Eliminar', 'Voluntarios', "Eliminó al voluntario {$nombre}");
+        
         return response()->json(['success' => true, 'message' => 'Eliminado con éxito']);
     }
 
-    // --- GESTIÓN DE VISITAS (Visitas también se pueden buscar si quieres) ---
+    // --- GESTIÓN DE VISITAS ---
     public function visitas()
     {
         $visitas = Visita::with(['adultoMayor', 'voluntario.user'])
-                         ->latest('fecha_visita')
-                         ->paginate(10);
+            ->latest('fecha_visita')
+            ->paginate(10);
+            
         $adultos = AdultoMayor::all(['id', 'nombres', 'apellidos']);
         $voluntarios = Voluntario::with('user')->get();
         
-        $data = [
+        return view('dashboard.visitas', [
             'title' => 'Gestión de Visitas - WasiQhari',
             'page' => 'visitas',
             'visitas' => $visitas,
             'adultos' => $adultos,
             'voluntarios' => $voluntarios
-        ];
-        return view('dashboard.visitas', $data);
+        ]);
     }
-    // ... (storeVisita, showVisita, etc. iguales que antes) ...
+    
     public function storeVisita(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -258,7 +249,10 @@ class DashboardController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('visitas')->withErrors($validator)->withInput()->with('error_form', 'Error al guardar.');
+            return redirect()->route('visitas')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error_form', 'Error al guardar.');
         }
 
         $data = $request->all();
@@ -268,34 +262,23 @@ class DashboardController extends Controller
             $data['foto_evidencia'] = $path;
         }
 
-        // Crear la visita
         $visita = Visita::create($data);
 
-        // --- LÓGICA DE NOTIFICACIÓN ---
-        // Si es emergencia, notificamos a todos los usuarios con rol 'organizacion' o al admin
+        ActivityLog::registrar('Crear', 'Visitas', "Registró visita ID #{$visita->id}");
+
+        // NOTIFICACIÓN DE EMERGENCIA
         if ($visita->emergencia) {
-            // Por simplicidad, notificamos al usuario actual (para que veas que funciona)
-            // En producción, harías: User::where('role', 'organizacion')->get()
             $usersToNotify = User::all(); 
-            
             foreach ($usersToNotify as $user) {
                 $user->notify(new \App\Notifications\NuevaEmergencia($visita));
             }
         }
-        // -----------------------------------------
 
         return redirect()->route('visitas')->with('success', '¡Visita registrada con éxito!');
     }
     
-    // --- MARCAR TODO COMO LEÍDO ---
-    public function markNotificationsRead()
-    {
-        auth()->user()->unreadNotifications->markAsRead();
-        return back();
-    }
     public function showVisita(Visita $visita)
     {
-        // Cargamos relaciones, URL de foto Y AHORA LOS COMENTARIOS con sus usuarios
         $visita->load(['adultoMayor', 'voluntario.user', 'comentarios.user']);
         
         if ($visita->foto_evidencia) {
@@ -305,58 +288,119 @@ class DashboardController extends Controller
         return response()->json($visita);
     }
 
-    // 2. AGREGAR ESTA NUEVA FUNCIÓN
+    public function updateVisita(Request $request, Visita $visita)
+    {
+        $data = $request->all();
+        
+        if ($request->hasFile('foto_evidencia')) {
+            if ($visita->foto_evidencia) {
+                Storage::disk('public')->delete($visita->foto_evidencia);
+            }
+            $data['foto_evidencia'] = $request->file('foto_evidencia')->store('evidencias', 'public');
+        }
+        
+        $visita->update($data);
+        
+        ActivityLog::registrar('Actualizar', 'Visitas', "Actualizó visita #{$visita->id}");
+
+        return redirect()->route('visitas')->with('success', 'Actualizada');
+    }
+
+    public function destroyVisita(Visita $visita)
+    {
+        if ($visita->foto_evidencia) {
+            Storage::disk('public')->delete($visita->foto_evidencia);
+        }
+        
+        $visita->delete();
+        
+        ActivityLog::registrar('Eliminar', 'Visitas', "Eliminó visita #{$visita->id}");
+
+        return response()->json(['success' => true, 'message' => 'Eliminada']);
+    }
+
     public function storeComentario(Request $request, Visita $visita)
     {
         $request->validate([
             'contenido' => 'required|string|max:500'
         ]);
-
-        $comentario = \App\Models\ComentarioVisita::create([
+        
+        $comentario = ComentarioVisita::create([
             'visita_id' => $visita->id,
             'user_id' => auth()->id(),
             'contenido' => $request->contenido
         ]);
-
-        // Devolvemos el comentario creado con los datos del usuario para mostrarlo al instante
+        
         return response()->json($comentario->load('user'));
     }
-    public function updateVisita(Request $request, Visita $visita) {
-        $visita->update($request->all());
-        return redirect()->route('visitas')->with('success', 'Actualizada');
-    }
-    public function destroyVisita(Visita $visita) {
-        if ($visita->foto_evidencia) Storage::disk('public')->delete($visita->foto_evidencia);
-        $visita->delete();
-        return response()->json(['success' => true, 'message' => 'Eliminada']);
+
+    // --- OTRAS FUNCIONES ---
+    public function markNotificationsRead()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+        return back();
     }
 
-    // Rutas extra del calendario (de la mejora anterior)
-    public function calendario() { return view('dashboard.calendario', ['title' => 'Calendario', 'page' => 'calendario']); }
-    public function getEventosCalendario() {
+    public function calendario()
+    {
+        return view('dashboard.calendario', [
+            'title' => 'Calendario',
+            'page' => 'calendario'
+        ]);
+    }
+    
+    public function getEventosCalendario()
+    {
         $visitas = Visita::with(['adultoMayor', 'voluntario.user'])->get();
+        
         $eventos = $visitas->map(function($visita) {
-            $color = '#3788d8';
-            if ($visita->emergencia) $color = '#e74c3c';
+            $color = $visita->emergencia ? '#e74c3c' : '#3788d8';
+            
+            // Construimos el título con cuidado para evitar errores si falta info
+            $nombreAdulto = $visita->adultoMayor->nombres ?? 'N/A';
+            $nombreVoluntario = $visita->voluntario->user->name ?? 'N/A';
+            
             return [
                 'id' => $visita->id,
-                'title' => ($visita->adultoMayor->nombres ?? 'N/A'),
+                'title' => "$nombreAdulto - $nombreVoluntario",
                 'start' => $visita->fecha_visita->format('Y-m-d\TH:i:s'),
-                'backgroundColor' => $color
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                // Propiedades extendidas para el modal del calendario
+                'extendedProps' => [
+                    'tipo' => $visita->tipo_visita,
+                    'adulto' => $nombreAdulto,
+                    'voluntario' => $nombreVoluntario,
+                    'emergencia' => $visita->emergencia ? 'SI' : 'No',
+                    'observaciones' => $visita->observaciones ?? 'Sin observaciones'
+                ]
             ];
         });
+        
         return response()->json($eventos);
     }
     
-    // Rutas simples
-    public function ai() { return view('dashboard.ai', ['title' => 'IA', 'page' => 'ai']); }
+    public function ai()
+    {
+        return view('dashboard.ai', [
+            'title' => 'IA',
+            'page' => 'ai'
+        ]);
+    }
+    
     public function reporters() 
     {
-        $data = [
-            'title' => 'Reportes - WasiQhari',
-            'page' => 'reportes' // Esto asegura que el menú se marque como activo
-        ];
-        return view('dashboard.reportes', $data);
+        return view('dashboard.reportes', [
+            'title' => 'Reportes',
+            'page' => 'reportes'
+        ]);
     }
-    public function settings() { return view('dashboard.settings', ['title' => 'Config', 'page' => 'settings']); }
+    
+    public function settings()
+    {
+        return view('dashboard.settings', [
+            'title' => 'Config',
+            'page' => 'settings'
+        ]);
+    }
 }

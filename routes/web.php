@@ -38,6 +38,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/dashboard/adultos/{adulto}', [DashboardController::class, 'update'])->name('adultos.update');
     Route::delete('/dashboard/adultos/{adulto}', [DashboardController::class, 'destroy'])->name('adultos.destroy');
     
+    Route::get('/dashboard/auditoria', [DashboardController::class, 'auditoria'])->name('auditoria');
+    
     // ============ CREDENCIALES (¡NUEVO!) ============
     Route::get('/dashboard/adultos/{adulto}/credencial', [ReporteController::class, 'credencialAdulto'])->name('adultos.credencial');
     Route::get('/dashboard/voluntarios/{voluntario}/credencial', [ReporteController::class, 'credencialVoluntario'])->name('voluntarios.credencial');
