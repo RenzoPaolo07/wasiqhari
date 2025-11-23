@@ -68,7 +68,7 @@
                     </div>
                 </div>
                 <div class="service-hero-image" data-aos="fade-left">
-                    <img src="https://i.postimg.cc/XY7jQ7Zj/dashboard-preview.png" alt="Dashboard WasiQhari" class="service-image">
+                    <img src="https://www.questionpro.com/blog/wp-content/uploads/2024/01/2619-seguimiento-de-datos.jpg" alt="Dashboard WasiQhari" class="service-image">
                 </div>
             </div>
         </div>
@@ -79,7 +79,7 @@
         <div class="container">
             <div class="service-hero reverse">
                 <div class="service-hero-image" data-aos="fade-right">
-                    <img src="https://i.postimg.cc/XY7jQ7Zj/volunteer-network.png" alt="Red de Voluntarios" class="service-image">
+                    <img src="https://aiij.org/wp-content/uploads/2021/12/RSV-Home-AIIJ.jpg" alt="Red de Voluntarios" class="service-image">
                 </div>
                 <div class="service-hero-content" data-aos="fade-left">
                     <h2>AyniConnect</h2>

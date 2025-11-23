@@ -123,7 +123,7 @@
                     <div class="team-info">
                         <h4>Renzo Costa</h4>
                         <p class="team-role">Ing. de Sistemas</p>
-                        <p class="team-bio">Especialista en desarrollo backend y arquitectura de software</p>
+                        <p class="team-bio">Especialista en desarrollo backend y arquitectura de software - Especialista en IA y análisis de datos</p>
                         <div class="team-social">
                             <a href="#"><i class="fab fa-linkedin"></i></a>
                             <a href="#"><i class="fab fa-github"></i></a>
@@ -133,7 +133,7 @@
                 
                 <div class="team-card" data-aos="flip-left" data-aos-delay="100">
                     <div class="team-image">
-                        <img src="https://i.postimg.cc/Y0b7q6z2/team2.jpg" alt="Brian Villavicencio">
+                        <img src="https://i.postimg.cc/8cFCTxvW/unnamedvc.webp" alt="Brian Villavicencio">
                     </div>
                     <div class="team-info">
                         <h4>Brian Villavicencio</h4>
@@ -148,27 +148,12 @@
                 
                 <div class="team-card" data-aos="flip-left" data-aos-delay="200">
                     <div class="team-image">
-                        <img src="https://i.postimg.cc/XY7jQ7Zj/team3.jpg" alt="Mikaela Mendoza">
+                        <img src="https://i.postimg.cc/g2h6VLnK/Whats-App-Image-2025-11-22-at-9-38-38-PM.jpg" alt="Mikaela Mendoza">
                     </div>
                     <div class="team-info">
                         <h4>Mikaela Mendoza</h4>
                         <p class="team-role">Ing. de Sistemas</p>
                         <p class="team-bio">Desarrolladora frontend y diseñadora UX/UI</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin"></i></a>
-                            <a href="#"><i class="fab fa-github"></i></a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="team-card" data-aos="flip-left" data-aos-delay="300">
-                    <div class="team-image">
-                        <img src="https://i.postimg.cc/8Cq7yZ7h/team4.jpg" alt="Matias Area">
-                    </div>
-                    <div class="team-info">
-                        <h4>Matias Area</h4>
-                        <p class="team-role">Ing. de Sistemas</p>
-                        <p class="team-bio">Especialista en IA y análisis de datos</p>
                         <div class="team-social">
                             <a href="#"><i class="fab fa-linkedin"></i></a>
                             <a href="#"><i class="fab fa-github"></i></a>

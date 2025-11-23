@@ -279,8 +279,8 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .stat-icon {
-    width: 70px;
-    height: 70px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     display: flex;
     align-items: center;

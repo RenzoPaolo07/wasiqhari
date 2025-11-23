@@ -44,7 +44,7 @@
                 <h3>Contacto</h3>
                 <div class="contact-info">
                     <p><i class="fas fa-map-marker-alt"></i> Cusco, Perú</p>
-                    <p><i class="fas fa-phone"></i> +51 984 123 456</p>
+                    <p><i class="fas fa-phone"></i> +51 995 877 921</p>
                     <p><i class="fas fa-envelope"></i> info@wasiqhari.org</p>
                 </div>
             </div>

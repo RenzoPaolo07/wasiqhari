@@ -258,7 +258,7 @@ body {
 
 .stat-card i {
     font-size: 3rem;
-    color: var(--primary-color);
+    color: #ffffff;
     margin-bottom: 20px;
 }
 
@@ -1740,7 +1740,6 @@ body {
     display: flex;
     justify-content: flex-end;
 }
-/* (Aquí faltarían los estilos de .pagination, Laravel los pone por defecto) */
 
 /* ----- Modal Mejorado ----- */
 .modal {
@@ -1894,8 +1893,6 @@ body {
     .sidebar {
         transform: translateX(-100%);
         position: fixed;
-        /* (Se necesitaría JS para un botón de menú hamburguesa) */
-        /* Por ahora, lo dejamos visible pero ajustamos el main */
         width: 220px;
     }
     .main-content {
@@ -1925,7 +1922,7 @@ body {
 }
 
 /* =================================================================== */
-/* =      ESTILOS PARA LA PAGINACIÓN (AÑADIR AL FINAL)           = */
+/* =      ESTILOS PARA LA PAGINACIÓN       = */
 /* =================================================================== */
 
 .pagination-container {
@@ -1985,7 +1982,7 @@ body {
 }
 
 /* =================================================================== */
-/* =      ESTILOS PARA BADGES DE VOLUNTARIOS (AÑADIR AL FINAL)     = */
+/* =      ESTILOS PARA BADGES DE VOLUNTARIOS    = */
 /* =================================================================== */
 
 .badge-estado-activo { 
