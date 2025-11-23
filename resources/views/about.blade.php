@@ -5,19 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'WasiQhari - Sobre Nosotros' }}</title>
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Estilos CSS -->
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
 <body>
     @include('header')
 
-    <!-- Hero Section -->
     <section class="page-hero">
         <div class="container">
             <div class="hero-content">
@@ -36,7 +32,6 @@
         </div>
     </section>
 
-    <!-- Misión y Visión -->
     <section class="about-section">
         <div class="container">
             <div class="about-grid">
@@ -67,7 +62,6 @@
         </div>
     </section>
 
-    <!-- Valores -->
     <section class="values-section">
         <div class="container">
             <h2 class="section-title">Nuestros Valores</h2>
@@ -109,7 +103,6 @@
         </div>
     </section>
 
-    <!-- Equipo -->
     <section class="team-section">
         <div class="container">
             <h2 class="section-title">Nuestro Equipo</h2>
@@ -164,7 +157,6 @@
         </div>
     </section>
 
-    <!-- Stats -->
     <section class="impact-stats">
         <div class="container">
             <h2 class="section-title">Nuestro Impacto</h2>
@@ -196,11 +188,30 @@
     @include('footer')
 
     <script>
-    // Animación de números para stats
     document.addEventListener('DOMContentLoaded', function() {
+        
+        // ===============================================
+        // 1. ANIMACIÓN DE TEXTO HERO (¡ESTO FALTABA!)
+        // ===============================================
+        const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Observamos el título y la descripción
+        document.querySelectorAll('.animate-fade-in, .animate-slide-up').forEach(el => {
+            heroObserver.observe(el);
+        });
+
+        // ===============================================
+        // 2. ANIMACIÓN DE NÚMEROS (STATS)
+        // ===============================================
         const stats = document.querySelectorAll('.impact-stat h3');
         
-        const observer = new IntersectionObserver((entries) => {
+        const statsObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     stats.forEach(stat => {
@@ -211,7 +222,10 @@
             });
         });
         
-        observer.observe(document.querySelector('.impact-stats'));
+        const impactSection = document.querySelector('.impact-stats');
+        if(impactSection) {
+            statsObserver.observe(impactSection);
+        }
         
         function animateNumber(element, target) {
             let current = 0;

@@ -21,7 +21,7 @@
     <section class="page-hero">
         <div class="container">
             <div class="hero-content">
-                <h1 class="hero-title animate-fade-in">Contáct<span class="highlight">anos</span></h1>
+                <h1 class="hero-title animate-fade-in">Queremos <span class="highlight">Escucharte</span></h1>
                 <p class="hero-description animate-slide-up">
                     ¿Tienes preguntas? Estamos aquí para ayudarte. Juntos construyamos una comunidad más solidaria.
                 </p>
@@ -234,6 +234,62 @@
     </section>
 
     @include('footer')
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // ===============================================
+        // 1. ANIMACIÓN DE TEXTO HERO (¡ESTO FALTABA!)
+        // ===============================================
+        const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Observamos el título y la descripción
+        document.querySelectorAll('.animate-fade-in, .animate-slide-up').forEach(el => {
+            heroObserver.observe(el);
+        });
+
+        // ===============================================
+        // 2. ANIMACIÓN DE NÚMEROS (STATS)
+        // ===============================================
+        const stats = document.querySelectorAll('.impact-stat h3');
+        
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    stats.forEach(stat => {
+                        const target = parseInt(stat.getAttribute('data-target'));
+                        animateNumber(stat, target);
+                    });
+                }
+            });
+        });
+        
+        const impactSection = document.querySelector('.impact-stats');
+        if(impactSection) {
+            statsObserver.observe(impactSection);
+        }
+        
+        function animateNumber(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target + (target === 98 ? '%' : '+');
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current) + (target === 98 ? '%' : '+');
+                }
+            }, 20);
+        }
+    });
+    </script>
 
     <script>
     // FAQ Accordion
