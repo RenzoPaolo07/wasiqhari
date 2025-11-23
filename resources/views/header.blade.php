@@ -15,6 +15,13 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#e74c3c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1077/1077114.png">
+
 </head>
 <body>
     <nav class="navbar">
@@ -356,6 +363,15 @@
             navToggle.classList.toggle('active');
         });
     }
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registrado! Scope:', reg.scope))
+                    .catch(err => console.log('Error SW:', err));
+            });
+        }
     </script>
 </body>
 </html>
