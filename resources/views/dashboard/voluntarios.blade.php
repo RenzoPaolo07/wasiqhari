@@ -50,7 +50,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($voluntarios as $vol)  <tr id="fila-voluntario-{{ $vol->id }}">
+                        @forelse($voluntarios as $vol) <tr id="fila-voluntario-{{ $vol->id }}">
                                 <td>{{ $vol->user->name ?? 'Usuario no encontrado' }}</td>
                                 <td>{{ $vol->user->email ?? 'N/A' }}</td>
                                 <td>{{ $vol->telefono ?? 'N/A' }}</td>
@@ -61,14 +61,25 @@
                                     </span>
                                 </td>
                                 <td>
+                                    @if($vol->telefono)
+                                        <a href="https://wa.me/51{{ preg_replace('/[^0-9]/', '', $vol->telefono) }}?text=Hola {{ $vol->user->name }}, te escribo desde la coordinación de WasiQhari." 
+                                           target="_blank" 
+                                           class="btn-action btn-whatsapp" 
+                                           title="Chat en WhatsApp">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </a>
+                                    @endif
+                                    
                                     <a href="{{ route('voluntarios.credencial', $vol->id) }}" target="_blank" class="btn-action btn-credencial" title="Descargar Credencial">
                                         <i class="fas fa-id-card"></i>
                                     </a>
+                                    
                                     <button class="btn-action btn-ver" 
                                             data-id="{{ $vol->id }}" 
                                             title="Ver / Editar">
                                         <i class="fas fa-eye"></i>
                                     </button>
+                                    
                                     <button class="btn-action btn-eliminar" 
                                             data-id="{{ $vol->id }}" 
                                             data-name="{{ $vol->user->name ?? 'Voluntario' }}" 
@@ -267,12 +278,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             Swal.fire({
                 title: `¿Estás seguro?`,
-                text: `¡Se eliminará a ${name}!`,
+                text: `¡Se eliminará a ${name}! Esto también eliminará su cuenta de usuario.`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e74c3c',
                 cancelButtonColor: '#95a5a6',
-                confirmButtonText: 'Sí, ¡bórralo!'
+                confirmButtonText: 'Sí, ¡bórralo!',
+                cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`/dashboard/voluntarios/${id}`, {

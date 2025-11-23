@@ -2023,3 +2023,15 @@ body {
 
 .btn-action.btn-credencial { color: #8e44ad; }
 .btn-action.btn-credencial:hover { background: #f3e5f5; color: #6c3483; }
+
+/* Botón de WhatsApp */
+.btn-action.btn-whatsapp {
+    color: #25D366;
+    transition: all 0.3s ease;
+}
+
+.btn-action.btn-whatsapp:hover {
+    background-color: #e5f9ed;
+    color: #128C7E;
+    transform: scale(1.1);
+}
