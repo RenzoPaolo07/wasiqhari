@@ -64,6 +64,10 @@
                     <i class="fas fa-file-alt"></i>
                     <span>Reportes</span>
                 </a>
+                <a href="{{ route('inventario') }}" class="nav-link {{ ($page ?? '') == 'inventario' ? 'active' : '' }}">
+                    <i class="fas fa-box-open"></i>
+                    <span>Inventario</span>
+                </a>
                 <a href="{{ route('ai') }}" class="nav-link {{ ($page ?? '') == 'ai' ? 'active' : '' }}">
                     <i class="fas fa-robot"></i>
                     <span>Análisis IA</span>

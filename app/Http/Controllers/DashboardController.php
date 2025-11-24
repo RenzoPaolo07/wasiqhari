@@ -403,4 +403,96 @@ class DashboardController extends Controller
             'page' => 'settings'
         ]);
     }
+
+    // --- GESTIÓN DE INVENTARIO ---
+    public function inventario(Request $request)
+    {
+        $query = \App\Models\Inventario::query();
+
+        // Filtros
+        if ($request->has('search') && $request->search != '') {
+            $query->where('nombre', 'like', '%' . $request->search . '%');
+        }
+        if ($request->has('categoria') && $request->categoria != '') {
+            $query->where('categoria', $request->categoria);
+        }
+
+        $items = $query->latest()->paginate(10)->withQueryString();
+        
+        // Alertas de stock bajo (menos de 10 unidades)
+        $stockBajo = \App\Models\Inventario::where('cantidad', '<', 10)->count();
+        $totalItems = \App\Models\Inventario::count();
+
+        return view('dashboard.inventario', [
+            'title' => 'Gestión de Inventario - WasiQhari',
+            'page' => 'inventario',
+            'items' => $items,
+            'stockBajo' => $stockBajo,
+            'totalItems' => $totalItems
+        ]);
+    }
+
+    public function storeInventario(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255',
+            'categoria' => 'required|in:Alimentos,Medicinas,Ropa,Equipamiento,Otros',
+            'cantidad' => 'required|integer|min:0',
+            'unidad' => 'required|string|max:50',
+            'fecha_vencimiento' => 'nullable|date',
+            'descripcion' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('inventario')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error_form', 'Error al guardar el ítem.');
+        }
+
+        $data = $request->all();
+        // Estado automático
+        $data['estado'] = $request->cantidad > 0 ? 'Disponible' : 'Agotado';
+
+        $item = \App\Models\Inventario::create($data);
+
+        // LOG
+        ActivityLog::registrar('Crear', 'Inventario', "Agregó {$item->cantidad} {$item->unidad} de {$item->nombre}");
+
+        return redirect()->route('inventario')->with('success', 'Ítem registrado con éxito');
+    }
+
+    public function showInventario(\App\Models\Inventario $item)
+    {
+        return response()->json($item);
+    }
+
+    public function updateInventario(Request $request, \App\Models\Inventario $item)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'cantidad' => 'required|integer|min:0',
+        ]);
+
+        $data = $request->all();
+        $data['estado'] = $request->cantidad > 0 ? 'Disponible' : 'Agotado';
+        
+        $item->update($data);
+
+        // LOG
+        ActivityLog::registrar('Actualizar', 'Inventario', "Actualizó stock de {$item->nombre} a {$item->cantidad}");
+
+        return redirect()->route('inventario')->with('success', 'Inventario actualizado');
+    }
+
+    public function destroyInventario(\App\Models\Inventario $item)
+    {
+        $nombre = $item->nombre;
+        $item->delete();
+
+        // LOG
+        ActivityLog::registrar('Eliminar', 'Inventario', "Eliminó el ítem {$nombre}");
+
+        return response()->json(['success' => true, 'message' => 'Ítem eliminado']);
+    }
 }

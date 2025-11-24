@@ -40,7 +40,7 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/dashboard/auditoria', [DashboardController::class, 'auditoria'])->name('auditoria');
     
-    // ============ CREDENCIALES (¡NUEVO!) ============
+    // ============ CREDENCIALES ============
     Route::get('/dashboard/adultos/{adulto}/credencial', [ReporteController::class, 'credencialAdulto'])->name('adultos.credencial');
     Route::get('/dashboard/voluntarios/{voluntario}/credencial', [ReporteController::class, 'credencialVoluntario'])->name('voluntarios.credencial');
     // ===============================================
@@ -64,6 +64,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/visitas/{visita}', [DashboardController::class, 'showVisita'])->name('visitas.show');
     Route::put('/dashboard/visitas/{visita}', [DashboardController::class, 'updateVisita'])->name('visitas.update');
     Route::delete('/dashboard/visitas/{visita}', [DashboardController::class, 'destroyVisita'])->name('visitas.destroy');
+    
+    // ============ GESTIÓN DE INVENTARIO (¡NUEVO!) ============
+    Route::get('/dashboard/inventario', [DashboardController::class, 'inventario'])->name('inventario');
+    Route::post('/dashboard/inventario', [DashboardController::class, 'storeInventario'])->name('inventario.store');
+    Route::get('/dashboard/inventario/{item}', [DashboardController::class, 'showInventario'])->name('inventario.show');
+    Route::put('/dashboard/inventario/{item}', [DashboardController::class, 'updateInventario'])->name('inventario.update');
+    Route::delete('/dashboard/inventario/{item}', [DashboardController::class, 'destroyInventario'])->name('inventario.destroy');
+    // =========================================================
+    
     // Ruta para COMENTARIOS (Chat)
     Route::post('/dashboard/visitas/{visita}/comentarios', [DashboardController::class, 'storeComentario'])->name('visitas.comentarios.store');
 

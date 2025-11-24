@@ -10,7 +10,10 @@
             <p>Bienvenido, {{ Auth::user()->name }}</p>
         </div>
         <div class="header-actions">
-            </div>
+            <button class="btn btn-primary" onclick="iniciarAyuda()">
+                <i class="fas fa-hands-helping"></i> Quiero Ayudar
+            </button>
+        </div>
     </div>
 
     <div class="stats-grid">
@@ -128,10 +131,63 @@
         </div>
     </div>
 </div>
+
+<div id="ayudaModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>¿En qué quieres ayudar?</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="ayuda-options">
+                <div class="ayuda-option" onclick="seleccionarAyuda('visita')">
+                    <i class="fas fa-home"></i>
+                    <h4>Realizar Visita</h4>
+                    <p>Visitar a un adulto mayor para acompañamiento</p>
+                </div>
+                
+                <div class="ayuda-option" onclick="seleccionarAyuda('alimentos')">
+                    <i class="fas fa-utensils"></i>
+                    <h4>Entrega de Alimentos</h4>
+                    <p>Llevar comida o víveres a quienes lo necesitan</p>
+                </div>
+                
+                <div class="ayuda-option" onclick="seleccionarAyuda('medicina')">
+                    <i class="fas fa-briefcase-medical"></i>
+                    <h4>Apoyo Médico</h4>
+                    <p>Brindar atención básica de salud</p>
+                </div>
+                
+                <div class="ayuda-option" onclick="seleccionarAyuda('otro')">
+                    <i class="fas fa-hands"></i>
+                    <h4>Otro Tipo de Ayuda</h4>
+                    <p>Otra forma de apoyo que quieras brindar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+    /* Estilos del Modal de Ayuda */
+    .modal { display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+    .modal-content { background-color: white; margin: 10% auto; padding: 0; border-radius: 15px; width: 90%; max-width: 600px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); animation: slideIn 0.3s ease; }
+    .modal-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border-radius: 15px 15px 0 0; }
+    .modal-body { padding: 25px; }
+    .close { color: white; font-size: 28px; font-weight: bold; cursor: pointer; }
+    
+    .ayuda-options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .ayuda-option { background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; }
+    .ayuda-option:hover { border-color: #e74c3c; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(231,76,60,0.2); }
+    .ayuda-option i { font-size: 2.5rem; color: #e74c3c; margin-bottom: 15px; }
+    .ayuda-option h4 { margin: 0 0 10px; color: #2c3e50; }
+    .ayuda-option p { font-size: 0.9rem; color: #7f8c8d; margin: 0; }
+    
+    @keyframes slideIn { from {transform: translateY(-50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+</style>
 @endpush
 
 @push('scripts')
@@ -141,45 +197,59 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
-    // 1. INICIALIZAR MAPA
+    // --- LÓGICA DEL MAPA ---
     if (document.getElementById('map')) {
-        // Coordenadas de Cusco
         var map = L.map('map').setView([-13.5319, -71.9675], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Datos pasados desde el controlador
         const adultosData = @json($adultosParaMapa ?? []);
-
-        // Iconos personalizados
+        
         var redIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         });
-        
         var blueIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         });
 
-        // Poner marcadores
         adultosData.forEach(adulto => {
             if(adulto.lat && adulto.lon) {
                 L.marker([adulto.lat, adulto.lon], {
                     icon: adulto.nivel_riesgo === 'Alto' ? redIcon : blueIcon
-                })
-                .addTo(map)
-                .bindPopup(`<b>${adulto.nombres} ${adulto.apellidos}</b><br>Riesgo: ${adulto.nivel_riesgo}`);
+                }).addTo(map).bindPopup(`<b>${adulto.nombres} ${adulto.apellidos}</b><br>Riesgo: ${adulto.nivel_riesgo}`);
             }
         });
     }
 
-    // 2. GRÁFICOS
-    // Salud
+    // --- LÓGICA DEL MODAL DE AYUDA ---
+    const modal = document.getElementById('ayudaModal');
+    const span = document.getElementsByClassName("close")[0];
+
+    window.iniciarAyuda = function() {
+        modal.style.display = "block";
+    }
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    
+    window.seleccionarAyuda = function(tipo) {
+        // Redirigir a la creación de visita con el tipo preseleccionado (si quisieras)
+        // Por ahora, solo cerramos y redirigimos a visitas
+        modal.style.display = "none";
+        window.location.href = "{{ route('visitas') }}"; 
+    }
+
+    // --- GRÁFICOS ---
     const saludCtx = document.getElementById('saludChart');
     if (saludCtx) {
         const saludData = @json($saludData ?? []);
@@ -196,7 +266,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Actividades
     const actCtx = document.getElementById('actividadesChart');
     if (actCtx) {
         const actData = @json($actividadesData ?? []);
