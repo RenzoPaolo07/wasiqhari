@@ -495,4 +495,50 @@ class DashboardController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Ítem eliminado']);
     }
+    // --- EXPEDIENTE EVOLUTIVO ---
+    public function evolucionAdulto(AdultoMayor $adulto)
+    {
+        // 1. Obtener visitas ordenadas cronológicamente (antiguas primero para el gráfico)
+        $visitasGrafico = $adulto->visitas()->orderBy('fecha_visita', 'asc')->get();
+
+        $labels = [];
+        $fisicoData = [];
+        $emocionalData = [];
+
+        // Mapas de conversión (Texto -> Puntaje)
+        // Ajusta los textos EXACTAMENTE como están en tu base de datos/enum
+        $mapFisico = [
+            'Bueno' => 100, 
+            'Regular' => 75, 
+            'Malo' => 50, 
+            'Critico' => 25, 'Crítico' => 25 
+        ];
+        
+        $mapEmocional = [
+            'Eufórico' => 100, 
+            'Estable' => 80, 
+            'Triste' => 50, 
+            'Ansioso' => 40, 
+            'Deprimido' => 20 
+        ];
+
+        foreach ($visitasGrafico as $v) {
+            $labels[] = $v->fecha_visita->format('d/m/Y');
+            $fisicoData[] = $mapFisico[$v->estado_fisico] ?? 50; // 50 por defecto
+            $emocionalData[] = $mapEmocional[$v->estado_emocional] ?? 50;
+        }
+
+        // 2. Obtener visitas para el Timeline (nuevas primero)
+        $visitasTimeline = $adulto->visitas()->with('voluntario.user')->orderBy('fecha_visita', 'desc')->get();
+
+        return view('dashboard.adultos_evolucion', [
+            'title' => 'Expediente: ' . $adulto->nombres,
+            'page' => 'adultos',
+            'adulto' => $adulto,
+            'visitas' => $visitasTimeline,
+            'chartLabels' => $labels,
+            'chartFisico' => $fisicoData,
+            'chartEmocional' => $emocionalData
+        ]);
+    }
 }

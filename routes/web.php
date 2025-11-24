@@ -37,6 +37,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/adultos/{adulto}', [DashboardController::class, 'show'])->name('adultos.show'); 
     Route::put('/dashboard/adultos/{adulto}', [DashboardController::class, 'update'])->name('adultos.update');
     Route::delete('/dashboard/adultos/{adulto}', [DashboardController::class, 'destroy'])->name('adultos.destroy');
+    // RUTA NUEVA: Expediente Evolutivo
+    Route::get('/dashboard/adultos/{adulto}/evolucion', [DashboardController::class, 'evolucionAdulto'])->name('adultos.evolucion');
+    //
     
     Route::get('/dashboard/auditoria', [DashboardController::class, 'auditoria'])->name('auditoria');
     
