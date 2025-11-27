@@ -21,45 +21,88 @@ class AIController extends Controller
             return response()->json(['response' => 'Error: No se encontró la API KEY en el archivo .env']);
         }
 
-        // --- 1. RECOPILAR DATOS (CONTEXTO) ---
+        // --- 1. DETECTAR SI PREGUNTA POR ALGUIEN ESPECÍFICO ---
+        $adultoEncontrado = null;
+        // Obtenemos solo nombres para no cargar todo
+        $adultos = AdultoMayor::all(['id', 'nombres', 'apellidos', 'edad', 'nivel_riesgo']);
+
+        foreach ($adultos as $adulto) {
+            // Buscamos si el nombre O el apellido aparece en el mensaje (ignorando mayúsculas)
+            if (str_contains(strtolower($mensaje), strtolower($adulto->nombres)) || 
+                str_contains(strtolower($mensaje), strtolower($adulto->apellidos))) {
+                $adultoEncontrado = $adulto;
+                break; // Encontramos uno, nos enfocamos en él
+            }
+        }
+
+        // --- 2. CONSTRUIR EL CONTEXTO (Historial o General) ---
         
-        $totalAdultos = AdultoMayor::count();
-        $totalVoluntarios = Voluntario::count();
-        $voluntariosActivos = Voluntario::where('estado', 'Activo')->count();
-        
-        // Obtenemos casos críticos reales
-        $criticos = AdultoMayor::where('nivel_riesgo', 'Alto')
-                                ->get(['nombres', 'apellidos', 'distrito', 'edad'])
-                                ->map(function($a) {
-                                    return "{$a->nombres} {$a->apellidos} ({$a->edad} años, {$a->distrito})";
-                                })->implode(', ');
+        if ($adultoEncontrado) {
+            // === MODO CONSULTOR DE CASO ===
+            
+            // Traemos las últimas 5 visitas con el voluntario y la recomendación del Doctor IA
+            $visitas = $adultoEncontrado->visitas()
+                        ->with('voluntario.user')
+                        ->latest('fecha_visita')
+                        ->take(5)
+                        ->get();
+            
+            $historial = "";
+            if ($visitas->count() > 0) {
+                foreach($visitas as $v) {
+                    $fecha = $v->fecha_visita->format('d/m/Y');
+                    $voluntario = $v->voluntario->user->name ?? 'Voluntario';
+                    
+                    // Aquí está la magia: Incluimos lo que opinó el Doctor IA
+                    $alertaIA = $v->recomendacion_ia ? "[{$v->recomendacion_ia}]" : "";
+                    
+                    $historial .= "- {$fecha} ({$voluntario}): Físico {$v->estado_fisico}, Ánimo {$v->estado_emocional}. Obs: \"{$v->observaciones}\" {$alertaIA}\n";
+                }
+            } else {
+                $historial = "No hay visitas registradas recientemente.";
+            }
 
-        $visitasSemana = Visita::where('fecha_visita', '>=', Carbon::now()->subDays(7))->count();
+            $datosDelSistema = "
+            EXPEDIENTE DEL PACIENTE: {$adultoEncontrado->nombres} {$adultoEncontrado->apellidos}
+            Edad: {$adultoEncontrado->edad} años
+            Nivel de Riesgo Actual: {$adultoEncontrado->nivel_riesgo}
+            
+            HISTORIAL CLÍNICO RECIENTE (Últimas visitas):
+            {$historial}
+            ";
 
-        $datosDelSistema = "
-        DATOS ACTUALES DEL SISTEMA:
-        - Beneficiarios: {$totalAdultos}
-        - Voluntarios: {$totalVoluntarios} ({$voluntariosActivos} activos)
-        - Visitas esta semana: {$visitasSemana}
-        - CASOS CRÍTICOS (Alto Riesgo): {$criticos}
-        ";
+            $systemInstruction = "Eres el Consultor Clínico de WasiQhari. 
+            El usuario está preguntando específicamente por el paciente {$adultoEncontrado->nombres}.
+            Usa el historial clínico proporcionado para responder. 
+            Si ves alertas del 'DR. IA' en el historial, menciónalas como puntos de atención.
+            Sé empático, profesional y basa tu respuesta SOLO en los datos mostrados.";
 
-        // --- 2. PREPARAR EL PROMPT ---
+        } else {
+            // === MODO ASISTENTE GENERAL (Estadísticas) ===
+            
+            $totalAdultos = AdultoMayor::count();
+            $totalVoluntarios = Voluntario::count();
+            $criticos = AdultoMayor::where('nivel_riesgo', 'Alto')->count();
+            // Nombres de los casos críticos para referencia rápida
+            $listaCriticos = AdultoMayor::where('nivel_riesgo', 'Alto')->pluck('nombres')->implode(', ');
+            
+            $datosDelSistema = "
+            ESTADÍSTICAS GENERALES DE WASIQHARI:
+            - Beneficiarios totales: {$totalAdultos}
+            - Casos de ALTO RIESGO: {$criticos} (Nombres: {$listaCriticos})
+            - Voluntarios registrados: {$totalVoluntarios}
+            ";
 
-        $systemInstruction = "Eres el asistente experto de WasiQhari.
-                   Usa los siguientes datos reales para responder.
-                   Si preguntan por casos urgentes, menciona los de alto riesgo.
-                   Responde breve y profesionalmente.
-                   
-                   {$datosDelSistema}";
+            $systemInstruction = "Eres el asistente general de WasiQhari.
+            Responde preguntas sobre el estado general del albergue usando estos datos.
+            Si te preguntan por una persona específica, pídeles que escriban su nombre completo.";
+        }
 
-        $prompt = $systemInstruction . "\n\nUsuario: " . $mensaje . "\nAsistente:";
+        $prompt = $systemInstruction . "\n\nDATOS DE CONTEXTO:\n" . $datosDelSistema . "\n\nPREGUNTA USUARIO: " . $mensaje . "\nRESPUESTA:";
 
         try {
-            // --- 3. LLAMADA A LA API (CORREGIDA A GEMINI 2.0) ---
-            // Usamos 'gemini-2.0-flash' que es el que aparece en tu lista de modelos disponibles
-            $model = "gemini-2.0-flash";
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+            // Usamos el modelo 'gemini-flash-latest' que sabemos que funciona bien con tu llave nueva
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}";
 
             $response = Http::withHeaders(['Content-Type' => 'application/json'])
                 ->post($url, [
@@ -68,37 +111,17 @@ class AIController extends Controller
 
             $data = $response->json();
 
-            // Si falla el 2.0, intentamos con el "latest" que suele ser un comodín seguro
             if (isset($data['error'])) {
-                Log::warning('Falló Gemini 2.0, intentando con gemini-1.5-flash-latest...');
-                
-                $modelFallback = "gemini-1.5-flash-latest"; 
-                $urlFallback = "https://generativelanguage.googleapis.com/v1beta/models/{$modelFallback}:generateContent?key={$apiKey}";
-                
-                $response = Http::withHeaders(['Content-Type' => 'application/json'])
-                    ->post($urlFallback, [
-                        'contents' => [['parts' => [['text' => $prompt]]]]
-                    ]);
-                $data = $response->json();
+                return response()->json(['response' => "Error de IA: " . ($data['error']['message'] ?? 'Desconocido')]);
             }
 
-            // Verificar errores finales
-            if (isset($data['error'])) {
-                $errorMsg = $data['error']['message'] ?? 'Error desconocido';
-                return response()->json(['response' => "Error de IA: $errorMsg"]);
-            }
-
-            $texto = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
-
-            if ($texto) {
-                return response()->json(['response' => $texto]);
-            } else {
-                return response()->json(['response' => 'La IA no devolvió una respuesta válida.']);
-            }
+            $texto = $data['candidates'][0]['content']['parts'][0]['text'] ?? 'Lo siento, no pude analizar los datos en este momento.';
+            
+            return response()->json(['response' => $texto]);
 
         } catch (\Exception $e) {
-            Log::error('Error IA: ' . $e->getMessage());
-            return response()->json(['response' => 'Error interno del servidor.'], 500);
+            Log::error('Error Chat IA: ' . $e->getMessage());
+            return response()->json(['response' => 'Error de conexión con el servidor.'], 500);
         }
     }
 }
