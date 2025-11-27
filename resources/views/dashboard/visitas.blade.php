@@ -50,23 +50,39 @@
                                     <strong>{{ $visita->adultoMayor->nombres ?? 'N/A' }}</strong><br>
                                     <small class="text-muted">{{ $visita->adultoMayor->apellidos ?? '' }}</small>
                                 </td>
+                                
                                 <td>{{ $visita->voluntario->user->name ?? 'N/A' }}</td>
+                                
                                 <td>
                                     {{ $visita->fecha_visita->format('d/m/Y') }}<br>
                                     <small>{{ $visita->fecha_visita->format('h:i A') }}</small>
                                 </td>
+                                
                                 <td>
                                     @php
                                         $color = 'secondary';
-                                        if($visita->estado_fisico == 'Bueno') $color = 'success'; // Verde
-                                        if($visita->estado_fisico == 'Regular') $color = 'warning'; // Amarillo
-                                        if($visita->estado_fisico == 'Malo') $color = 'orange'; // Naranja
-                                        if($visita->estado_fisico == 'Crítico') $color = 'danger'; // Rojo
+                                        if($visita->estado_fisico == 'Bueno') $color = 'success';
+                                        if($visita->estado_fisico == 'Regular') $color = 'warning';
+                                        if($visita->estado_fisico == 'Malo') $color = 'orange';
+                                        if($visita->estado_fisico == 'Crítico' || $visita->estado_fisico == 'Critico') $color = 'danger';
                                     @endphp
+                                    
                                     <span class="badge badge-{{ $color }}">
                                         {{ $visita->estado_fisico ?? 'Regular' }}
                                     </span>
+
+                                    {{-- AQUÍ APARECE EL MENSAJE DEL DOCTOR --}}
+                                    @if($visita->recomendacion_ia)
+                                        <div style="margin-top: 5px;">
+                                            <small style="font-size: 0.75rem; display: inline-block; 
+                                                color: {{ str_contains($visita->recomendacion_ia, '⚠️') ? '#c0392b' : '#27ae60' }}; 
+                                                font-weight: bold; background: #fff; padding: 4px 6px; border-radius: 4px; border: 1px solid #ddd; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                                {{ $visita->recomendacion_ia }}
+                                            </small>
+                                        </div>
+                                    @endif
                                 </td>
+                                
                                 <td>
                                     @if($visita->foto_evidencia)
                                         <a href="{{ asset('storage/'.$visita->foto_evidencia) }}" target="_blank" class="link-foto">
@@ -76,6 +92,7 @@
                                         <span class="text-muted">-</span>
                                     @endif
                                 </td>
+                                
                                 <td>
                                     <button class="btn-action btn-ver" data-id="{{ $visita->id }}" title="Ver Detalles y Chat">
                                         <i class="fas fa-comments"></i>
@@ -156,7 +173,7 @@
                                 <option value="Bueno">🟢 Bueno (Estable)</option>
                                 <option value="Regular">🟡 Regular (Molestias leves)</option>
                                 <option value="Malo">🟠 Malo (Requiere atención)</option>
-                                <option value="Crítico">🔴 Crítico (Urgencia)</option>
+                                <option value="Critico">🔴 Crítico (Urgencia)</option>
                             </select>
                         </div>
 

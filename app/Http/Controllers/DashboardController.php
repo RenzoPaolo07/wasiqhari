@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http; // <--- AGREGA ESTA LÍNEA
+use Illuminate\Support\Facades\Log;  // <--- Y ESTA TAMBIÉN
 
 class DashboardController extends Controller
 {
@@ -263,6 +265,19 @@ class DashboardController extends Controller
         }
 
         $visita = Visita::create($data);
+
+        // --- INICIO CÓDIGO NUEVO ---
+        // Llamamos al Doctor IA en segundo plano (simulado)
+        try {
+            // Cargamos la relación para que la IA sepa el nombre del abuelo
+            $visita->load('adultoMayor'); 
+            $this->analizarVisitaConIA($visita);
+        } catch (\Exception $e) {
+            // Si falla la IA, no detenemos el registro, solo lo ignoramos
+        }
+        // --- FIN CÓDIGO NUEVO ---
+
+        ActivityLog::registrar('Crear', 'Visitas', "Registró visita ID #{$visita->id}");
 
         ActivityLog::registrar('Crear', 'Visitas', "Registró visita ID #{$visita->id}");
 
@@ -540,5 +555,67 @@ class DashboardController extends Controller
             'chartFisico' => $fisicoData,
             'chartEmocional' => $emocionalData
         ]);
+    }
+
+    // --- FUNCIÓN PRIVADA: DOCTOR WASIQHARI (VERSIÓN 2.0 MEJORADA) ---
+    private function analizarVisitaConIA($visita)
+    {
+        $apiKey = env('GEMINI_API_KEY');
+        if (!$apiKey) return;
+
+        // CAMBIO 1: Prompt más agresivo para detectar riesgos
+        $prompt = "Actúa como un médico geriatra muy precavido. 
+        Analiza este reporte de visita a un adulto mayor:
+        - Paciente: {$visita->adultoMayor->nombres} ({$visita->adultoMayor->edad} años)
+        - Estado Físico (según voluntario): {$visita->estado_fisico}
+        - Observaciones (TEXTO CLAVE): \"{$visita->observaciones}\"
+        
+        INSTRUCCIÓN CRÍTICA:
+        Si en las 'Observaciones' detectas palabras clave de alarma (dolor, caída, sangre, no come, triste, golpe, mareo, olvido), MARCA RIESGO SIEMPRE, aunque el Estado Físico diga 'Bueno' o 'Regular'. Prioriza el texto sobre el checkbox.
+        
+        Responde SOLO con un JSON estricto:
+        {\"riesgo\": \"SI\", \"mensaje\": \"Explicación muy breve\"}
+        o
+        {\"riesgo\": \"NO\", \"mensaje\": \"Todo en orden\"}";
+
+        try {
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}", [
+                    'contents' => [['parts' => [['text' => $prompt]]]]
+                ]);
+
+            $data = $response->json();
+            $textoIA = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+            // Limpieza del JSON
+            $textoIA = str_replace(['```json', '```', "\n"], '', $textoIA);
+            
+            // LOG PARA ESPIAR (Si falla, revisa storage/logs/laravel.log)
+            Log::info("Respuesta Doctor IA Raw: " . $textoIA);
+
+            $analisis = json_decode($textoIA, true);
+
+            // CAMBIO 2: Lógica a prueba de balas (Mayúsculas, acentos, etc.)
+            $esRiesgo = false;
+            
+            if (isset($analisis['riesgo'])) {
+                $respuestaRiesgo = strtoupper(trim($analisis['riesgo'])); // Convertimos a mayúsculas y quitamos espacios
+                // Detectamos SI, SÍ, YES, TRUE...
+                if (in_array($respuestaRiesgo, ['SI', 'SÍ', 'YES', 'TRUE'])) {
+                    $esRiesgo = true;
+                }
+            }
+
+            if ($esRiesgo) {
+                $visita->recomendacion_ia = "⚠️ DR. IA: " . ($analisis['mensaje'] ?? 'Riesgo detectado.');
+            } else {
+                $visita->recomendacion_ia = "✅ DR. IA: " . ($analisis['mensaje'] ?? 'Paciente estable.');
+            }
+            
+            $visita->save();
+
+        } catch (\Exception $e) {
+            Log::error("Error Doctor IA: " . $e->getMessage());
+        }
     }
 }

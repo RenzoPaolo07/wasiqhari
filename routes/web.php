@@ -110,4 +110,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
 });
 
+// RUTA TEMPORAL PARA ACTUALIZAR LA BASE DE DATOS
+/*Route::get('/instalar-doctor-ia', function() {
+    try {
+        Illuminate\Support\Facades\Schema::table('visitas', function (Illuminate\Database\Schema\Blueprint $table) {
+            $table->text('recomendacion_ia')->nullable()->after('observaciones');
+        });
+        return "¡Éxito! Columna 'recomendacion_ia' creada correctamente. Ya puedes borrar esta ruta.";
+    } catch (\Exception $e) {
+        return "Error (quizás ya existe la columna): " . $e->getMessage();
+    }
+});*/
+
 Route::fallback([ErrorController::class, 'notFound']);

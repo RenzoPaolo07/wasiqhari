@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail; // <--- IMPORTANTE
+use App\Mail\BienvenidaVoluntario;   // <--- IMPORTANTE
 
 class UserController extends Controller
 {
@@ -69,6 +71,15 @@ class UserController extends Controller
                 'fecha_registro' => now()
             ]);
         }
+
+        // --- ENVÍO DE CORREO DE BIENVENIDA ---
+        try {
+            Mail::to($user->email)->send(new BienvenidaVoluntario($user));
+        } catch (\Exception $e) {
+            // Si falla el correo, no detenemos el registro, solo lo logueamos
+            \Log::error('Error enviando correo bienvenida: ' . $e->getMessage());
+        }
+        // -------------------------------------
 
         Auth::login($user);
         return redirect()->route('dashboard')->with('success', '¡Bienvenido a WasiQhari!');
