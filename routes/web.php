@@ -122,4 +122,24 @@ Route::middleware(['auth'])->group(function () {
     }
 });*/
 
+// RUTA DE EMERGENCIA PARA ARREGLAR IMÁGENES
+Route::get('/fix-storage', function () {
+    $targetFolder = storage_path('app/public');
+    $linkFolder = public_path('storage');
+
+    // 1. Si existe un enlace viejo y roto, lo borramos
+    if (file_exists($linkFolder)) {
+        // En Windows es rmdir, en Linux unlink suele funcionar mejor para symlinks
+        @unlink($linkFolder); 
+    }
+
+    // 2. Creamos el nuevo enlace
+    try {
+        symlink($targetFolder, $linkFolder);
+        return '¡ÉXITO! 📸 El puente de imágenes ha sido reparado. <br> Ruta Origen: '.$targetFolder.'<br> Ruta Destino: '.$linkFolder;
+    } catch (\Exception $e) {
+        return 'ERROR: No se pudo crear el enlace. <br> Detalle: ' . $e->getMessage();
+    }
+});
+
 Route::fallback([ErrorController::class, 'notFound']);
