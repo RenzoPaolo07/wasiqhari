@@ -20,6 +20,12 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+    @if(session('error_form') || session('error_form_edit'))
+        <div class="alert alert-danger">
+            <strong>¡Atención!</strong> Revisa el formulario.
+             @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
+        </div>
+    @endif
 
     <div class="content-card">
         <div class="card-header">
@@ -33,8 +39,7 @@
                             <th>Adulto Mayor</th>
                             <th>Voluntario</th>
                             <th>Fecha</th>
-                            <th>Tipo</th>
-                            <th>Evidencia</th>
+                            <th>Estado Físico</th> <th>Evidencia</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -51,16 +56,21 @@
                                     <small>{{ $visita->fecha_visita->format('h:i A') }}</small>
                                 </td>
                                 <td>
-                                    @if($visita->emergencia)
-                                        <span class="badge badge-critico">Emergencia</span>
-                                    @else
-                                        <span class="badge badge-regular">{{ $visita->tipo_visita ?? 'Rutina' }}</span>
-                                    @endif
+                                    @php
+                                        $color = 'secondary';
+                                        if($visita->estado_fisico == 'Bueno') $color = 'success'; // Verde
+                                        if($visita->estado_fisico == 'Regular') $color = 'warning'; // Amarillo
+                                        if($visita->estado_fisico == 'Malo') $color = 'orange'; // Naranja
+                                        if($visita->estado_fisico == 'Crítico') $color = 'danger'; // Rojo
+                                    @endphp
+                                    <span class="badge badge-{{ $color }}">
+                                        {{ $visita->estado_fisico ?? 'Regular' }}
+                                    </span>
                                 </td>
                                 <td>
                                     @if($visita->foto_evidencia)
                                         <a href="{{ asset('storage/'.$visita->foto_evidencia) }}" target="_blank" class="link-foto">
-                                            <i class="fas fa-image"></i> Ver Foto
+                                            <i class="fas fa-image"></i> Ver
                                         </a>
                                     @else
                                         <span class="text-muted">-</span>
@@ -68,7 +78,8 @@
                                 </td>
                                 <td>
                                     <button class="btn-action btn-ver" data-id="{{ $visita->id }}" title="Ver Detalles y Chat">
-                                        <i class="fas fa-comments"></i> </button>
+                                        <i class="fas fa-comments"></i>
+                                    </button>
                                     <button class="btn-action btn-eliminar" data-id="{{ $visita->id }}" title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -138,6 +149,17 @@
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label>Estado Físico (Salud) *</label>
+                            <select id="estado_fisico" name="estado_fisico" required style="border: 2px solid #3498db;">
+                                <option value="Bueno">🟢 Bueno (Estable)</option>
+                                <option value="Regular">🟡 Regular (Molestias leves)</option>
+                                <option value="Malo">🟠 Malo (Requiere atención)</option>
+                                <option value="Crítico">🔴 Crítico (Urgencia)</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label>Estado Emocional</label>
                             <select id="estado_emocional" name="estado_emocional">
@@ -148,6 +170,7 @@
                                 <option value="Deprimido">Deprimido</option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label>Emergencia?</label>
                             <select id="emergencia" name="emergencia" style="color: #e74c3c; font-weight: bold;">
@@ -182,12 +205,9 @@
                     <div id="chatMessages" class="chat-messages-area">
                         <div class="text-center text-muted p-3">Cargando comentarios...</div>
                     </div>
-                    
                     <div class="chat-input-area">
-                        <input type="text" id="chatInput" placeholder="Escribe un comentario sobre esta visita..." disabled>
-                        <button id="btnEnviarComentario" class="btn btn-primary" disabled>
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                        <input type="text" id="chatInput" placeholder="Escribe un comentario..." disabled>
+                        <button id="btnEnviarComentario" class="btn btn-primary" disabled><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>
@@ -199,25 +219,27 @@
 
 @push('styles')
 <style>
-/* Estilos del Chat */
-.modal-tabs { display: flex; border-bottom: 1px solid #eee; padding: 0 20px; background: #f9f9f9; }
-.tab-btn { padding: 15px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: #7f8c8d; border-bottom: 3px solid transparent; }
-.tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
-.tab-btn:hover { color: var(--dark-color); }
+    /* Estilos adicionales para badges de colores */
+    .badge-success { background: #e6ffe6; color: #27ae60; } /* Bueno */
+    .badge-warning { background: #fff8e9; color: #f39c12; } /* Regular */
+    .badge-orange { background: #fff3cd; color: #d35400; }  /* Malo */
+    .badge-danger { background: #ffe6e6; color: #e74c3c; }  /* Critico */
+    .badge-secondary { background: #f0f0f0; color: #7f8c8d; }
 
-.chat-container { display: flex; flex-direction: column; height: 400px; }
-.chat-messages-area { flex: 1; overflow-y: auto; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; }
-
-.chat-message { margin-bottom: 15px; display: flex; flex-direction: column; }
-.chat-message.own { align-items: flex-end; }
-.chat-bubble { background: white; padding: 10px 15px; border-radius: 15px; border: 1px solid #e0e0e0; max-width: 80%; position: relative; }
-.chat-message.own .chat-bubble { background: #eaf3ff; border-color: #d0e1f5; }
-.chat-meta { font-size: 0.75rem; color: #999; margin-top: 4px; }
-.chat-user { font-weight: bold; font-size: 0.8rem; color: #2c3e50; margin-bottom: 2px; display: block; }
-
-.chat-input-area { display: flex; gap: 10px; }
-.chat-input-area input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
-.chat-input-area button { border-radius: 50%; width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center; }
+    .modal-tabs { display: flex; border-bottom: 1px solid #eee; padding: 0 20px; background: #f9f9f9; }
+    .tab-btn { padding: 15px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: #7f8c8d; border-bottom: 3px solid transparent; }
+    .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+    .chat-container { display: flex; flex-direction: column; height: 400px; }
+    .chat-messages-area { flex: 1; overflow-y: auto; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; }
+    .chat-message { margin-bottom: 15px; display: flex; flex-direction: column; }
+    .chat-message.own { align-items: flex-end; }
+    .chat-bubble { background: white; padding: 10px 15px; border-radius: 15px; border: 1px solid #e0e0e0; max-width: 80%; }
+    .chat-message.own .chat-bubble { background: #eaf3ff; border-color: #d0e1f5; }
+    .chat-meta { font-size: 0.75rem; color: #999; margin-top: 4px; }
+    .chat-user { font-weight: bold; font-size: 0.8rem; color: #2c3e50; }
+    .chat-input-area { display: flex; gap: 10px; }
+    .chat-input-area input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
+    .link-foto { color: #3498db; font-weight: 500; text-decoration: none; }
 </style>
 @endpush
 
@@ -233,7 +255,6 @@ function previewImage(input) {
     } else { container.style.display = 'none'; }
 }
 
-// Cambiar pestañas
 window.switchModalTab = function(tabName) {
     document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -246,18 +267,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnNueva = document.getElementById('btnNuevaVisita');
     const form = document.getElementById('formVisita');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    
-    let currentVisitaId = null; // Para saber en qué visita estamos chateando
+    let currentVisitaId = null;
 
-    // --- NUEVA VISITA ---
     btnNueva.addEventListener('click', function() {
         form.reset();
         form.action = "{{ route('visitas.store') }}";
         document.getElementById('formMethod').value = "POST";
         document.getElementById('modalTitulo').textContent = "Registrar Nueva Visita";
         document.getElementById('imagePreviewContainer').style.display = 'none';
-        
-        // Ocultar pestaña de chat al crear nueva (porque no existe la visita aún)
         document.querySelector('.modal-tabs').style.display = 'none';
         document.getElementById('tab-detalles').style.display = 'block';
         document.getElementById('tab-chat').style.display = 'none';
@@ -269,32 +286,31 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.style.display = 'block';
     });
 
-    // --- CERRAR ---
     document.querySelectorAll('#closeModal, #btnCancelarModal').forEach(el => {
         el.addEventListener('click', () => modal.style.display = 'none');
     });
 
-    // --- VER / EDITAR Y CHAT ---
     document.querySelectorAll('.btn-ver').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
-            currentVisitaId = id; // Guardamos ID para el chat
+            currentVisitaId = id;
 
-            // Mostrar pestañas
             document.querySelector('.modal-tabs').style.display = 'flex';
-            switchModalTab('detalles'); // Resetear a la primera pestaña
-            // Simular clic en la primera pestaña para activar estilos
-            document.querySelector('.tab-btn').click();
+            switchModalTab('detalles'); 
+            document.querySelector('.tab-btn').classList.add('active'); // Reset visual
 
             fetch(`/dashboard/visitas/${id}`)
                 .then(r => r.json())
                 .then(data => {
-                    // Llenar Formulario
                     document.getElementById('adulto_id').value = data.adulto_id;
                     document.getElementById('voluntario_id').value = data.voluntario_id;
                     document.getElementById('fecha_visita').value = data.fecha_visita.slice(0,16);
                     document.getElementById('tipo_visita').value = data.tipo_visita;
+                    
+                    // Llenar selectores de estado
                     document.getElementById('estado_emocional').value = data.estado_emocional;
+                    document.getElementById('estado_fisico').value = data.estado_fisico || 'Regular'; // Valor por defecto si viene null
+                    
                     document.getElementById('emergencia').value = data.emergencia ? 1 : 0;
                     document.getElementById('observaciones').value = data.observaciones;
                     
@@ -307,9 +323,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     form.action = `/dashboard/visitas/${id}`;
                     document.getElementById('formMethod').value = "PUT";
-                    document.getElementById('modalTitulo').textContent = "Detalles y Chat de Visita";
+                    document.getElementById('modalTitulo').textContent = "Detalles y Chat";
                     
-                    // --- CARGAR CHAT ---
                     loadChatMessages(data.comentarios);
                     enableChatInput();
 
@@ -318,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- LÓGICA DEL CHAT ---
+    // --- Chat Logic ---
     const chatArea = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const btnEnviar = document.getElementById('btnEnviarComentario');
@@ -326,80 +341,49 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadChatMessages(comentarios) {
         chatArea.innerHTML = '';
         if(!comentarios || comentarios.length === 0) {
-            chatArea.innerHTML = '<div class="text-center text-muted mt-4">No hay comentarios aún. ¡Inicia la conversación!</div>';
+            chatArea.innerHTML = '<div class="text-center text-muted mt-4">No hay comentarios aún.</div>';
             return;
         }
-
-        comentarios.forEach(c => {
-            appendMessage(c);
-        });
+        comentarios.forEach(c => appendMessage(c));
         scrollToBottom();
     }
 
     function appendMessage(c) {
         const isOwn = c.user_id == {{ auth()->id() }};
-        const html = `
-            <div class="chat-message ${isOwn ? 'own' : ''}">
-                <div class="chat-bubble">
-                    <span class="chat-user">${c.user.name}</span>
-                    ${c.contenido}
-                </div>
-                <span class="chat-meta">${new Date(c.created_at).toLocaleString()}</span>
-            </div>
-        `;
+        const html = `<div class="chat-message ${isOwn ? 'own' : ''}"><div class="chat-bubble"><span class="chat-user">${c.user.name}</span>${c.contenido}</div><span class="chat-meta">${new Date(c.created_at).toLocaleString()}</span></div>`;
         chatArea.insertAdjacentHTML('beforeend', html);
     }
 
-    function scrollToBottom() {
-        chatArea.scrollTop = chatArea.scrollHeight;
-    }
+    function scrollToBottom() { chatArea.scrollTop = chatArea.scrollHeight; }
+    function enableChatInput() { chatInput.disabled = false; btnEnviar.disabled = false; }
 
-    function enableChatInput() {
-        chatInput.disabled = false;
-        btnEnviar.disabled = false;
-    }
-
-    // Enviar Mensaje
     btnEnviar.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') sendMessage();
-    });
+    chatInput.addEventListener('keypress', function(e) { if(e.key === 'Enter') sendMessage(); });
 
     function sendMessage() {
         const msg = chatInput.value.trim();
         if(!msg || !currentVisitaId) return;
-
-        // Optimistic UI (mostrar antes de confirmar)
-        // Pero mejor esperar respuesta para tener los datos reales del usuario y fecha
         
         fetch(`/dashboard/visitas/${currentVisitaId}/comentarios`, {
             method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ contenido: msg })
         })
         .then(r => r.json())
         .then(newComment => {
-            // Si era el primer mensaje, limpiar el "No hay comentarios"
             if(chatArea.querySelector('.text-center')) chatArea.innerHTML = '';
-            
             appendMessage(newComment);
             chatInput.value = '';
             scrollToBottom();
-        })
-        .catch(e => Swal.fire('Error', 'No se pudo enviar el mensaje', 'error'));
+        });
     }
 
-    // Eliminar Visita
+    // Eliminar
     document.querySelectorAll('.btn-eliminar').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.getAttribute('data-id');
             Swal.fire({
-                title: '¿Eliminar visita?', text: "Se borrarán también los comentarios.", icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí, borrar'
+                title: '¿Borrar?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí'
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`/dashboard/visitas/${id}`, {
