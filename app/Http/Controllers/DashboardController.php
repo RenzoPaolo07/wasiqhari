@@ -557,65 +557,69 @@ class DashboardController extends Controller
         ]);
     }
 
-    // --- FUNCIÓN PRIVADA: DOCTOR WASIQHARI (VERSIÓN 2.0 MEJORADA) ---
+    // --- FUNCIÓN PRIVADA: DOCTOR WASIQHARI (MODO DEBUG VISUAL) ---
     private function analizarVisitaConIA($visita)
     {
         $apiKey = env('GEMINI_API_KEY');
-        if (!$apiKey) return;
+        
+        // 1. Verificar si hay llave
+        if (empty($apiKey)) {
+            $visita->recomendacion_ia = "❌ ERROR: Falta API KEY en .env";
+            $visita->save();
+            return;
+        }
 
-        // CAMBIO 1: Prompt más agresivo para detectar riesgos
-        $prompt = "Actúa como un médico geriatra muy precavido. 
-        Analiza este reporte de visita a un adulto mayor:
+        $prompt = "Actúa como médico geriatra. Analiza:
         - Paciente: {$visita->adultoMayor->nombres} ({$visita->adultoMayor->edad} años)
-        - Estado Físico (según voluntario): {$visita->estado_fisico}
-        - Observaciones (TEXTO CLAVE): \"{$visita->observaciones}\"
+        - Estado: {$visita->estado_fisico}
+        - Observaciones: \"{$visita->observaciones}\"
         
-        INSTRUCCIÓN CRÍTICA:
-        Si en las 'Observaciones' detectas palabras clave de alarma (dolor, caída, sangre, no come, triste, golpe, mareo, olvido), MARCA RIESGO SIEMPRE, aunque el Estado Físico diga 'Bueno' o 'Regular'. Prioriza el texto sobre el checkbox.
-        
-        Responde SOLO con un JSON estricto:
-        {\"riesgo\": \"SI\", \"mensaje\": \"Explicación muy breve\"}
-        o
-        {\"riesgo\": \"NO\", \"mensaje\": \"Todo en orden\"}";
+        INSTRUCCIONES:
+        1. Si ves RIESGO (dolor, caída, sangre, mareo, golpe, tristeza), responde: 'PELIGRO: [Causa breve]'
+        2. Si todo está bien, responde: 'OK: Estable'
+        Responde solo con esa línea.";
 
         try {
+            // USAMOS 'gemini-flash-latest' (El comodín que suele funcionar siempre)
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}";
+            
             $response = Http::withHeaders(['Content-Type' => 'application/json'])
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}", [
+                ->post($url, [
                     'contents' => [['parts' => [['text' => $prompt]]]]
                 ]);
 
             $data = $response->json();
-            $textoIA = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-            // Limpieza del JSON
-            $textoIA = str_replace(['```json', '```', "\n"], '', $textoIA);
-            
-            // LOG PARA ESPIAR (Si falla, revisa storage/logs/laravel.log)
-            Log::info("Respuesta Doctor IA Raw: " . $textoIA);
-
-            $analisis = json_decode($textoIA, true);
-
-            // CAMBIO 2: Lógica a prueba de balas (Mayúsculas, acentos, etc.)
-            $esRiesgo = false;
-            
-            if (isset($analisis['riesgo'])) {
-                $respuestaRiesgo = strtoupper(trim($analisis['riesgo'])); // Convertimos a mayúsculas y quitamos espacios
-                // Detectamos SI, SÍ, YES, TRUE...
-                if (in_array($respuestaRiesgo, ['SI', 'SÍ', 'YES', 'TRUE'])) {
-                    $esRiesgo = true;
-                }
+            // 2. Si Google nos da error, LO MOSTRAMOS EN PANTALLA
+            if (isset($data['error'])) {
+                $mensajeError = $data['error']['message'] ?? 'Error desconocido';
+                $visita->recomendacion_ia = "❌ GOOGLE ERROR: " . substr($mensajeError, 0, 50) . "...";
+                $visita->save();
+                Log::error("DOCTOR IA API ERROR FULL: " . json_encode($data));
+                return;
             }
 
-            if ($esRiesgo) {
-                $visita->recomendacion_ia = "⚠️ DR. IA: " . ($analisis['mensaje'] ?? 'Riesgo detectado.');
+            // 3. Procesar respuesta
+            $textoIA = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            $textoIA = trim(str_replace(['*', '`', '"'], '', $textoIA));
+
+            if (empty($textoIA)) {
+                $visita->recomendacion_ia = "⚠️ ALERTA: Google respondió vacío.";
+            } elseif (str_starts_with(strtoupper($textoIA), 'PELIGRO')) {
+                $mensaje = substr($textoIA, 7); 
+                $mensaje = ltrim($mensaje, ": ");
+                $visita->recomendacion_ia = "⚠️ DR. IA: " . ($mensaje ?: 'Riesgo detectado.');
             } else {
-                $visita->recomendacion_ia = "✅ DR. IA: " . ($analisis['mensaje'] ?? 'Paciente estable.');
+                $visita->recomendacion_ia = "✅ DR. IA: Paciente estable.";
             }
             
             $visita->save();
 
         } catch (\Exception $e) {
-            Log::error("Error Doctor IA: " . $e->getMessage());
+            // 4. Si el código explota, LO MOSTRAMOS
+            $visita->recomendacion_ia = "❌ CRASH: " . substr($e->getMessage(), 0, 50);
+            $visita->save();
+            Log::error("DOCTOR IA CRASH: " . $e->getMessage());
         }
     }
 }
