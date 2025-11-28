@@ -23,6 +23,7 @@
         <td>
             <div style="display: flex; gap: 5px; align-items: center;">
                 
+                {{-- BLOQUE DE CONTACTO --}}
                 @if($adulto->telefono)
                     @php 
                         // Limpiamos el número para evitar errores en los links
@@ -35,7 +36,7 @@
                         <i class="fas fa-phone"></i>
                     </a>
 
-                    <a href="sms:+51{{ $telefonoLimpio }}?body=Hola {{ $adulto->nombres }}, le saludamos de WasiQhari para saber cómo se encuentra." 
+                    <a href="sms:+51{{ $telefonoLimpio }}?body=Hola {{ $adulto->nombres }}, le saludamos de WasiQhari." 
                        class="btn-icon btn-sms" 
                        title="Enviar SMS">
                         <i class="fas fa-comment-alt"></i>
@@ -49,8 +50,16 @@
                     </a>
                     
                     <div style="width: 1px; height: 20px; background: #e0e0e0; margin: 0 5px;"></div>
+                
+                @else
+                    <div style="margin-right: 5px; opacity: 0.5; padding-right: 5px; border-right: 1px solid #eee;">
+                        <span style="font-size: 0.8rem; color: #999;" title="Sin teléfono registrado">
+                            <i class="fas fa-phone-slash"></i>
+                        </span>
+                    </div>
                 @endif
 
+                {{-- BLOQUE DE GESTIÓN --}}
                 <a href="{{ route('adultos.credencial', $adulto->id) }}" target="_blank" class="btn-action btn-credencial" title="Credencial">
                     <i class="fas fa-id-card"></i>
                 </a>
@@ -73,7 +82,7 @@
     <tr>
         <td colspan="7" class="text-center" style="padding: 40px; color: #999;">
             <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i><br>
-            No hay adultos mayores registrados con esos criterios.
+            No hay adultos mayores registrados.
         </td>
     </tr>
 @endforelse
