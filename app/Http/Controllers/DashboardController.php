@@ -266,16 +266,26 @@ class DashboardController extends Controller
 
         $visita = Visita::create($data);
 
-        // --- INICIO CÓDIGO NUEVO ---
-        // Llamamos al Doctor IA en segundo plano (simulado)
+        $visita = Visita::create($data);
+
+        // --- CÓDIGO IA (TEXTO + FOTO) ---
         try {
-            // Cargamos la relación para que la IA sepa el nombre del abuelo
             $visita->load('adultoMayor'); 
+            
+            // 1. Primero analiza el Texto (Doctor Wasiqhari)
             $this->analizarVisitaConIA($visita);
+
+            // 2. Si subió foto, analiza la Foto (Ojo Clínico)
+            if (isset($data['foto_evidencia'])) {
+                $this->analizarFotoConIA($visita, $data['foto_evidencia']);
+            }
+            
         } catch (\Exception $e) {
-            // Si falla la IA, no detenemos el registro, solo lo ignoramos
+            // Silencioso para no detener al usuario
         }
-        // --- FIN CÓDIGO NUEVO ---
+        // --- FIN CÓDIGO IA ---
+
+        ActivityLog::registrar('Crear', 'Visitas', "Registró visita ID #{$visita->id}");
 
         ActivityLog::registrar('Crear', 'Visitas', "Registró visita ID #{$visita->id}");
 
@@ -620,6 +630,72 @@ class DashboardController extends Controller
             $visita->recomendacion_ia = "❌ CRASH: " . substr($e->getMessage(), 0, 50);
             $visita->save();
             Log::error("DOCTOR IA CRASH: " . $e->getMessage());
+        }
+    }
+
+    // --- FUNCIÓN PRIVADA: OJO CLÍNICO (ANÁLISIS DE FOTOS) ---
+    private function analizarFotoConIA($visita, $imagePath)
+    {
+        $apiKey = env('GEMINI_API_KEY');
+        if (empty($apiKey)) return;
+
+        // 1. Convertir imagen a Base64 (Para que Gemini la pueda "ver" desde tu servidor)
+        try {
+            $fullPath = public_path("storage/" . $imagePath);
+            if (!file_exists($fullPath)) return;
+            
+            $imageData = base64_encode(file_get_contents($fullPath));
+        } catch (\Exception $e) {
+            return;
+        }
+
+        // 2. El Prompt para la Imagen
+        $prompt = "Actúa como trabajador social experto. Analiza esta FOTO de una visita domiciliaria.
+        Busca signos de:
+        1. Pobreza extrema o falta de higiene grave.
+        2. Riesgos de seguridad (cables sueltos, desorden peligroso).
+        3. Estado anímico visible del paciente (si aparece).
+        
+        INSTRUCCIONES:
+        - Si ves algo ALARMANTE, inicia con 'FOTO-ALERTA:'.
+        - Si todo se ve normal/aceptable, responde 'FOTO-OK'.
+        - Sé muy breve (max 15 palabras).";
+
+        try {
+            // USAMOS GEMINI 2.0 FLASH (Multimodal)
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}";
+            
+            $payload = [
+                'contents' => [[
+                    'parts' => [
+                        ['text' => $prompt],
+                        [
+                            'inline_data' => [
+                                'mime_type' => 'image/jpeg', // Asumimos jpeg por simplicidad
+                                'data' => $imageData
+                            ]
+                        ]
+                    ]
+                ]]
+            ];
+
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])
+                ->post($url, $payload);
+
+            $data = $response->json();
+            $textoIA = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            $textoIA = trim(str_replace(['*', '`'], '', $textoIA));
+
+            // 3. Guardar resultado (Concatenamos con lo que ya dijo el Doctor Texto)
+            if (str_starts_with(strtoupper($textoIA), 'FOTO-ALERTA')) {
+                $mensaje = substr($textoIA, 12); // Quitamos "FOTO-ALERTA:"
+                // Agregamos un salto de línea si ya había texto
+                $visita->recomendacion_ia .= "\n👁️ OJO: " . ($mensaje ?: 'Riesgo visual detectado.');
+                $visita->save();
+            }
+
+        } catch (\Exception $e) {
+            Log::error("VISION IA CRASH: " . $e->getMessage());
         }
     }
 }
