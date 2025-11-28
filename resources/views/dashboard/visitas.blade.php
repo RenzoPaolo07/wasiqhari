@@ -286,6 +286,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     let currentVisitaId = null;
 
+    // --- EVITAR DOBLE CLICK AL GUARDAR (ANTI-DUPLICADOS) ---
+    const formVisita = document.getElementById('formVisita');
+    const btnGuardar = document.getElementById('btnGuardar');
+
+    if(formVisita) {
+        formVisita.addEventListener('submit', function() {
+            // 1. Cambiamos el texto del botón
+            btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando y Analizando...';
+            // 2. Desactivamos el botón para que no se pueda clickear de nuevo
+            btnGuardar.disabled = true;
+            // 3. (Opcional) Un poco de estilo para que se vea apagado
+            btnGuardar.style.opacity = '0.7';
+            btnGuardar.style.cursor = 'not-allowed';
+        });
+    }
+
     btnNueva.addEventListener('click', function() {
         form.reset();
         form.action = "{{ route('visitas.store') }}";

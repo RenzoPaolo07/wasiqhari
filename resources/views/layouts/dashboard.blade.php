@@ -7,7 +7,6 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!--Cargar pagina movil-->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#e74c3c">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,6 +28,10 @@
     @stack('styles')
 </head>
 <body>
+    <button id="mobileMenuBtn" class="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+    </button>
+
     <div class="dashboard-layout">
         
         <aside class="sidebar">
@@ -100,11 +103,11 @@
             @yield('content')
         </main>
 
-    </div> <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
+    </div> 
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!--Movil-->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -113,6 +116,31 @@
                     .catch(err => console.log('Error SW:', err));
             });
         }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if(btn && sidebar) {
+                // Abrir/Cerrar menú al tocar el botón
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Evita que el clic se propague al documento
+                    sidebar.classList.toggle('active');
+                });
+
+                // Cerrar menú al tocar fuera de él
+                document.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 768) {
+                        // Si el clic NO fue en el sidebar Y NO fue en el botón
+                        if (!sidebar.contains(e.target) && !btn.contains(e.target) && sidebar.classList.contains('active')) {
+                            sidebar.classList.remove('active');
+                        }
+                    }
+                });
+            }
+        });
     </script>
     
     @stack('scripts')

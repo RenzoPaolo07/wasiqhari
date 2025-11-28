@@ -2032,3 +2032,89 @@ body {
     color: #128C7E;
     transform: scale(1.1);
 }
+
+/* ========================================= */
+/* =           ESTILOS MÓVILES             = */
+/* ========================================= */
+
+/* Botón Flotante (Hamburguesa) */
+.mobile-menu-btn {
+    display: none; /* Oculto en PC */
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1100; /* Por encima de todo */
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+    /* Mostrar botón en móvil */
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    /* Sidebar Móvil (Oculto por defecto) */
+    .sidebar {
+        display: flex; /* Lo volvemos a mostrar pero movido */
+        transform: translateX(-100%); /* Escondido a la izquierda */
+        width: 260px;
+        transition: transform 0.3s ease;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+    }
+
+    /* Sidebar Activo (Cuando le das click) */
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    /* Ajuste del contenido principal */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 80px 15px 20px 15px; /* Más padding arriba para el botón */
+        width: 100%;
+    }
+
+    /* Tablas Responsivas (Scroll Horizontal) */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Suavidad en iOS */
+        border: 1px solid #eee;
+    }
+
+    /* Ajuste de Formulario en una columna */
+    .form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+    }
+    
+    .form-group[data-span="3"], 
+    .form-group[style*="span 2"], 
+    .form-group[style*="span 3"] {
+        grid-column: span 1 !important;
+    }
+
+    /* Header del Dashboard en columna */
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .header-actions {
+        width: 100%;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
