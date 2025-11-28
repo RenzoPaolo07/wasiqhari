@@ -142,6 +142,37 @@
     .btn-action.btn-whatsapp { color: #25D366; }
     .btn-action.btn-whatsapp:hover { background: #e5f9ed; color: #128C7E; }
     .text-muted { color: #7f8c8d; font-size: 0.85rem; }
+    /* Botones de Contacto Redondos */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    color: white;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: white;
+}
+
+/* Colores Específicos */
+.btn-llamar {
+    background-color: #3498db; /* Azul */
+}
+.btn-sms {
+    background-color: #f39c12; /* Naranja (SMS clásico) */
+}
+.btn-whatsapp {
+    background-color: #25D366; /* Verde WhatsApp */
+}
 </style>
 @endpush
 
