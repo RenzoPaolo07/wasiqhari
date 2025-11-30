@@ -106,13 +106,76 @@
                     <div class="form-group"><label>Longitud</label><input type="text" id="lon" name="lon" readonly style="background:#f8f9fa;"></div>
                     <div class="form-group"><label>Teléfono</label><input type="text" id="telefono" name="telefono"></div>
                     
-                    <div class="form-group"><label>Lee/Escribe</label><select id="lee_escribe" name="lee_escribe"><option value="Si">Si</option><option value="No">No</option></select></div>
-                    <div class="form-group"><label>Estudio</label><select id="nivel_estudio" name="nivel_estudio"><option value="Ninguno">Ninguno</option><option value="Primaria">Primaria</option></select></div>
-                    <div class="form-group"><label>Apoyo</label><select id="apoyo_familiar" name="apoyo_familiar"><option value="Ninguno">Ninguno</option></select></div>
-                    <div class="form-group"><label>Abandono</label><select id="estado_abandono" name="estado_abandono"><option value="Total">Total</option></select></div>
-                    <div class="form-group"><label>Salud</label><select id="estado_salud" name="estado_salud"><option value="Bueno">Bueno</option></select></div>
-                    <div class="form-group"><label>Actividad</label><input type="text" id="actividad_calle" name="actividad_calle" value="Ninguna"></div>
-                    <div class="form-group"><label>Riesgo</label><select id="nivel_riesgo" name="nivel_riesgo"><option value="Bajo">Bajo</option></select></div>
+                    <div class="form-group">
+                        <label>Lee/Escribe</label>
+                        <select id="lee_escribe" name="lee_escribe">
+                            <option value="Si">Si</option>
+                            <option value="No">No</option>
+                            <option value="Poco">Poco</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nivel Estudio</label>
+                        <select id="nivel_estudio" name="nivel_estudio">
+                            <option value="Ninguno">Ninguno</option>
+                            <option value="Primaria">Primaria</option>
+                            <option value="Secundaria">Secundaria</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Apoyo Familiar</label>
+                        <select id="apoyo_familiar" name="apoyo_familiar">
+                            <option value="Ninguno">Ninguno</option>
+                            <option value="Poco">Poco</option>
+                            <option value="Ocasional">Ocasional</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado Abandono</label>
+                        <select id="estado_abandono" name="estado_abandono">
+                            <option value="Total">Total</option>
+                            <option value="Parcial">Parcial</option>
+                            <option value="Situación Calle">Situación Calle</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado Salud</label>
+                        <select id="estado_salud" name="estado_salud">
+                            <option value="Bueno">Bueno</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Malo">Malo</option>
+                            <option value="Critico">Crítico</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Actividad en Calle</label>
+                        <select id="actividad_calle" name="actividad_calle">
+                            <option value="Otro">Ninguna / Otro</option>
+                            <option value="Vende dulces">Vende dulces</option>
+                            <option value="Pide limosna">Pide limosna</option>
+                            <option value="Recicla">Recicla</option>
+                            <option value="Vende artesanías">Vende artesanías</option>
+                            <option value="Vende periódicos">Vende periódicos</option>
+                            <option value="Vende frutas">Vende frutas</option>
+                            <option value="Vende flores">Vende flores</option>
+                            <option value="Vende empanadas">Vende empanadas</option>
+                            <option value="Vende verduras">Vende verduras</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nivel Riesgo</label>
+                        <select id="nivel_riesgo" name="nivel_riesgo">
+                            <option value="Bajo">Bajo</option>
+                            <option value="Medio">Medio</option>
+                            <option value="Alto">Alto</option>
+                        </select>
+                    </div>
                     
                     <div class="form-group" style="grid-column: span 3;"><label>Necesidades</label><textarea id="necesidades" name="necesidades"></textarea></div>
                     <div class="form-group" style="grid-column: span 3;"><label>Observaciones</label><textarea id="observaciones" name="observaciones"></textarea></div>
@@ -142,37 +205,32 @@
     .btn-action.btn-whatsapp { color: #25D366; }
     .btn-action.btn-whatsapp:hover { background: #e5f9ed; color: #128C7E; }
     .text-muted { color: #7f8c8d; font-size: 0.85rem; }
+    
     /* Botones de Contacto Redondos */
-.btn-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    color: white;
-    font-size: 0.9rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
 
-.btn-icon:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    color: white;
-}
+    .btn-icon:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        color: white;
+    }
 
-/* Colores Específicos */
-.btn-llamar {
-    background-color: #3498db; /* Azul */
-}
-.btn-sms {
-    background-color: #f39c12; /* Naranja (SMS clásico) */
-}
-.btn-whatsapp {
-    background-color: #25D366; /* Verde WhatsApp */
-}
+    /* Colores Específicos */
+    .btn-llamar { background-color: #3498db; }
+    .btn-sms { background-color: #f39c12; }
+    .btn-whatsapp { background-color: #25D366; }
 </style>
 @endpush
 
@@ -287,12 +345,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('zona_ubicacion').value = data.zona_ubicacion;
                 document.getElementById('direccion').value = data.direccion;
                 document.getElementById('telefono').value = data.telefono;
+                
+                // Carga de selectores (ahora funcionará porque los valores existen)
                 document.getElementById('lee_escribe').value = data.lee_escribe;
                 document.getElementById('nivel_estudio').value = data.nivel_estudio;
                 document.getElementById('apoyo_familiar').value = data.apoyo_familiar;
                 document.getElementById('estado_abandono').value = data.estado_abandono;
                 document.getElementById('estado_salud').value = data.estado_salud;
                 document.getElementById('actividad_calle').value = data.actividad_calle;
+                
                 document.getElementById('necesidades').value = data.necesidades;
                 document.getElementById('observaciones').value = data.observaciones;
                 document.getElementById('nivel_riesgo').value = data.nivel_riesgo;
