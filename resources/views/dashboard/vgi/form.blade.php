@@ -32,54 +32,188 @@
             @csrf
             
             <div id="tab-social" class="vgi-tab-content" style="display: block;">
-                <h4 class="mb-3 text-primary"><i class="fas fa-users"></i> I. Datos Sociodemográficos y Valoración Social</h4>
-                
-                <div class="form-grid">
-                    <div class="form-group"><label>DNI</label><input type="text" value="{{ $adulto->dni }}" readonly style="background: #f0f0f0;"></div>
-                    <div class="form-group"><label>Dirección</label><input type="text" value="{{ $adulto->direccion }}" readonly style="background: #f0f0f0;"></div>
-                    <div class="form-group"><label>Teléfono</label><input type="text" value="{{ $adulto->telefono }}" readonly style="background: #f0f0f0;"></div>
-                    
-                    <div class="form-group"><label>Nombre del Cuidador</label><input type="text" name="nombre_cuidador" value="{{ $vgi->nombre_cuidador ?? '' }}"></div>
-                    <div class="form-group"><label>Parentesco</label>
-                        <select name="parentesco_cuidador">
-                            <option value="">Seleccione...</option>
-                            <option value="Hijo/a" {{ ($vgi->parentesco_cuidador ?? '') == 'Hijo/a' ? 'selected' : '' }}>Hijo/a</option>
-                            <option value="Esposo/a" {{ ($vgi->parentesco_cuidador ?? '') == 'Esposo/a' ? 'selected' : '' }}>Esposo/a</option>
-                            <option value="Nieto/a" {{ ($vgi->parentesco_cuidador ?? '') == 'Nieto/a' ? 'selected' : '' }}>Nieto/a</option>
-                            <option value="Vecino/a" {{ ($vgi->parentesco_cuidador ?? '') == 'Vecino/a' ? 'selected' : '' }}>Vecino/a</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>DNI Cuidador</label><input type="text" name="dni_cuidador" value="{{ $vgi->dni_cuidador ?? '' }}"></div>
+                <div class="ficha-header mb-4">
+                    <h4 class="m-0"><i class="fas fa-id-card"></i> I. DATOS SOCIODEMOGRÁFICOS</h4>
                 </div>
 
-                <hr class="my-4">
-                <h5 class="text-secondary">Escala Socio-Familiar de Gijón (Riesgo Social)</h5>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label>Situación Familiar</label>
-                        <select name="gijon_familiar" class="form-control">
-                            <option value="1">Vive con familia, sin dependencia</option>
-                            <option value="2">Vive con cónyuge de similar edad</option>
-                            <option value="3">Vive con familia, presenta dependencia</option>
-                            <option value="4">Vive solo, hijos próximos</option>
-                            <option value="5">Vive solo, sin hijos o lejanos</option>
-                        </select>
+                <div class="row mb-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Fecha</label>
+                        <input type="date" name="fecha_evaluacion" class="form-control" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label>Situación Económica</label>
-                        <select name="gijon_economica" class="form-control">
-                            <option value="1">Más de 1.5 sueldos mínimos</option>
-                            <option value="3">Sueldo mínimo vital</option>
-                            <option value="5">Sin pensión ni ingresos</option>
-                        </select>
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Hora</label>
+                        <input type="time" name="hora_evaluacion" class="form-control" value="{{ \Carbon\Carbon::now()->format('H:i') }}">
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label>Vivienda</label>
-                        <select name="gijon_vivienda" class="form-control">
-                            <option value="1">Adecuada</option>
-                            <option value="3">Barreras arquitectónicas</option>
-                            <option value="5">Mala conservación / Inadecuada</option>
-                        </select>
+                    <div class="col-md-3">
+                        <label class="form-label-sm fw-bold bg-highlight">HCL (Historia Clínica)</label>
+                        <input type="text" name="hcl" class="form-control border-warning" value="{{ $vgi->hcl ?? '' }}">
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="form-section">
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold bg-highlight">NOMBRES Y APELLIDOS:</label>
+                            <input type="text" class="form-control-plaintext border-bottom" value="{{ $adulto->nombres }} {{ $adulto->apellidos }}" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">GÉNERO:</label>
+                            <div class="d-flex gap-3 mt-2">
+                                <label><input type="radio" name="sexo" value="F" {{ $adulto->sexo == 'F' ? 'checked' : '' }} disabled> 1) F</label>
+                                <label><input type="radio" name="sexo" value="M" {{ $adulto->sexo == 'M' ? 'checked' : '' }} disabled> 2) M</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-2">
+                            <label class="bg-highlight px-1">EDAD:</label>
+                            <input type="text" class="form-control form-control-sm" value="{{ $adulto->edad }}" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label>DNI:</label>
+                            <input type="text" class="form-control form-control-sm" value="{{ $adulto->dni }}" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Fecha Nacimiento:</label>
+                            <input type="date" name="fecha_nacimiento" class="form-control form-control-sm" value="{{ $adulto->fecha_nacimiento ? \Carbon\Carbon::parse($adulto->fecha_nacimiento)->format('Y-m-d') : '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Lugar de Nacimiento:</label>
+                            <input type="text" name="lugar_nacimiento" class="form-control form-control-sm border-bottom-only" value="{{ $vgi->lugar_nacimiento ?? '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4">
+                            <label class="bg-highlight px-1">Procedencia:</label>
+                            <input type="text" name="procedencia" class="form-control form-control-sm border-bottom-only" value="{{ $vgi->procedencia ?? $adulto->distrito }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="bg-highlight px-1">Religión:</label>
+                            <input type="text" name="religion" class="form-control form-control-sm border-bottom-only" value="{{ $vgi->religion ?? '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="bg-highlight px-1">Ocupación:</label>
+                            <input type="text" name="ocupacion" class="form-control form-control-sm border-bottom-only" value="{{ $vgi->ocupacion ?? '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label>Grupo Sanguíneo y FRH:</label>
+                            <input type="text" name="grupo_sanguineo" class="form-control form-control-sm border-bottom-only" value="{{ $vgi->grupo_sanguineo ?? '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label>DIRECCIÓN:</label>
+                            <input type="text" class="form-control form-control-sm" value="{{ $adulto->direccion }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-md-12">
+                            <label class="bg-highlight px-1">TELÉFONOS (CASA / CELULARES):</label>
+                            <input type="text" name="telefonos_referencia" class="form-control form-control-sm border-bottom-only" value="{{ $vgi->telefonos_referencia ?? $adulto->telefono }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section mb-4">
+                    <label class="fw-bold bg-highlight px-2 mb-2">GRADO DE INSTRUCCIÓN:</label>
+                    <div class="instruction-grid p-2 border rounded bg-light">
+                        <label class="d-block"><input type="radio" name="grado_instruccion" value="Sin instrucción" {{ ($vgi->grado_instruccion ?? '') == 'Sin instrucción' ? 'checked' : '' }}> 1) Sin instrucción</label>
+                        
+                        <div class="d-flex gap-3">
+                            <span>2) Primaria:</span>
+                            <label><input type="radio" name="grado_instruccion" value="Primaria I" {{ ($vgi->grado_instruccion ?? '') == 'Primaria I' ? 'checked' : '' }}> I (Incompleta)</label>
+                            <label><input type="radio" name="grado_instruccion" value="Primaria C" {{ ($vgi->grado_instruccion ?? '') == 'Primaria C' ? 'checked' : '' }}> C (Completa)</label>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <span>3) Secundaria:</span>
+                            <label><input type="radio" name="grado_instruccion" value="Secundaria I" {{ ($vgi->grado_instruccion ?? '') == 'Secundaria I' ? 'checked' : '' }}> I</label>
+                            <label><input type="radio" name="grado_instruccion" value="Secundaria C" {{ ($vgi->grado_instruccion ?? '') == 'Secundaria C' ? 'checked' : '' }}> C</label>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <span>4) Superior:</span>
+                            <label><input type="radio" name="grado_instruccion" value="Superior Univ I" {{ ($vgi->grado_instruccion ?? '') == 'Superior Univ I' ? 'checked' : '' }}> Univ I</label>
+                            <label><input type="radio" name="grado_instruccion" value="Superior Univ C" {{ ($vgi->grado_instruccion ?? '') == 'Superior Univ C' ? 'checked' : '' }}> Univ C</label>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <span>5) No Universitario:</span>
+                            <label><input type="radio" name="grado_instruccion" value="No Univ I" {{ ($vgi->grado_instruccion ?? '') == 'No Univ I' ? 'checked' : '' }}> I</label>
+                            <label><input type="radio" name="grado_instruccion" value="No Univ C" {{ ($vgi->grado_instruccion ?? '') == 'No Univ C' ? 'checked' : '' }}> C</label>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <label>5) N° de años de estudio: <input type="number" name="anios_estudio" class="d-inline-block form-control form-control-sm w-auto" style="width: 80px;" value="{{ $vgi->anios_estudio ?? '' }}"> años</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section mb-4">
+                    <label class="fw-bold bg-highlight px-2 mb-2">ESTADO CIVIL:</label>
+                    <div class="d-flex flex-wrap gap-3 p-2 border rounded">
+                        <label><input type="radio" name="estado_civil" value="Soltero" {{ ($vgi->estado_civil ?? '') == 'Soltero' ? 'checked' : '' }}> 1) Soltero</label>
+                        <label><input type="radio" name="estado_civil" value="Casado" {{ ($vgi->estado_civil ?? '') == 'Casado' ? 'checked' : '' }}> 2) Casado</label>
+                        <label><input type="radio" name="estado_civil" value="Conviviente" {{ ($vgi->estado_civil ?? '') == 'Conviviente' ? 'checked' : '' }}> 3) Conviviente</label>
+                        <label><input type="radio" name="estado_civil" value="Viudo" {{ ($vgi->estado_civil ?? '') == 'Viudo' ? 'checked' : '' }}> 4) Viudo</label>
+                        <label><input type="radio" name="estado_civil" value="Divorciado" {{ ($vgi->estado_civil ?? '') == 'Divorciado' ? 'checked' : '' }}> 5) Divorciado</label>
+                    </div>
+                </div>
+
+                <div class="form-section mb-4 p-3 border border-primary rounded" style="background-color: #f0f8ff;">
+                    <label class="fw-bold bg-highlight px-2">CUIDADOR: (En pacientes adulto mayores dependientes)</label>
+                    <p class="text-muted small fst-italic mb-2">Nota: Solo llenar si la PAM es dependiente funcional o tiene deterioro cognitivo.</p>
+                    
+                    <div class="d-flex gap-4 mb-3">
+                        <div>
+                            <strong>¿Aplica?</strong>
+                            <label class="ms-2"><input type="radio" name="cuidador_aplica" value="1" id="cuidador_si" onchange="toggleCuidador(true)" {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'checked' : '' }}> SI</label>
+                            <label class="ms-2"><input type="radio" name="cuidador_aplica" value="0" id="cuidador_no" onchange="toggleCuidador(false)" {{ ($vgi->cuidador_aplica ?? 0) == 0 ? 'checked' : '' }}> NO</label>
+                        </div>
+                    </div>
+
+                    <div id="bloque_cuidador" style="display: {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'block' : 'none' }}; border-top: 1px dashed #999; padding-top: 15px;">
+                        <div class="mb-3">
+                            <label class="fw-bold">1. Relación con el cuidador:</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <label><input type="radio" name="parentesco_cuidador" value="Esposa(o)" {{ ($vgi->parentesco_cuidador ?? '') == 'Esposa(o)' ? 'checked' : '' }}> Esposa(o)</label>
+                                <label><input type="radio" name="parentesco_cuidador" value="Hijas(os)" {{ ($vgi->parentesco_cuidador ?? '') == 'Hijas(os)' ? 'checked' : '' }}> Hijas(os)</label>
+                                <label><input type="radio" name="parentesco_cuidador" value="Sobrinos(as)" {{ ($vgi->parentesco_cuidador ?? '') == 'Sobrinos(as)' ? 'checked' : '' }}> Sobrinos(as)</label>
+                                <label><input type="radio" name="parentesco_cuidador" value="Nietos(as)" {{ ($vgi->parentesco_cuidador ?? '') == 'Nietos(as)' ? 'checked' : '' }}> Nietos(as)</label>
+                                <label><input type="radio" name="parentesco_cuidador" value="Nuera" {{ ($vgi->parentesco_cuidador ?? '') == 'Nuera' ? 'checked' : '' }}> Nuera</label>
+                                <label><input type="radio" name="parentesco_cuidador" value="Otros" {{ ($vgi->parentesco_cuidador ?? '') == 'Otros' ? 'checked' : '' }}> Otros</label>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label>2. Nombre del cuidador:</label>
+                                <input type="text" name="nombre_cuidador" class="form-control form-control-sm border-bottom-only" value="{{ $vgi->nombre_cuidador ?? '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label>3. DNI:</label>
+                                <input type="text" name="dni_cuidador" class="form-control form-control-sm border-bottom-only" value="{{ $vgi->dni_cuidador ?? '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-1 align-items-center">
+                            <div class="col-md-6">
+                                <label>4. Sexo:</label>
+                                <label class="ms-2"><input type="radio" name="cuidador_sexo" value="F" {{ ($vgi->cuidador_sexo ?? '') == 'F' ? 'checked' : '' }}> F</label>
+                                <label class="ms-2"><input type="radio" name="cuidador_sexo" value="M" {{ ($vgi->cuidador_sexo ?? '') == 'M' ? 'checked' : '' }}> M</label>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Edad:</label>
+                                <input type="number" name="cuidador_edad" class="d-inline-block form-control form-control-sm w-auto" style="width: 80px;" value="{{ $vgi->cuidador_edad ?? '' }}"> años
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -263,14 +397,31 @@
 
 @push('styles')
 <style>
-    .vgi-tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #eee; overflow-x: auto; padding: 0 10px; }
-    .vgi-tab { padding: 15px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: #7f8c8d; border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; }
+    /* Estilos Generales VGI */
+    .vgi-container { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    /* Pestañas */
+    .vgi-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #ddd; overflow-x: auto; padding: 0 10px; }
+    .vgi-tab { padding: 15px 25px; border: none; background: none; cursor: pointer; font-weight: 600; color: #666; border-bottom: 4px solid transparent; transition: 0.3s; white-space: nowrap; font-size: 1rem; }
     .vgi-tab:hover { background: #e9ecef; color: #333; }
-    .vgi-tab.active { color: #e74c3c; border-bottom-color: #e74c3c; background: white; }
-    .vgi-tab-content { display: none; animation: fadeIn 0.4s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-    .card { border-radius: 8px; border: 1px solid #ddd; }
+    .vgi-tab.active { color: #0056b3; border-bottom-color: #0056b3; background: white; }
+    .vgi-tab-content { display: none; padding-top: 20px; animation: fadeIn 0.4s; }
+    
+    /* Simulación de Papel Médico */
+    .bg-highlight { background-color: #ffff00; padding: 2px 5px; font-weight: bold; border-radius: 2px; display: inline-block; }
+    .form-control-plaintext { padding: 0; outline: none; }
+    .border-bottom-only { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; background: transparent; padding: 0 5px; }
+    .border-bottom-only:focus { border-bottom: 2px solid #0056b3 !important; background: #f0f8ff; }
+    
+    /* Inputs Pequeños */
+    .form-control-sm { font-size: 0.9rem; }
+    .form-label { margin-bottom: 2px; font-weight: 500; font-size: 0.9rem; }
+    
+    /* Checkbox y Radios más grandes para tablet */
+    input[type="radio"], input[type="checkbox"] { transform: scale(1.2); margin-right: 5px; cursor: pointer; }
+    label { cursor: pointer; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 @endpush
 
@@ -284,6 +435,18 @@
         for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
+    // NUEVA FUNCIÓN PARA EL CUIDADOR
+    function toggleCuidador(show) {
+        const bloque = document.getElementById('bloque_cuidador');
+        if(show) {
+            bloque.style.display = 'block';
+            // Animación simple
+            bloque.style.opacity = 0;
+            setTimeout(() => bloque.style.opacity = 1, 50);
+        } else {
+            bloque.style.display = 'none';
+        }
+    }
     }
 </script>
 @endpush
