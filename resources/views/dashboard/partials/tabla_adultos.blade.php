@@ -63,6 +63,9 @@
                 <a href="{{ route('adultos.credencial', $adulto->id) }}" target="_blank" class="btn-action btn-credencial" title="Credencial">
                     <i class="fas fa-id-card"></i>
                 </a>
+
+                <a href="{{ route('adultos.vgi', $adulto->id) }}" class="btn-action" style="color: #e74c3c;" title="Historia Clínica VGI">
+                    <i class="fas fa-user-md"></i> </a>
                 
                 <a href="{{ route('adultos.evolucion', $adulto->id) }}" class="btn-action" style="color: #3498db;" title="Ver Evolución">
                     <i class="fas fa-chart-line"></i>

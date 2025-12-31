@@ -37,6 +37,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/adultos/{adulto}', [DashboardController::class, 'show'])->name('adultos.show'); 
     Route::put('/dashboard/adultos/{adulto}', [DashboardController::class, 'update'])->name('adultos.update');
     Route::delete('/dashboard/adultos/{adulto}', [DashboardController::class, 'destroy'])->name('adultos.destroy');
+    // ============ HISTORIA CLÍNICA VGI (NUEVO) ============
+    Route::get('/dashboard/adultos/{id}/vgi', [App\Http\Controllers\VgiController::class, 'show'])->name('adultos.vgi');
+    Route::post('/dashboard/adultos/{id}/vgi', [App\Http\Controllers\VgiController::class, 'store'])->name('adultos.vgi.store');
+    // ======================================================
     // RUTA NUEVA: Expediente Evolutivo
     Route::get('/dashboard/adultos/{adulto}/evolucion', [DashboardController::class, 'evolucionAdulto'])->name('adultos.evolucion');
     //

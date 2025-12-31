@@ -42,11 +42,14 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        // 1. VALIDACIÓN
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
-            'role' => 'required|in:voluntario,familiar,organizacion',
+            // Aceptamos cualquier string en 'role' para no romper la validación, 
+            // pero luego lo filtraremos abajo
+            'role' => 'required|string', 
             'phone' => 'nullable|string|max:20',
             'terms' => 'required'
         ]);
@@ -55,11 +58,20 @@ class UserController extends Controller
             return redirect()->route('register')->withErrors($validator)->withInput();
         }
 
+        // 2. FILTRO DE SEGURIDAD (¡NUEVO!)
+        // Solo permitimos estos roles públicos. Cualquier otro se convierte en "voluntario".
+        $rolSeguro = 'voluntario';
+        if (in_array($request->role, ['voluntario', 'familiar'])) {
+            $rolSeguro = $request->role;
+        }
+        // Si alguien manda "role" => "medico" o "admin", el sistema lo ignorará y pondrá "voluntario".
+
+        // 3. CREACIÓN DEL USUARIO
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role
+            'role' => $rolSeguro // <--- Usamos la variable filtrada
         ]);
 
         if ($request->role === 'voluntario') {
