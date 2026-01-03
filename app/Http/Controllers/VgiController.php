@@ -50,6 +50,7 @@ class VgiController extends Controller
             'sindrome_caidas', 'sindrome_incontinencia', 'sindrome_delirio',
             'problema_dental', 'usa_protesis', 'vision_conservada', 'audicion_conservada',
             'problema_estrenimiento', 'problema_insomnio', 'problema_nocturia',
+            'realiza_ejercicio', 'acude_centro_social',
             'toma_medicacion', 'num_medicamentos'
         ];
 
