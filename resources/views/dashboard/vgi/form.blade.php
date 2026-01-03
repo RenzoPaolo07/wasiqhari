@@ -36,19 +36,22 @@
         <div class="vgi-tabs-container sticky-top bg-white z-index-10 border-bottom pt-3 pb-0 px-4">
             <div class="vgi-tabs d-flex justify-content-center gap-4">
                 <button class="vgi-tab active" onclick="openTab(event, 'tab-social')">
-                    <i class="fas fa-user-circle"></i> <span>Datos Sociales</span>
+                    <i class="fas fa-user-circle"></i> <span>I. Social</span>
                 </button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-clinica')">
-                    <i class="fas fa-weight"></i> <span>Antropometría</span>
+                    <i class="fas fa-weight"></i> <span>II. Antropometría</span>
+                </button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-comorbilidades')">
+                    <i class="fas fa-heartbeat"></i> <span>III. Comorbilidades</span>
                 </button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-funcional')">
-                    <i class="fas fa-walking"></i> <span>Funcional</span>
+                    <i class="fas fa-walking"></i> <span>IV. Funcional</span>
                 </button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mental')">
-                    <i class="fas fa-brain"></i> <span>Mental</span>
+                    <i class="fas fa-brain"></i> <span>V. Mental</span>
                 </button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')">
-                    <i class="fas fa-apple-alt"></i> <span>Física</span>
+                    <i class="fas fa-apple-alt"></i> <span>VI. Física</span>
                 </button>
             </div>
         </div>
@@ -324,7 +327,6 @@
                                 <small class="text-muted">Fuerza de prensión manual</small>
                             </div>
                         </div>
-                        
                         <div class="ms-auto d-flex align-items-center gap-2">
                             <span class="text-muted small fw-bold">Mano Dominante:</span>
                             <select name="mano_dominante" class="form-select form-select-sm w-auto border-secondary">
@@ -367,36 +369,70 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="mt-5 pt-4 border-top">
-                    <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="document.getElementById('extra-clinico').style.display = 'block'; this.style.display='none';">
-                        <i class="fas fa-chevron-down me-2"></i> Mostrar Comorbilidades (Si Aplica)
-                    </button>
-                    
-                    <div id="extra-clinico" style="display: none;" class="mt-4 fade-in-down">
-                        <div class="section-container">
-                            <div class="section-header">
-                                <div class="header-icon bg-danger text-white"><i class="fas fa-heartbeat"></i></div>
-                                <h4 class="header-title text-danger">Comorbilidades</h4>
-                            </div>
-                            <div class="section-body p-4">
-                                <div class="row g-3">
-                                    @foreach(['HTA' => 'tiene_hta', 'Diabetes' => 'tiene_diabetes', 'EPOC/Asma' => 'tiene_epoc', 'Insuf. Card.' => 'tiene_icc', 'Demencia' => 'tiene_demencia', 'Artrosis' => 'tiene_artrosis', 'Hipoacusia' => 'tiene_audicion_baja', 'Dism. Visual' => 'tiene_vision_baja', 'Caídas Recientes' => 'caidas_recientes', 'Incontinencia' => 'tiene_incontinencia'] as $label => $name)
-                                    <div class="col-6 col-md-3">
-                                        <label class="selection-card p-3">
-                                            <input type="checkbox" name="{{ $name }}" value="1" {{ ($vgi->$name ?? 0) ? 'checked' : '' }}>
-                                            <div class="card-inner flex-row align-items-center gap-3 p-2 h-auto text-start">
-                                                <div class="check-box-visual"></div>
-                                                <span class="text fw-bold text-dark">{{ $label }}</span>
-                                            </div>
-                                        </label>
+            <div id="tab-comorbilidades" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-danger text-white"><i class="fas fa-heartbeat"></i></div>
+                    <h4 class="header-title text-danger">III. Comorbilidades</h4>
+                </div>
+                
+                <div class="section-container">
+                    <div class="section-body p-4">
+                        <div class="row g-4">
+                            @php
+                                $enfermedades = [
+                                    'tiene_hta' => 'HTA Presión Arterial',
+                                    'tiene_diabetes' => 'Diabetes Mellitus',
+                                    'tiene_epoc' => 'Enfermedad pulmonar obstructiva crónica (EPOC)',
+                                    'tiene_epid' => 'Enfermedad Pulmonar intersticial difusa (EPID)',
+                                    'tiene_fa' => 'Fibrilación auricular o fluter auricular',
+                                    'tiene_coronaria' => 'Enfermedad coronaria crónica',
+                                    'tiene_icc' => 'Insuficiencia cardiaca',
+                                    'tiene_demencia' => 'Demencia',
+                                    'tiene_hipotiroidismo' => 'Hipotiroidismo',
+                                    'tiene_depresion' => 'Depresión en tratamiento',
+                                    'tiene_osteoporosis' => 'Osteoporosis (con densitometría o en tto)',
+                                    'tiene_artrosis' => 'Osteoartrosis: rodilla, cadera, columna, manos',
+                                    'tiene_parkinson' => 'Enfermedad de Parkinson'
+                                ];
+                            @endphp
+
+                            @foreach($enfermedades as $key => $label)
+                            <div class="col-md-12 border-bottom pb-3">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="fw-bold text-dark" style="font-size: 1rem;">{{ $label }}</span>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="{{ $key }}" id="{{ $key }}_si" value="1" {{ ($vgi->$key ?? 0) == 1 ? 'checked' : '' }}>
+                                        <label class="btn btn-outline-danger btn-sm px-4 rounded-start-pill" for="{{ $key }}_si">1. Si</label>
+
+                                        <input type="radio" class="btn-check" name="{{ $key }}" id="{{ $key }}_no" value="0" {{ ($vgi->$key ?? 0) == 0 ? 'checked' : '' }}>
+                                        <label class="btn btn-outline-secondary btn-sm px-4 rounded-end-pill" for="{{ $key }}_no">2. No</label>
                                     </div>
-                                    @endforeach
                                 </div>
-                                <div class="mt-4">
-                                    <label class="label-input">Otras Enfermedades</label>
-                                    <input type="text" name="otras_enfermedades" class="form-control modern-input" placeholder="Especifique..." value="{{ $vgi->otras_enfermedades ?? '' }}">
+                            </div>
+                            @endforeach
+
+                            <div class="col-12 border-bottom pb-3 bg-soft-gray p-3 rounded">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <span class="fw-bold text-danger">Cáncer</span>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="tiene_cancer" id="cancer_si" value="1" {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='block'">
+                                        <label class="btn btn-outline-danger btn-sm px-4 rounded-start-pill" for="cancer_si">1. Si</label>
+
+                                        <input type="radio" class="btn-check" name="tiene_cancer" id="cancer_no" value="0" {{ ($vgi->tiene_cancer ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='none'">
+                                        <label class="btn btn-outline-secondary btn-sm px-4 rounded-end-pill" for="cancer_no">2. No</label>
+                                    </div>
                                 </div>
+                                <div id="cancer_details" style="display: {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'block' : 'none' }};">
+                                    <label class="label-input">Especifique órgano y estadio:</label>
+                                    <input type="text" name="cancer_info" class="form-control modern-input" placeholder="Ej: Pulmón, Estadio II..." value="{{ $vgi->cancer_info ?? '' }}">
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="label-input">Otras enfermedades:</label>
+                                <input type="text" name="otras_enfermedades" class="form-control modern-input" placeholder="Especifique..." value="{{ $vgi->otras_enfermedades ?? '' }}">
                             </div>
                         </div>
                     </div>

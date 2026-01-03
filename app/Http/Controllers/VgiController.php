@@ -27,28 +27,46 @@ class VgiController extends Controller
     // Guarda una NUEVA evaluación (Cada vez que guardan, es una foto médica nueva en el tiempo)
     public function store(Request $request, $adultoId)
     {
-        // 1. Validamos que sea personal autorizado (Médico o Admin)
-        // Puedes ajustar esto según tus roles exactos en BD
-        /* if (Auth::user()->role !== 'medico' && Auth::user()->role !== 'admin') {
-            return abort(403, 'No tienes permiso para firmar historias clínicas.');
-        } */ 
-        // Lo dejo comentado por ahora para que TÚ puedas probarlo. Descoméntalo para producción.
-
-        // 2. Creamos la evaluación
-        // Usamos $request->except para guardar TODO el formulario de golpe
-        // Laravel filtrará automáticamente gracias al modelo que creamos antes
+        // 1. Obtener todos los datos
         $data = $request->except(['_token']);
         
+        // 2. Definir campos que deben ser 0 si vienen vacíos (Scores y Checkboxes)
+        $camposNumericos = [
+            'cuidador_aplica', 'peso', 'talla', 'imc', 'perimetro_abdominal', 'perimetro_pantorrilla',
+            'dinam_derecha_1', 'dinam_derecha_2', 'dinam_derecha_3',
+            'dinam_izquierda_1', 'dinam_izquierda_2', 'dinam_izquierda_3',
+            'barthel_comer', 'barthel_lavarse', 'barthel_vestirse', 'barthel_arreglarse',
+            'barthel_deposicion', 'barthel_miccion', 'barthel_ir_bano', 'barthel_traslado',
+            'barthel_deambulacion', 'barthel_escaleras', 'barthel_total',
+            'lawton_telefono', 'lawton_compras', 'lawton_comida', 'lawton_casa',
+            'lawton_ropa', 'lawton_transporte', 'lawton_medicacion', 'lawton_finanzas', 'lawton_total',
+            'pfeiffer_errores', 'yesavage_total', 'mna_puntaje', 'frail_puntaje', 'sarcf_puntaje',
+            'sppb_balance', 'sppb_velocidad', 'sppb_silla', 'sppb_total',
+            // Comorbilidades (Booleanos)
+            'tiene_hta', 'tiene_diabetes', 'tiene_epoc', 'tiene_epid', 'tiene_fa', 'tiene_icc',
+            'tiene_coronaria', 'tiene_demencia', 'tiene_hipotiroidismo', 'tiene_depresion',
+            'tiene_osteoporosis', 'tiene_artrosis', 'tiene_parkinson', 'tiene_cancer'
+        ];
+
+        foreach ($camposNumericos as $campo) {
+            if (!isset($data[$campo]) || $data[$campo] === null) {
+                $data[$campo] = 0; // Asigna 0 si está vacío
+            }
+        }
+
+        // 3. Asignar IDs y Fechas
         $data['adulto_mayor_id'] = $adultoId;
-        $data['user_id'] = Auth::id(); // El médico que está logueado
-        $data['fecha_evaluacion'] = now();
+        $data['user_id'] = Auth::id();
+        
+        // Si no mandan fecha, ponemos la de hoy
+        if (empty($data['fecha_evaluacion'])) {
+            $data['fecha_evaluacion'] = now();
+        }
 
-        // Cálculos Automáticos de Totales (Opcional: Si el front no los manda, los sumamos aquí)
-        // Por ahora confiamos en que el formulario envíe los totales o sean 0.
-
+        // 4. Guardar
         VgiEvaluacion::create($data);
 
         return redirect()->route('adultos.vgi', $adultoId)
-                         ->with('success', 'Historia Clínica VGI actualizada correctamente.');
+                         ->with('success', 'Historia Clínica VGI guardada correctamente.');
     }
 }
