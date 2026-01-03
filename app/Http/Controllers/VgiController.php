@@ -45,7 +45,12 @@ class VgiController extends Controller
             // Comorbilidades (Booleanos)
             'tiene_hta', 'tiene_diabetes', 'tiene_epoc', 'tiene_epid', 'tiene_fa', 'tiene_icc',
             'tiene_coronaria', 'tiene_demencia', 'tiene_hipotiroidismo', 'tiene_depresion',
-            'tiene_osteoporosis', 'tiene_artrosis', 'tiene_parkinson', 'tiene_cancer'
+            'tiene_osteoporosis', 'tiene_artrosis', 'tiene_parkinson', 'tiene_cancer',
+            // AGREGA ESTOS NUEVOS AL FINAL DE LA LISTA:
+            'sindrome_caidas', 'sindrome_incontinencia', 'sindrome_delirio',
+            'problema_dental', 'usa_protesis', 'vision_conservada', 'audicion_conservada',
+            'problema_estrenimiento', 'problema_insomnio', 'problema_nocturia',
+            'toma_medicacion', 'num_medicamentos'
         ];
 
         foreach ($camposNumericos as $campo) {

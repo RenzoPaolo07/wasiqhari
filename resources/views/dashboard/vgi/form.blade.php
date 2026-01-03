@@ -207,6 +207,40 @@
                     </div>
                 </div>
 
+                <!-- Nueva sección de Red Social y Apoyo -->
+                <div class="section-container mb-5">
+                    <div class="section-header">
+                        <div class="header-icon bg-success text-white"><i class="fas fa-users"></i></div>
+                        <h4 class="header-title text-success">Red Social y Apoyo</h4>
+                    </div>
+                    <div class="section-body p-4">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="label-input">¿Con quién vive?</label>
+                                <select name="vive_con" class="form-select modern-input">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach(['Solo', 'Pareja', 'Hijos', 'Familia extendida', 'Amigos', 'Institución'] as $opcion)
+                                        <option value="{{ $opcion }}" {{ ($vgi->vive_con ?? '') == $opcion ? 'selected' : '' }}>{{ $opcion }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="label-input">Frecuencia de visitas familiares</label>
+                                <select name="visitas_familiares" class="form-select modern-input">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach(['Diario', 'Semanal', 'Quincenal', 'Mensual', 'Rara vez', 'Nunca'] as $frec)
+                                        <option value="{{ $frec }}" {{ ($vgi->visitas_familiares ?? '') == $frec ? 'selected' : '' }}>{{ $frec }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="label-input">¿Participa en actividades sociales o comunitarias?</label>
+                                <textarea name="actividades_sociales" class="form-control modern-input" rows="2" placeholder="Ej: Club del adulto mayor, iglesia, voluntariado...">{{ $vgi->actividades_sociales ?? '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="caregiver-section rounded-4 overflow-hidden shadow-sm {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'active' : '' }}" id="caregiverContainer">
                     <div class="caregiver-header p-4 d-flex align-items-center justify-content-between cursor-pointer" onclick="toggleSwitch()">
                         <div class="d-flex align-items-center">
@@ -374,12 +408,13 @@
             <div id="tab-comorbilidades" class="vgi-tab-content">
                 <div class="section-header mb-4">
                     <div class="header-icon bg-danger text-white"><i class="fas fa-heartbeat"></i></div>
-                    <h4 class="header-title text-danger">III. Comorbilidades</h4>
+                    <h4 class="header-title text-danger">III. Comorbilidades y Síndromes</h4>
                 </div>
                 
-                <div class="section-container">
+                <div class="section-container mb-5">
+                    <div class="section-header bg-soft-gray"><h5 class="m-0 fw-bold text-dark">Patologías Crónicas</h5></div>
                     <div class="section-body p-4">
-                        <div class="row g-4">
+                        <div class="row g-3">
                             @php
                                 $enfermedades = [
                                     'tiene_hta' => 'HTA Presión Arterial',
@@ -399,41 +434,97 @@
                             @endphp
 
                             @foreach($enfermedades as $key => $label)
-                            <div class="col-md-12 border-bottom pb-3">
+                            <div class="col-md-12 border-bottom pb-2">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <span class="fw-bold text-dark" style="font-size: 1rem;">{{ $label }}</span>
+                                    <span class="fw-bold text-dark" style="font-size: 0.95rem;">{{ $label }}</span>
                                     <div class="btn-group" role="group">
                                         <input type="radio" class="btn-check" name="{{ $key }}" id="{{ $key }}_si" value="1" {{ ($vgi->$key ?? 0) == 1 ? 'checked' : '' }}>
-                                        <label class="btn btn-outline-danger btn-sm px-4 rounded-start-pill" for="{{ $key }}_si">1. Si</label>
-
+                                        <label class="btn btn-outline-danger btn-sm px-4 rounded-start-pill" for="{{ $key }}_si">SI</label>
                                         <input type="radio" class="btn-check" name="{{ $key }}" id="{{ $key }}_no" value="0" {{ ($vgi->$key ?? 0) == 0 ? 'checked' : '' }}>
-                                        <label class="btn btn-outline-secondary btn-sm px-4 rounded-end-pill" for="{{ $key }}_no">2. No</label>
+                                        <label class="btn btn-outline-secondary btn-sm px-4 rounded-end-pill" for="{{ $key }}_no">NO</label>
                                     </div>
                                 </div>
                             </div>
                             @endforeach
 
-                            <div class="col-12 border-bottom pb-3 bg-soft-gray p-3 rounded">
-                                <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="col-12 border-bottom pb-2 pt-2 bg-light rounded">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
                                     <span class="fw-bold text-danger">Cáncer</span>
                                     <div class="btn-group" role="group">
                                         <input type="radio" class="btn-check" name="tiene_cancer" id="cancer_si" value="1" {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='block'">
-                                        <label class="btn btn-outline-danger btn-sm px-4 rounded-start-pill" for="cancer_si">1. Si</label>
-
+                                        <label class="btn btn-outline-danger btn-sm px-4 rounded-start-pill" for="cancer_si">SI</label>
                                         <input type="radio" class="btn-check" name="tiene_cancer" id="cancer_no" value="0" {{ ($vgi->tiene_cancer ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='none'">
-                                        <label class="btn btn-outline-secondary btn-sm px-4 rounded-end-pill" for="cancer_no">2. No</label>
+                                        <label class="btn btn-outline-secondary btn-sm px-4 rounded-end-pill" for="cancer_no">NO</label>
                                     </div>
                                 </div>
                                 <div id="cancer_details" style="display: {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'block' : 'none' }};">
-                                    <label class="label-input">Especifique órgano y estadio:</label>
-                                    <input type="text" name="cancer_info" class="form-control modern-input" placeholder="Ej: Pulmón, Estadio II..." value="{{ $vgi->cancer_info ?? '' }}">
+                                    <input type="text" name="cancer_info" class="form-control modern-input" placeholder="Especifique órgano y estadio..." value="{{ $vgi->cancer_info ?? '' }}">
                                 </div>
                             </div>
-
-                            <div class="col-12">
+                            <div class="col-12 pt-2">
                                 <label class="label-input">Otras enfermedades:</label>
                                 <input type="text" name="otras_enfermedades" class="form-control modern-input" placeholder="Especifique..." value="{{ $vgi->otras_enfermedades ?? '' }}">
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-container mb-5">
+                    <div class="section-header bg-soft-gray"><h5 class="m-0 fw-bold text-dark">Síndromes Geriátricos</h5></div>
+                    <div class="section-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12 border-bottom pb-2">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>a) Se ha caído dos o más veces en el último año</span>
+                                    <div class="btn-group"><input type="radio" class="btn-check" name="sindrome_caidas" id="caidas_si" value="1" {{ ($vgi->sindrome_caidas ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="caidas_si">SI</label><input type="radio" class="btn-check" name="sindrome_caidas" id="caidas_no" value="0" {{ ($vgi->sindrome_caidas ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="caidas_no">NO</label></div>
+                                </div>
+                            </div>
+                            <div class="col-12 border-bottom pb-2">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>b) Tiene problemas para contener orina o deposiciones</span>
+                                    <div class="btn-group"><input type="radio" class="btn-check" name="sindrome_incontinencia" id="inc_si" value="1" {{ ($vgi->sindrome_incontinencia ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="inc_si">SI</label><input type="radio" class="btn-check" name="sindrome_incontinencia" id="inc_no" value="0" {{ ($vgi->sindrome_incontinencia ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="inc_no">NO</label></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>c) Delirio (en hospitalización previa se desorientó)</span>
+                                    <div class="btn-group"><input type="radio" class="btn-check" name="sindrome_delirio" id="delirio_si" value="1" {{ ($vgi->sindrome_delirio ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="delirio_si">SI</label><input type="radio" class="btn-check" name="sindrome_delirio" id="delirio_no" value="0" {{ ($vgi->sindrome_delirio ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="delirio_no">NO</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-container mb-5">
+                    <div class="section-header bg-soft-gray"><h5 class="m-0 fw-bold text-dark">Problemas Geriátricos</h5></div>
+                    <div class="section-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>a) Le faltan algunas o todas las piezas dentarias</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_dental" id="dent_si" value="1" {{ ($vgi->problema_dental ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="dent_si">SI</label><input type="radio" class="btn-check" name="problema_dental" id="dent_no" value="0" {{ ($vgi->problema_dental ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="dent_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between ps-4"><span class="text-muted">- Usa prótesis dental</span><div class="btn-group"><input type="radio" class="btn-check" name="usa_protesis" id="prot_si" value="1" {{ ($vgi->usa_protesis ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-primary btn-sm px-3" for="prot_si">SI</label><input type="radio" class="btn-check" name="usa_protesis" id="prot_no" value="0" {{ ($vgi->usa_protesis ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="prot_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>b) Usted ve bien</span><div class="btn-group"><input type="radio" class="btn-check" name="vision_conservada" id="vis_si" value="1" {{ ($vgi->vision_conservada ?? 1) == 1 ? 'checked' : '' }}><label class="btn btn-outline-success btn-sm px-3" for="vis_si">SI</label><input type="radio" class="btn-check" name="vision_conservada" id="vis_no" value="0" {{ ($vgi->vision_conservada ?? 1) == 0 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="vis_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>c) Usted escucha bien</span><div class="btn-group"><input type="radio" class="btn-check" name="audicion_conservada" id="aud_si" value="1" {{ ($vgi->audicion_conservada ?? 1) == 1 ? 'checked' : '' }}><label class="btn btn-outline-success btn-sm px-3" for="aud_si">SI</label><input type="radio" class="btn-check" name="audicion_conservada" id="aud_no" value="0" {{ ($vgi->audicion_conservada ?? 1) == 0 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="aud_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>d) Es estreñido</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_estrenimiento" id="estr_si" value="1" {{ ($vgi->problema_estrenimiento ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="estr_si">SI</label><input type="radio" class="btn-check" name="problema_estrenimiento" id="estr_no" value="0" {{ ($vgi->problema_estrenimiento ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="estr_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>e) Problemas para dormir (insomnio)</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_insomnio" id="insom_si" value="1" {{ ($vgi->problema_insomnio ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="insom_si">SI</label><input type="radio" class="btn-check" name="problema_insomnio" id="insom_no" value="0" {{ ($vgi->problema_insomnio ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="insom_no">NO</label></div></div></div>
+                            <div class="col-12"><div class="d-flex justify-content-between"><span>f) Se levanta varias veces por la noche (Nocturia)</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_nocturia" id="noct_si" value="1" {{ ($vgi->problema_nocturia ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="noct_si">SI</label><input type="radio" class="btn-check" name="problema_nocturia" id="noct_no" value="0" {{ ($vgi->problema_nocturia ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="noct_no">NO</label></div></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-container">
+                    <div class="section-header bg-soft-gray"><h5 class="m-0 fw-bold text-dark">Medicación</h5></div>
+                    <div class="section-body p-4">
+                        <div class="mb-3">
+                            <label class="d-block mb-3 fw-bold">¿Está tomando algún tratamiento a diario en los últimos 6 meses?</label>
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="toma_medicacion" id="meds_si" value="1" {{ ($vgi->toma_medicacion ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('meds_qty').style.display='block'">
+                                <label class="btn btn-outline-danger btn-sm px-4" for="meds_si">1. SI</label>
+                                <input type="radio" class="btn-check" name="toma_medicacion" id="meds_no" value="0" {{ ($vgi->toma_medicacion ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('meds_qty').style.display='none'">
+                                <label class="btn btn-outline-secondary btn-sm px-4" for="meds_no">2. NO</label>
+                            </div>
+                        </div>
+                        <div id="meds_qty" style="display: {{ ($vgi->toma_medicacion ?? 0) == 1 ? 'block' : 'none' }};">
+                            <label class="label-input">De ser así, ¿Cuántos medicamentos consume al día?</label>
+                            <input type="number" name="num_medicamentos" class="form-control modern-input w-25" placeholder="N°" value="{{ $vgi->num_medicamentos ?? '' }}">
                         </div>
                     </div>
                 </div>
