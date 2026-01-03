@@ -47,14 +47,17 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-ejercicio')">
                     <i class="fas fa-running"></i> <span>IV. Ejercicio</span>
                 </button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-gijon')">
+                    <i class="fas fa-users"></i> <span>V. Ev. Social</span>
+                </button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-funcional')">
-                    <i class="fas fa-walking"></i> <span>V. Funcional</span>
+                    <i class="fas fa-walking"></i> <span>VI. Funcional</span>
                 </button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mental')">
-                    <i class="fas fa-brain"></i> <span>VI. Mental</span>
+                    <i class="fas fa-brain"></i> <span>VII. Mental</span>
                 </button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')">
-                    <i class="fas fa-apple-alt"></i> <span>VII. Física</span>
+                    <i class="fas fa-apple-alt"></i> <span>VIII. Física</span>
                 </button>
             </div>
         </div>
@@ -67,25 +70,22 @@
                 <div class="metadata-banner bg-white rounded-4 shadow-sm p-4 mb-5 border-start border-5 border-purple">
                     <div class="row g-4 align-items-center justify-content-between">
                         <div class="col-md-3">
-                            <label class="label-mini text-muted">Fecha de Registro</label>
-                            <div class="d-flex align-items-center gap-2">
+                            <label class="label-mini text-muted">Fecha</label>
+                            <div class="d-flex gap-2">
                                 <div class="icon-sq bg-purple-light text-purple"><i class="far fa-calendar-alt"></i></div>
-                                <input type="date" name="fecha_evaluacion" class="form-control border-0 bg-transparent fw-bold p-0 text-dark" 
-                                       value="{{ \Carbon\Carbon::now('America/Lima')->format('Y-m-d') }}">
+                                <input type="date" name="fecha_evaluacion" class="form-control border-0 bg-transparent fw-bold p-0 text-dark" value="{{ \Carbon\Carbon::now('America/Lima')->format('Y-m-d') }}">
                             </div>
                         </div>
                         <div class="col-md-2 border-start ps-4">
                             <label class="label-mini text-muted">Hora</label>
-                            <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex gap-2">
                                 <div class="icon-sq bg-purple-light text-purple"><i class="far fa-clock"></i></div>
-                                <input type="time" name="hora_evaluacion" class="form-control border-0 bg-transparent fw-bold p-0 text-dark" 
-                                       value="{{ \Carbon\Carbon::now('America/Lima')->format('H:i') }}">
+                                <input type="time" name="hora_evaluacion" class="form-control border-0 bg-transparent fw-bold p-0 text-dark" value="{{ \Carbon\Carbon::now('America/Lima')->format('H:i') }}">
                             </div>
                         </div>
                         <div class="col-md-6 border-start ps-4">
                             <label class="label-mini text-purple fw-bold mb-1">N° Historia Clínica (HCL)</label>
-                            <input type="text" name="hcl" class="form-control form-control-lg bg-light border-0 text-dark fw-bold" 
-                                   placeholder="---" value="{{ $vgi->hcl ?? '' }}">
+                            <input type="text" name="hcl" class="form-control form-control-lg bg-light border-0 text-dark fw-bold" placeholder="---" value="{{ $vgi->hcl ?? '' }}">
                         </div>
                     </div>
                 </div>
@@ -144,7 +144,7 @@
                                 <input type="text" name="ocupacion" class="form-control modern-input" value="{{ $vgi->ocupacion ?? '' }}">
                             </div>
                             <div class="col-12">
-                                <label class="label-input">Teléfonos de Contacto</label>
+                                <label class="label-input">Teléfonos</label>
                                 <div class="input-with-icon">
                                     <i class="fas fa-phone text-muted"></i>
                                     <input type="text" name="telefonos_referencia" class="form-control ps-5" placeholder="Casa / Celular" value="{{ $vgi->telefonos_referencia ?? $adulto->telefono }}">
@@ -364,7 +364,7 @@
                                 <small class="text-muted">Fuerza de prensión manual</small>
                             </div>
                         </div>
-                        <div class="ms-auto"><select name="mano_dominante" class="form-select form-select-sm w-auto"><option value="">Mano Dominante...</option><option value="Derecha" {{ ($vgi->mano_dominante ?? '') == 'Derecha' ? 'selected' : '' }}>Derecha</option><option value="Izquierda" {{ ($vgi->mano_dominante ?? '') == 'Izquierda' ? 'selected' : '' }}>Izquierda</option></select></div>
+                        <div class="ms-auto"><select name="mano_dominante" class="form-select form-select-sm w-auto"><option value="">Seleccionar...</option><option value="Derecha" {{ ($vgi->mano_dominante ?? '') == 'Derecha' ? 'selected' : '' }}>Derecha</option><option value="Izquierda" {{ ($vgi->mano_dominante ?? '') == 'Izquierda' ? 'selected' : '' }}>Izquierda</option></select></div>
                     </div>
                     
                     <div class="section-body p-0">
@@ -373,9 +373,9 @@
                                 <thead class="bg-light text-secondary small text-uppercase">
                                     <tr>
                                         <th class="py-3" style="width: 20%;">Mano</th>
-                                        <th class="py-3">1ra Medida (Kg)</th>
-                                        <th class="py-3">2da Medida (Kg)</th>
-                                        <th class="py-3">3ra Medida (Kg)</th>
+                                        <th class="py-3">1ra (Kg)</th>
+                                        <th class="py-3">2da (Kg)</th>
+                                        <th class="py-3">3ra (Kg)</th>
                                         <th class="py-3 bg-soft-gray">Máximo</th>
                                     </tr>
                                 </thead>
@@ -411,24 +411,7 @@
                     <div class="section-header bg-soft-gray"><h5 class="m-0 fw-bold text-dark">Patologías Crónicas</h5></div>
                     <div class="section-body p-4">
                         <div class="row g-3">
-                            @php
-                                $enfermedades = [
-                                    'tiene_hta' => 'HTA Presión Arterial',
-                                    'tiene_diabetes' => 'Diabetes Mellitus',
-                                    'tiene_epoc' => 'EPOC',
-                                    'tiene_epid' => 'Enf. Pulmonar Intersticial Difusa',
-                                    'tiene_fa' => 'Fibrilación Auricular',
-                                    'tiene_coronaria' => 'Enf. Coronaria Crónica',
-                                    'tiene_icc' => 'Insuficiencia Cardiaca',
-                                    'tiene_demencia' => 'Demencia',
-                                    'tiene_hipotiroidismo' => 'Hipotiroidismo',
-                                    'tiene_depresion' => 'Depresión en tratamiento',
-                                    'tiene_osteoporosis' => 'Osteoporosis',
-                                    'tiene_artrosis' => 'Osteoartrosis',
-                                    'tiene_parkinson' => 'Enfermedad de Parkinson'
-                                ];
-                            @endphp
-
+                            @php $enfermedades = [ 'tiene_hta' => 'HTA Presión Arterial', 'tiene_diabetes' => 'Diabetes Mellitus', 'tiene_epoc' => 'EPOC', 'tiene_epid' => 'Enf. Pulmonar Intersticial Difusa', 'tiene_fa' => 'Fibrilación Auricular', 'tiene_coronaria' => 'Enf. Coronaria Crónica', 'tiene_icc' => 'Insuficiencia Cardiaca', 'tiene_demencia' => 'Demencia', 'tiene_hipotiroidismo' => 'Hipotiroidismo', 'tiene_depresion' => 'Depresión en tratamiento', 'tiene_osteoporosis' => 'Osteoporosis', 'tiene_artrosis' => 'Osteoartrosis', 'tiene_parkinson' => 'Enfermedad de Parkinson' ]; @endphp
                             @foreach($enfermedades as $key => $label)
                             <div class="col-md-12 border-bottom pb-2">
                                 <div class="d-flex align-items-center justify-content-between">
@@ -437,102 +420,190 @@
                                 </div>
                             </div>
                             @endforeach
-
                             <div class="col-12 border-bottom pb-2 pt-2 bg-light rounded">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="fw-bold text-danger">Cáncer</span>
-                                    <div class="btn-group"><input type="radio" class="btn-check" name="tiene_cancer" id="cancer_si" value="1" {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='block'"><label class="btn btn-outline-danger btn-sm px-4 rounded-start-pill" for="cancer_si">SI</label><input type="radio" class="btn-check" name="tiene_cancer" id="cancer_no" value="0" {{ ($vgi->tiene_cancer ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='none'"><label class="btn btn-outline-secondary btn-sm px-4 rounded-end-pill" for="cancer_no">NO</label></div>
-                                </div>
-                                <div id="cancer_details" style="display: {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'block' : 'none' }};">
-                                    <input type="text" name="cancer_info" class="form-control modern-input" placeholder="Especifique órgano y estadio..." value="{{ $vgi->cancer_info ?? '' }}">
-                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-2"><span class="fw-bold text-danger">Cáncer</span><div class="btn-group"><input type="radio" class="btn-check" name="tiene_cancer" id="cancer_si" value="1" {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='block'"><label class="btn btn-outline-danger btn-sm px-4 rounded-start-pill" for="cancer_si">SI</label><input type="radio" class="btn-check" name="tiene_cancer" id="cancer_no" value="0" {{ ($vgi->tiene_cancer ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='none'"><label class="btn btn-outline-secondary btn-sm px-4 rounded-end-pill" for="cancer_no">NO</label></div></div>
+                                <div id="cancer_details" style="display: {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'block' : 'none' }};"><input type="text" name="cancer_info" class="form-control modern-input" placeholder="Especifique..." value="{{ $vgi->cancer_info ?? '' }}"></div>
                             </div>
-                            <div class="col-12 pt-2">
-                                <label class="label-input">Otras enfermedades:</label>
-                                <input type="text" name="otras_enfermedades" class="form-control modern-input" value="{{ $vgi->otras_enfermedades ?? '' }}">
-                            </div>
+                            <div class="col-12 pt-2"><label class="label-input">Otras:</label><input type="text" name="otras_enfermedades" class="form-control modern-input" value="{{ $vgi->otras_enfermedades ?? '' }}"></div>
                         </div>
                     </div>
                 </div>
-
                 <div class="section-container mb-5">
                     <div class="section-header bg-soft-gray"><h5 class="m-0 fw-bold text-dark">Síndromes y Problemas</h5></div>
                     <div class="section-body p-4">
                         <div class="row g-3">
                             <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Caídas > 2 último año</span><div class="btn-group"><input type="radio" class="btn-check" name="sindrome_caidas" id="caidas_si" value="1" {{ ($vgi->sindrome_caidas ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="caidas_si">SI</label><input type="radio" class="btn-check" name="sindrome_caidas" id="caidas_no" value="0" {{ ($vgi->sindrome_caidas ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="caidas_no">NO</label></div></div></div>
-                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Incontinencia Urinaria/Fecal</span><div class="btn-group"><input type="radio" class="btn-check" name="sindrome_incontinencia" id="inc_si" value="1" {{ ($vgi->sindrome_incontinencia ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="inc_si">SI</label><input type="radio" class="btn-check" name="sindrome_incontinencia" id="inc_no" value="0" {{ ($vgi->sindrome_incontinencia ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="inc_no">NO</label></div></div></div>
-                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Delirio (en hospitalización previa)</span><div class="btn-group"><input type="radio" class="btn-check" name="sindrome_delirio" id="del_si" value="1" {{ ($vgi->sindrome_delirio ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="del_si">SI</label><input type="radio" class="btn-check" name="sindrome_delirio" id="del_no" value="0" {{ ($vgi->sindrome_delirio ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="del_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Incontinencia</span><div class="btn-group"><input type="radio" class="btn-check" name="sindrome_incontinencia" id="inc_si" value="1" {{ ($vgi->sindrome_incontinencia ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="inc_si">SI</label><input type="radio" class="btn-check" name="sindrome_incontinencia" id="inc_no" value="0" {{ ($vgi->sindrome_incontinencia ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="inc_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Delirio</span><div class="btn-group"><input type="radio" class="btn-check" name="sindrome_delirio" id="del_si" value="1" {{ ($vgi->sindrome_delirio ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="del_si">SI</label><input type="radio" class="btn-check" name="sindrome_delirio" id="del_no" value="0" {{ ($vgi->sindrome_delirio ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="del_no">NO</label></div></div></div>
                             <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Faltan piezas dentales</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_dental" id="dent_si" value="1" {{ ($vgi->problema_dental ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="dent_si">SI</label><input type="radio" class="btn-check" name="problema_dental" id="dent_no" value="0" {{ ($vgi->problema_dental ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="dent_no">NO</label></div></div></div>
-                            <div class="col-12 border-bottom pb-2 ps-4"><div class="d-flex justify-content-between"><span class="text-muted">- Usa prótesis dental</span><div class="btn-group"><input type="radio" class="btn-check" name="usa_protesis" id="prot_si" value="1" {{ ($vgi->usa_protesis ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-primary btn-sm px-3" for="prot_si">SI</label><input type="radio" class="btn-check" name="usa_protesis" id="prot_no" value="0" {{ ($vgi->usa_protesis ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="prot_no">NO</label></div></div></div>
-                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Usted ve bien</span><div class="btn-group"><input type="radio" class="btn-check" name="vision_conservada" id="vis_si" value="1" {{ ($vgi->vision_conservada ?? 1) == 1 ? 'checked' : '' }}><label class="btn btn-outline-success btn-sm px-3" for="vis_si">SI</label><input type="radio" class="btn-check" name="vision_conservada" id="vis_no" value="0" {{ ($vgi->vision_conservada ?? 1) == 0 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="vis_no">NO</label></div></div></div>
-                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Usted escucha bien</span><div class="btn-group"><input type="radio" class="btn-check" name="audicion_conservada" id="aud_si" value="1" {{ ($vgi->audicion_conservada ?? 1) == 1 ? 'checked' : '' }}><label class="btn btn-outline-success btn-sm px-3" for="aud_si">SI</label><input type="radio" class="btn-check" name="audicion_conservada" id="aud_no" value="0" {{ ($vgi->audicion_conservada ?? 1) == 0 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="aud_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Usa prótesis</span><div class="btn-group"><input type="radio" class="btn-check" name="usa_protesis" id="prot_si" value="1" {{ ($vgi->usa_protesis ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-primary btn-sm px-3" for="prot_si">SI</label><input type="radio" class="btn-check" name="usa_protesis" id="prot_no" value="0" {{ ($vgi->usa_protesis ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="prot_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Ve bien</span><div class="btn-group"><input type="radio" class="btn-check" name="vision_conservada" id="vis_si" value="1" {{ ($vgi->vision_conservada ?? 1) == 1 ? 'checked' : '' }}><label class="btn btn-outline-success btn-sm px-3" for="vis_si">SI</label><input type="radio" class="btn-check" name="vision_conservada" id="vis_no" value="0" {{ ($vgi->vision_conservada ?? 1) == 0 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="vis_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Escucha bien</span><div class="btn-group"><input type="radio" class="btn-check" name="audicion_conservada" id="aud_si" value="1" {{ ($vgi->audicion_conservada ?? 1) == 1 ? 'checked' : '' }}><label class="btn btn-outline-success btn-sm px-3" for="aud_si">SI</label><input type="radio" class="btn-check" name="audicion_conservada" id="aud_no" value="0" {{ ($vgi->audicion_conservada ?? 1) == 0 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="aud_no">NO</label></div></div></div>
                             <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Estreñimiento</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_estrenimiento" id="estr_si" value="1" {{ ($vgi->problema_estrenimiento ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="estr_si">SI</label><input type="radio" class="btn-check" name="problema_estrenimiento" id="estr_no" value="0" {{ ($vgi->problema_estrenimiento ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="estr_no">NO</label></div></div></div>
-                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Insomnio</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_insomnio" id="ins_si" value="1" {{ ($vgi->problema_insomnio ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="ins_si">SI</label><input type="radio" class="btn-check" name="problema_insomnio" id="ins_no" value="0" {{ ($vgi->problema_insomnio ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="ins_no">NO</label></div></div></div>
-                            <div class="col-12"><div class="d-flex justify-content-between"><span>Nocturia (se levanta de noche)</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_nocturia" id="noc_si" value="1" {{ ($vgi->problema_nocturia ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="noc_si">SI</label><input type="radio" class="btn-check" name="problema_nocturia" id="noc_no" value="0" {{ ($vgi->problema_nocturia ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="noc_no">NO</label></div></div></div>
+                            <div class="col-12 border-bottom pb-2"><div class="d-flex justify-content-between"><span>Insomnio</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_insomnio" id="insom_si" value="1" {{ ($vgi->problema_insomnio ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="insom_si">SI</label><input type="radio" class="btn-check" name="problema_insomnio" id="insom_no" value="0" {{ ($vgi->problema_insomnio ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="insom_no">NO</label></div></div></div>
+                            <div class="col-12"><div class="d-flex justify-content-between"><span>Nocturia</span><div class="btn-group"><input type="radio" class="btn-check" name="problema_nocturia" id="noct_si" value="1" {{ ($vgi->problema_nocturia ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-danger btn-sm px-3" for="noct_si">SI</label><input type="radio" class="btn-check" name="problema_nocturia" id="noct_no" value="0" {{ ($vgi->problema_nocturia ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="noct_no">NO</label></div></div></div>
                         </div>
                     </div>
                 </div>
-
                 <div class="section-container">
                     <div class="section-header bg-soft-gray"><h5 class="m-0 fw-bold text-dark">Medicación</h5></div>
                     <div class="section-body p-4">
-                        <div class="mb-3">
-                            <label class="d-block mb-3 fw-bold">¿Está tomando algún tratamiento a diario en los últimos 6 meses?</label>
-                            <div class="btn-group" role="group">
-                                <input type="radio" class="btn-check" name="toma_medicacion" id="meds_si" value="1" {{ ($vgi->toma_medicacion ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('meds_qty').style.display='block'">
-                                <label class="btn btn-outline-danger btn-sm px-4" for="meds_si">1. SI</label>
-                                <input type="radio" class="btn-check" name="toma_medicacion" id="meds_no" value="0" {{ ($vgi->toma_medicacion ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('meds_qty').style.display='none'">
-                                <label class="btn btn-outline-secondary btn-sm px-4" for="meds_no">2. NO</label>
-                            </div>
+                        <div class="mb-3"><label class="d-block mb-3 fw-bold">¿Toma tratamiento diario (últimos 6 meses)?</label><div class="btn-group"><input type="radio" class="btn-check" name="toma_medicacion" id="meds_si" value="1" {{ ($vgi->toma_medicacion ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('meds_qty').style.display='block'"><label class="btn btn-outline-danger btn-sm px-4" for="meds_si">1. SI</label><input type="radio" class="btn-check" name="toma_medicacion" id="meds_no" value="0" {{ ($vgi->toma_medicacion ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('meds_qty').style.display='none'"><label class="btn btn-outline-secondary btn-sm px-4" for="meds_no">2. NO</label></div></div>
+                        <div id="meds_qty" style="display: {{ ($vgi->toma_medicacion ?? 0) == 1 ? 'block' : 'none' }};"><label class="label-input">¿Cuántos medicamentos al día?</label><input type="number" name="num_medicamentos" class="form-control modern-input w-25" placeholder="N°" value="{{ $vgi->num_medicamentos ?? '' }}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-ejercicio" class="vgi-tab-content">
+                <div class="section-header mb-4"><div class="header-icon bg-info text-white"><i class="fas fa-running"></i></div><h4 class="header-title text-info">IV. Ejercicio y Tiempo Libre</h4></div>
+                <div class="section-container">
+                    <div class="section-body p-4">
+                        <div class="mb-4 pb-4 border-bottom">
+                            <label class="d-block mb-3 fw-bold">1. ¿Usted realiza ejercicio? (camina 150 min/semana)</label>
+                            <div class="btn-group"><input type="radio" class="btn-check" name="realiza_ejercicio" id="ejer_si" value="1" {{ ($vgi->realiza_ejercicio ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-success btn-sm px-5 rounded-start-pill" for="ejer_si">1. SI</label><input type="radio" class="btn-check" name="realiza_ejercicio" id="ejer_no" value="0" {{ ($vgi->realiza_ejercicio ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-5 rounded-end-pill" for="ejer_no">2. NO</label></div>
                         </div>
-                        <div id="meds_qty" style="display: {{ ($vgi->toma_medicacion ?? 0) == 1 ? 'block' : 'none' }};">
-                            <label class="label-input">¿Cuántos medicamentos consume al día?</label>
-                            <input type="number" name="num_medicamentos" class="form-control modern-input w-25" placeholder="N°" value="{{ $vgi->num_medicamentos ?? '' }}">
+                        <div>
+                            <label class="d-block mb-3 fw-bold">2. ¿Acude a algún centro del adulto mayor, parroquial o municipal?</label>
+                            <div class="btn-group mb-4"><input type="radio" class="btn-check" name="acude_centro_social" id="centro_si" value="1" {{ ($vgi->acude_centro_social ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('activ_centro').style.display='block'"><label class="btn btn-outline-success btn-sm px-5 rounded-start-pill" for="centro_si">1. SI</label><input type="radio" class="btn-check" name="acude_centro_social" id="centro_no" value="0" {{ ($vgi->acude_centro_social ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('activ_centro').style.display='none'"><label class="btn btn-outline-secondary btn-sm px-5 rounded-end-pill" for="centro_no">2. NO</label></div>
+                            <div id="activ_centro" style="display: {{ ($vgi->acude_centro_social ?? 0) == 1 ? 'block' : 'none' }};" class="bg-soft-gray p-4 rounded-3 border">
+                                <label class="label-input mb-3 fw-bold text-dark">2.1 ¿Qué actividad realiza?</label>
+                                <div class="grid-selection justify-content-start">
+                                    @foreach(['Manualidades', 'Ejercicio / Taichí', 'Computación', 'Danzas'] as $act)
+                                        <label class="selection-card"><input type="radio" name="actividad_centro_social" value="{{ $act }}" {{ ($vgi->actividad_centro_social ?? '') == $act ? 'checked' : '' }}><div class="card-inner py-3"><div class="text">{{ $act }}</div></div></label>
+                                    @endforeach
+                                </div>
+                                <div class="mt-3"><label class="label-input">Otras actividades:</label><input type="text" name="actividad_centro_social" class="form-control modern-input" placeholder="Especifique..." value="{{ !in_array($vgi->actividad_centro_social ?? '', ['Manualidades', 'Ejercicio / Taichí', 'Computación', 'Danzas']) ? ($vgi->actividad_centro_social ?? '') : '' }}"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- NUEVA PESTAÑA: EJERCICIO Y TIEMPO LIBRE -->
-            <div id="tab-ejercicio" class="vgi-tab-content">
-                <div class="section-header mb-4"><div class="header-icon bg-info text-white"><i class="fas fa-running"></i></div><h4 class="header-title text-info">IV. Ejercicio y Tiempo Libre</h4></div>
-                
-                <div class="section-container">
-                    <div class="section-body p-4">
-                        <div class="mb-4 pb-4 border-bottom">
-                            <label class="d-block mb-3 fw-bold">1. ¿Usted realiza ejercicio? (camina 150 min/semana)</label>
-                            <div class="btn-group" role="group">
-                                <input type="radio" class="btn-check" name="realiza_ejercicio" id="ejer_si" value="1" {{ ($vgi->realiza_ejercicio ?? 0) == 1 ? 'checked' : '' }}>
-                                <label class="btn btn-outline-success btn-sm px-5 rounded-start-pill" for="ejer_si">1. SI</label>
-                                <input type="radio" class="btn-check" name="realiza_ejercicio" id="ejer_no" value="0" {{ ($vgi->realiza_ejercicio ?? 0) == 0 ? 'checked' : '' }}>
-                                <label class="btn btn-outline-secondary btn-sm px-5 rounded-end-pill" for="ejer_no">2. NO</label>
+            <!-- NUEVA PESTAÑA: EVALUACIÓN SOCIAL (GIJÓN) -->
+            <div id="tab-gijon" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-purple text-white"><i class="fas fa-users"></i></div>
+                    <h4 class="header-title text-purple">V. Evaluación Social (Gijón)</h4>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="section-container border mb-3">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">1. Situación Familiar</h6></div>
+                            <div class="section-body p-3">
+                                @php $fam = [
+                                    1 => 'Vive con familia, sin dependencia física/psíquica',
+                                    2 => 'Vive con cónyuge de similar edad',
+                                    3 => 'Vive con familia y presenta dependencia',
+                                    4 => 'Vive solo, hijos próximos',
+                                    5 => 'Vive solo, carece de hijos o viven lejos'
+                                ]; @endphp
+                                @foreach($fam as $val => $txt)
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="gijon_familiar" id="gf_{{$val}}" value="{{$val}}" {{ ($vgi->gijon_familiar ?? 0) == $val ? 'checked' : '' }} onchange="calcularGijon()">
+                                    <label class="form-check-label" for="gf_{{$val}}">{{$val}}. {{$txt}}</label>
+                                </div>
+                                @endforeach
                             </div>
                         </div>
+                    </div>
 
+                    <div class="col-md-12">
+                        <div class="section-container border mb-3">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">2. Situación Económica</h6></div>
+                            <div class="section-body p-3">
+                                @php $eco = [
+                                    1 => 'Dos veces el salario mínimo',
+                                    2 => 'Menos de 2 veces, pero más de 1 salario mínimo',
+                                    3 => '1 salario mínimo vital',
+                                    4 => 'Ingreso irregular (menos del mínimo)',
+                                    5 => 'Sin pensión, no tiene otros ingresos'
+                                ]; @endphp
+                                @foreach($eco as $val => $txt)
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="gijon_economica" id="ge_{{$val}}" value="{{$val}}" {{ ($vgi->gijon_economica ?? 0) == $val ? 'checked' : '' }} onchange="calcularGijon()">
+                                    <label class="form-check-label" for="ge_{{$val}}">{{$val}}. {{$txt}}</label>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="section-container border mb-3">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">3. Vivienda</h6></div>
+                            <div class="section-body p-3">
+                                @php $viv = [
+                                    1 => 'Adecuada a necesidades',
+                                    2 => 'Barreras arquitectónicas (pisos irregulares, peldaños)',
+                                    3 => 'Mala conservación, humedad, mala higiene',
+                                    4 => 'Vivienda semiconstruida o rústica',
+                                    5 => 'Asentamiento humano (Invasión) o sin vivienda'
+                                ]; @endphp
+                                @foreach($viv as $val => $txt)
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="gijon_vivienda" id="gv_{{$val}}" value="{{$val}}" {{ ($vgi->gijon_vivienda ?? 0) == $val ? 'checked' : '' }} onchange="calcularGijon()">
+                                    <label class="form-check-label" for="gv_{{$val}}">{{$val}}. {{$txt}}</label>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="section-container border mb-3">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">4. Relaciones Sociales</h6></div>
+                            <div class="section-body p-3">
+                                @php $rel = [
+                                    1 => 'Relaciones sociales externas',
+                                    2 => 'Relación solo con familia y vecinos',
+                                    3 => 'Relación solo con familia O vecinos',
+                                    4 => 'No sale, recibe familia',
+                                    5 => 'No sale y no recibe visitas'
+                                ]; @endphp
+                                @foreach($rel as $val => $txt)
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="gijon_relaciones" id="gr_{{$val}}" value="{{$val}}" {{ ($vgi->gijon_relaciones ?? 0) == $val ? 'checked' : '' }} onchange="calcularGijon()">
+                                    <label class="form-check-label" for="gr_{{$val}}">{{$val}}. {{$txt}}</label>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="section-container border mb-3">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">5. Apoyos a la red social</h6></div>
+                            <div class="section-body p-3">
+                                @php $apo = [
+                                    1 => 'No necesita apoyo',
+                                    2 => 'Con apoyo familiar o vecinal',
+                                    3 => 'Tiene seguro/SIS, pero necesita apoyo voluntariado',
+                                    4 => 'No cuenta con seguro social',
+                                    5 => 'Situación de abandono familiar'
+                                ]; @endphp
+                                @foreach($apo as $val => $txt)
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="gijon_apoyo" id="ga_{{$val}}" value="{{$val}}" {{ ($vgi->gijon_apoyo ?? 0) == $val ? 'checked' : '' }} onchange="calcularGijon()">
+                                    <label class="form-check-label" for="ga_{{$val}}">{{$val}}. {{$txt}}</label>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4 border-0 shadow-sm bg-dark text-white">
+                    <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
-                            <label class="d-block mb-3 fw-bold">2. ¿Acude a algún centro del adulto mayor, parroquial o municipal?</label>
-                            <div class="btn-group mb-4" role="group">
-                                <input type="radio" class="btn-check" name="acude_centro_social" id="centro_si" value="1" {{ ($vgi->acude_centro_social ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('activ_centro').style.display='block'">
-                                <label class="btn btn-outline-success btn-sm px-5 rounded-start-pill" for="centro_si">1. SI</label>
-                                <input type="radio" class="btn-check" name="acude_centro_social" id="centro_no" value="0" {{ ($vgi->acude_centro_social ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('activ_centro').style.display='none'">
-                                <label class="btn btn-outline-secondary btn-sm px-5 rounded-end-pill" for="centro_no">2. NO</label>
-                            </div>
-
-                            <div id="activ_centro" style="display: {{ ($vgi->acude_centro_social ?? 0) == 1 ? 'block' : 'none' }};" class="bg-soft-gray p-4 rounded-3 border">
-                                <label class="label-input mb-3 fw-bold text-dark">2.1 ¿Qué actividad realiza?</label>
-                                <div class="grid-selection justify-content-start">
-                                    @foreach(['Manualidades', 'Ejercicio / Taichí', 'Computación', 'Danzas'] as $act)
-                                        <label class="selection-card">
-                                            <input type="radio" name="actividad_centro_social" value="{{ $act }}" {{ ($vgi->actividad_centro_social ?? '') == $act ? 'checked' : '' }}>
-                                            <div class="card-inner py-3"><div class="text">{{ $act }}</div></div>
-                                        </label>
-                                    @endforeach
-                                </div>
-                                <div class="mt-3">
-                                    <label class="label-input">Otras actividades:</label>
-                                    <input type="text" name="actividad_centro_social" class="form-control modern-input" placeholder="Especifique..." value="{{ !in_array($vgi->actividad_centro_social ?? '', ['Manualidades', 'Ejercicio / Taichí', 'Computación', 'Danzas']) ? ($vgi->actividad_centro_social ?? '') : '' }}">
-                                </div>
-                            </div>
+                            <h5 class="m-0">Puntaje Total Gijón</h5>
+                            <small class="text-white-50">Suma automática</small>
+                        </div>
+                        <div class="text-end">
+                            <h2 class="m-0 fw-bold" id="gijon_score">{{ $vgi->gijon_total ?? 0 }}</h2>
+                            <span class="badge bg-secondary" id="gijon_result">Sin evaluar</span>
+                            <input type="hidden" name="gijon_total" id="input_gijon_total" value="{{ $vgi->gijon_total ?? 0 }}">
+                            <input type="hidden" name="gijon_valoracion" id="input_gijon_valoracion" value="{{ $vgi->gijon_valoracion ?? '' }}">
                         </div>
                     </div>
                 </div>
@@ -878,6 +949,39 @@
         document.getElementById('max_izquierda').innerText = maxI > 0 ? maxI + ' Kg' : '-';
     }
 
+    // 5. CÁLCULO DE GIJÓN
+    function calcularGijon() {
+        const fields = ['gijon_familiar', 'gijon_economica', 'gijon_vivienda', 'gijon_relaciones', 'gijon_apoyo'];
+        let total = 0;
+        let complete = true;
+        fields.forEach(f => {
+            const el = document.querySelector(`input[name="${f}"]:checked`);
+            if(el) total += parseInt(el.value);
+            else complete = false;
+        });
+
+        const scoreEl = document.getElementById('gijon_score');
+        const resultEl = document.getElementById('gijon_result');
+        const inputTotal = document.getElementById('input_gijon_total');
+        const inputVal = document.getElementById('input_gijon_valoracion');
+
+        scoreEl.innerText = total;
+        inputTotal.value = total;
+
+        let result = "Sin evaluar";
+        let color = "secondary";
+
+        if(total > 0) {
+            if(total <= 9) { result = "Buena / Aceptable situación social"; color = "success"; }
+            else if(total <= 14) { result = "Existe riesgo social"; color = "warning text-dark"; }
+            else { result = "Existe problema social"; color = "danger"; }
+        }
+
+        resultEl.innerText = result;
+        resultEl.className = `badge bg-${color} fs-6`;
+        inputVal.value = result;
+    }
+
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
         const tieneCuidador = {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
@@ -885,6 +989,7 @@
             document.getElementById('bloque_cuidador').style.display = 'block';
             document.getElementById('caregiverContainer').classList.add('active');
         }
+        calcularGijon(); // Calcular Gijón al cargar
     });
 </script>
 @endpush

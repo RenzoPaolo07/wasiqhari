@@ -51,6 +51,8 @@ class VgiController extends Controller
             'problema_dental', 'usa_protesis', 'vision_conservada', 'audicion_conservada',
             'problema_estrenimiento', 'problema_insomnio', 'problema_nocturia',
             'realiza_ejercicio', 'acude_centro_social',
+            'gijon_familiar', 'gijon_economica', 'gijon_vivienda', 
+            'gijon_relaciones', 'gijon_apoyo', 'gijon_total',
             'toma_medicacion', 'num_medicamentos'
         ];
 
