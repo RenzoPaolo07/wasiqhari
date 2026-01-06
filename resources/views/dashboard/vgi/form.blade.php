@@ -50,8 +50,8 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-gijon')">
                     <i class="fas fa-users"></i> <span>V. Ev. Social</span>
                 </button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-funcional')">
-                    <i class="fas fa-walking"></i> <span>VI. Funcional</span>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-barthel')">
+                    <i class="fas fa-wheelchair"></i> <span>VI. Barthel</span>
                 </button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mental')">
                     <i class="fas fa-brain"></i> <span>VII. Mental</span>
@@ -479,7 +479,7 @@
                 </div>
             </div>
 
-            <!-- NUEVA PESTAÑA: EVALUACIÓN SOCIAL (GIJÓN) -->
+            <!-- PESTAÑA: EVALUACIÓN SOCIAL (GIJÓN) -->
             <div id="tab-gijon" class="vgi-tab-content">
                 <div class="section-header mb-4">
                     <div class="header-icon bg-purple text-white"><i class="fas fa-users"></i></div>
@@ -609,33 +609,138 @@
                 </div>
             </div>
 
-            <div id="tab-funcional" class="vgi-tab-content">
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="section-container h-100">
-                            <div class="section-header bg-primary-light text-primary">
-                                <div class="icon-box bg-primary text-white"><i class="fas fa-walking"></i></div>
-                                <h5 class="m-0 fw-bold">Índice de Barthel</h5>
+            <!-- NUEVA PESTAÑA: ÍNDICE DE BARTHEL COMPLETO -->
+            <div id="tab-barthel" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-primary text-white"><i class="fas fa-wheelchair"></i></div>
+                    <h4 class="header-title text-primary">VI. Desempeño Funcional: Índice de BARTHEL</h4>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 fw-bold">1. COMER</h6>
+                                <span class="badge bg-white text-dark border">Puntos</span>
                             </div>
-                            <div class="section-body p-4">
-                                <div class="mb-3"><label class="label-input">Comer</label><select name="barthel_comer" class="form-select modern-input"><option value="10">Independiente (10)</option><option value="5">Ayuda (5)</option><option value="0">Dependiente (0)</option></select></div>
-                                <div class="mb-3"><label class="label-input">Lavarse</label><select name="barthel_lavarse" class="form-select modern-input"><option value="5">Independiente (5)</option><option value="0">Dependiente (0)</option></select></div>
-                                <div class="mb-3"><label class="label-input">Vestirse</label><select name="barthel_vestirse" class="form-select modern-input"><option value="10">Independiente (10)</option><option value="5">Ayuda (5)</option><option value="0">Dependiente (0)</option></select></div>
-                                <div class="mb-3"><label class="label-input">Deambulación</label><select name="barthel_deambulacion" class="form-select modern-input"><option value="15">Independiente (15)</option><option value="10">Ayuda (10)</option><option value="5">Silla Ruedas (5)</option><option value="0">Inmóvil (0)</option></select></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input barthel-radio" type="radio" name="barthel_comer" value="10" {{ ($vgi->barthel_comer ?? 0) == 10 ? 'checked' : '' }}>
+                                    <label class="form-check-label">Independiente (La comida está al alcance)</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input barthel-radio" type="radio" name="barthel_comer" value="5" {{ ($vgi->barthel_comer ?? 0) == 5 ? 'checked' : '' }}>
+                                    <label class="form-check-label">Necesita ayuda para cortar, untar, etc.</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input barthel-radio" type="radio" name="barthel_comer" value="0" {{ ($vgi->barthel_comer ?? 0) == 0 ? 'checked' : '' }}>
+                                    <label class="form-check-label">Dependiente (Necesita ser alimentado)</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="section-container h-100">
-                            <div class="section-header bg-success-light text-success">
-                                <div class="icon-box bg-success text-white"><i class="fas fa-home"></i></div>
-                                <h5 class="m-0 fw-bold">Lawton & Brody</h5>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">2. ASEO PERSONAL (Lavarse cara, manos, dientes)</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_aseo" value="5" {{ ($vgi->barthel_aseo ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">Independiente</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_aseo" value="0" {{ ($vgi->barthel_aseo ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Dependiente (Necesita ayuda)</label></div>
                             </div>
-                            <div class="section-body p-4">
-                                <div class="mb-3"><label class="label-input">Uso Teléfono</label><input type="number" min="0" max="1" name="lawton_telefono" class="form-control modern-input" placeholder="1 o 0"></div>
-                                <div class="mb-3"><label class="label-input">Compras</label><input type="number" min="0" max="1" name="lawton_compras" class="form-control modern-input" placeholder="1 o 0"></div>
-                                <div class="mb-3"><label class="label-input">Comida</label><input type="number" min="0" max="1" name="lawton_comida" class="form-control modern-input" placeholder="1 o 0"></div>
-                                <div class="mb-3"><label class="label-input">Medicación</label><input type="number" min="0" max="1" name="lawton_medicacion" class="form-control modern-input" placeholder="1 o 0"></div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">3. VESTIRSE</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_vestirse" value="10" {{ ($vgi->barthel_vestirse ?? 0) == 10 ? 'checked' : '' }}><label class="form-check-label">Independiente (Incluye botones, cierres, zapatos)</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_vestirse" value="5" {{ ($vgi->barthel_vestirse ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">Necesita ayuda (hace el 50% solo)</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_vestirse" value="0" {{ ($vgi->barthel_vestirse ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Dependiente total</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">4. BAÑARSE / DUCHARSE</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_banarse" value="5" {{ ($vgi->barthel_banarse ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">Independiente</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_banarse" value="0" {{ ($vgi->barthel_banarse ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Dependiente</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">5. CONTROL DE HECES</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_heces" value="10" {{ ($vgi->barthel_heces ?? 0) == 10 ? 'checked' : '' }}><label class="form-check-label">Continente (Ningún accidente)</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_heces" value="5" {{ ($vgi->barthel_heces ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">Accidente ocasional (1 vez por semana)</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_heces" value="0" {{ ($vgi->barthel_heces ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Incontinente (habitual)</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">6. CONTROL DE ORINA</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_orina" value="10" {{ ($vgi->barthel_orina ?? 0) == 10 ? 'checked' : '' }}><label class="form-check-label">Continente (Al menos 7 días seguidos)</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_orina" value="5" {{ ($vgi->barthel_orina ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">Accidente ocasional (Máx 1 en 24h)</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_orina" value="0" {{ ($vgi->barthel_orina ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Incontinente / Sonda</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">7. USO DE RETRETE</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_retrete" value="10" {{ ($vgi->barthel_retrete ?? 0) == 10 ? 'checked' : '' }}><label class="form-check-label">Independiente (Entrar, salir, limpiarse, vestirse)</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_retrete" value="5" {{ ($vgi->barthel_retrete ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">Necesita ayuda (equilibrio, limpiarse)</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_retrete" value="0" {{ ($vgi->barthel_retrete ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Dependiente</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">8. TRASLADO CAMA / SILLÓN</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_traslado" value="15" {{ ($vgi->barthel_traslado ?? 0) == 15 ? 'checked' : '' }}><label class="form-check-label">Independiente</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_traslado" value="10" {{ ($vgi->barthel_traslado ?? 0) == 10 ? 'checked' : '' }}><label class="form-check-label">Mínima ayuda (física o verbal)</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_traslado" value="5" {{ ($vgi->barthel_traslado ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">Gran ayuda (1 o 2 personas) / Se mantiene sentado</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_traslado" value="0" {{ ($vgi->barthel_traslado ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Dependiente / No se mantiene sentado</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">9. DEAMBULACIÓN</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_deambulacion" value="15" {{ ($vgi->barthel_deambulacion ?? 0) == 15 ? 'checked' : '' }}><label class="form-check-label">Independiente (al menos 50m, puede usar bastón)</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_deambulacion" value="10" {{ ($vgi->barthel_deambulacion ?? 0) == 10 ? 'checked' : '' }}><label class="form-check-label">Necesita ayuda (física o verbal de 1 persona)</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_deambulacion" value="5" {{ ($vgi->barthel_deambulacion ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">En silla de ruedas (independiente 50m)</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_deambulacion" value="0" {{ ($vgi->barthel_deambulacion ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Inmóvil</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-primary">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">10. SUBIR Y BAJAR ESCALERAS</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_escaleras" value="10" {{ ($vgi->barthel_escaleras ?? 0) == 10 ? 'checked' : '' }}><label class="form-check-label">Independiente</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input barthel-radio" type="radio" name="barthel_escaleras" value="5" {{ ($vgi->barthel_escaleras ?? 0) == 5 ? 'checked' : '' }}><label class="form-check-label">Necesita ayuda (física o verbal)</label></div>
+                                <div class="form-check"><input class="form-check-input barthel-radio" type="radio" name="barthel_escaleras" value="0" {{ ($vgi->barthel_escaleras ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Incapaz</label></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shadow-lg border-0 bg-primary text-white sticky-top" style="top: 100px;">
+                            <div class="card-body text-center p-4">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-calculator me-2"></i>PUNTUACIÓN BARTHEL</h5>
+                                <div class="display-1 fw-bold mb-2" id="barthel_score_display">0</div>
+                                <div class="badge bg-white text-primary px-3 py-2 fs-6 rounded-pill w-100" id="barthel_result_display">Sin evaluar</div>
+                                
+                                <input type="hidden" name="barthel_total" id="input_barthel_total" value="{{ $vgi->barthel_total ?? 0 }}">
+                                <input type="hidden" name="barthel_valoracion" id="input_barthel_valoracion" value="{{ $vgi->barthel_valoracion ?? '' }}">
+                                
+                                <hr class="border-white opacity-25 my-4">
+                                <ul class="list-unstyled text-start small opacity-75">
+                                    <li><strong>100:</strong> Independiente</li>
+                                    <li><strong>≥ 60:</strong> Dependencia Leve</li>
+                                    <li><strong>40 - 55:</strong> Dep. Moderada</li>
+                                    <li><strong>20 - 35:</strong> Dep. Severa</li>
+                                    <li><strong>< 20:</strong> Dep. Total</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -832,6 +937,17 @@
     .custom-switch .form-check-input:checked { background-color: var(--secondary); border-color: var(--secondary); }
     .divider-line { height: 1px; background-color: #eee; width: 100%; }
 
+    /* === ESTILOS ESPECÍFICOS BARTHEL === */
+    .barthel-radio { transform: scale(1.3); margin-right: 10px; cursor: pointer; }
+    .barthel-radio:checked + label { color: var(--primary); font-weight: bold; }
+
+    /* Colores para los badges del Barthel */
+    .bg-orange { background-color: var(--secondary) !important; }
+    .bg-info { background-color: #0dcaf0 !important; }
+    .bg-warning { background-color: #ffc107 !important; }
+    .bg-success { background-color: #198754 !important; }
+    .bg-danger { background-color: #dc3545 !important; }
+
     /* === BOTONES ACCIÓN === */
     .btn-brand { background: linear-gradient(135deg, #6f42c1, #8e44ad); border: none; transition: transform 0.2s; }
     .hover-scale:hover { transform: translateY(-2px); }
@@ -982,6 +1098,48 @@
         inputVal.value = result;
     }
 
+    // 6. CÁLCULO DE BARTHEL
+    function calcularBarthel() {
+        let total = 0;
+        const radios = document.querySelectorAll('.barthel-radio:checked');
+        radios.forEach(r => {
+            total += parseInt(r.value);
+        });
+
+        // Actualizar visualización
+        const scoreDisplay = document.getElementById('barthel_score_display');
+        const resultDisplay = document.getElementById('barthel_result_display');
+        const inputTotal = document.getElementById('input_barthel_total');
+        const inputVal = document.getElementById('input_barthel_valoracion');
+
+        scoreDisplay.innerText = total;
+        inputTotal.value = total;
+
+        let result = "";
+        let colorClass = "bg-white text-primary"; // Default
+
+        if (total == 100) {
+            result = "INDEPENDIENTE";
+            colorClass = "bg-success text-white";
+        } else if (total >= 60) {
+            result = "DEPENDIENTE LEVE";
+            colorClass = "bg-info text-white";
+        } else if (total >= 40) {
+            result = "DEPENDIENTE MODERADO";
+            colorClass = "bg-warning text-dark";
+        } else if (total >= 20) {
+            result = "DEPENDIENTE SEVERO";
+            colorClass = "bg-orange text-white";
+        } else {
+            result = "DEPENDIENTE TOTAL";
+            colorClass = "bg-warning text-white";
+        }
+
+        resultDisplay.innerText = result;
+        resultDisplay.className = `badge px-3 py-2 fs-6 rounded-pill w-100 ${colorClass}`;
+        inputVal.value = result;
+    }
+
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
         const tieneCuidador = {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
@@ -990,6 +1148,14 @@
             document.getElementById('caregiverContainer').classList.add('active');
         }
         calcularGijon(); // Calcular Gijón al cargar
+        calcularBarthel(); // Calcular Barthel al cargar
+    });
+
+    // Listeners para Barthel
+    document.addEventListener("change", function(e) {
+        if(e.target.classList.contains('barthel-radio')) {
+            calcularBarthel();
+        }
     });
 </script>
 @endpush

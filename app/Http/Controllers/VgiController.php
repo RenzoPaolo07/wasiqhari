@@ -53,7 +53,11 @@ class VgiController extends Controller
             'realiza_ejercicio', 'acude_centro_social',
             'gijon_familiar', 'gijon_economica', 'gijon_vivienda', 
             'gijon_relaciones', 'gijon_apoyo', 'gijon_total',
-            'toma_medicacion', 'num_medicamentos'
+            'toma_medicacion', 'num_medicamentos',
+            // Agrega estos a tu lista en el método store:
+            'barthel_comer', 'barthel_aseo', 'barthel_vestirse', 'barthel_banarse',
+            'barthel_heces', 'barthel_orina', 'barthel_retrete', 'barthel_escaleras',
+            'barthel_traslado', 'barthel_deambulacion', 'barthel_total'
         ];
 
         foreach ($camposNumericos as $campo) {
