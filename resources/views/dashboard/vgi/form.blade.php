@@ -15,6 +15,7 @@
                 <span class="badge rounded-pill bg-purple-light text-purple px-3">
                     <i class="fas fa-birthday-cake me-1"></i> {{ $adulto->edad }} años
                 </span>
+                <input type="hidden" id="paciente_sexo" value="{{ $adulto->sexo }}">
             </p>
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
@@ -34,31 +35,16 @@
     <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white main-card fade-in-up">
         
         <div class="vgi-tabs-container sticky-top bg-white z-index-10 border-bottom pt-3 pb-0 px-4">
-            <div class="vgi-tabs d-flex justify-content-center gap-4 pb-2">
-                <button class="vgi-tab active" onclick="openTab(event, 'tab-social')">
-                    <i class="fas fa-user-circle"></i> <span>I. Social</span>
-                </button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-clinica')">
-                    <i class="fas fa-weight"></i> <span>II. Antropometría</span>
-                </button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-comorbilidades')">
-                    <i class="fas fa-heartbeat"></i> <span>III. Comorbilidades</span>
-                </button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-ejercicio')">
-                    <i class="fas fa-running"></i> <span>IV. Ejercicio</span>
-                </button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-gijon')">
-                    <i class="fas fa-users"></i> <span>V. Ev. Social</span>
-                </button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-barthel')">
-                    <i class="fas fa-wheelchair"></i> <span>VI. Barthel</span>
-                </button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-mental')">
-                    <i class="fas fa-brain"></i> <span>VII. Mental</span>
-                </button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')">
-                    <i class="fas fa-apple-alt"></i> <span>VIII. Física</span>
-                </button>
+            <div class="vgi-tabs d-flex gap-3 pb-2">
+                <button class="vgi-tab active" onclick="openTab(event, 'tab-social')"><i class="fas fa-user-circle"></i> <span>I. Social</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-clinica')"><i class="fas fa-weight"></i> <span>II. Antropometría</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-comorbilidades')"><i class="fas fa-heartbeat"></i> <span>III. Comorbilidades</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-ejercicio')"><i class="fas fa-running"></i> <span>IV. Ejercicio</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-gijon')"><i class="fas fa-users"></i> <span>V. Gijón</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-barthel')"><i class="fas fa-wheelchair"></i> <span>VI. Barthel</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-lawton')"><i class="fas fa-tasks"></i> <span>VII. Lawton</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-pfeiffer')"><i class="fas fa-brain"></i> <span>VIII. Pfeiffer</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>IX. Física</span></button>
             </div>
         </div>
 
@@ -747,29 +733,210 @@
                 </div>
             </div>
 
-            <div id="tab-mental" class="vgi-tab-content">
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="section-container border-warning h-100">
-                            <div class="section-header bg-warning-light text-warning">
-                                <div class="icon-box bg-warning text-white"><i class="fas fa-brain"></i></div>
-                                <h5 class="m-0 fw-bold">Pfeiffer</h5>
+            <!-- NUEVA PESTAÑA: LAWTON Y BRODY -->
+            <div id="tab-lawton" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-success text-white"><i class="fas fa-tasks"></i></div>
+                    <h4 class="header-title text-success">VII. Actividades Instrumentales: Lawton y Brody</h4>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        
+                        <div class="section-container mb-3 border-start border-4 border-success">
+                            <div class="p-3 bg-light d-flex justify-content-between">
+                                <h6 class="m-0 fw-bold">1. Capacidad para usar el teléfono</h6>
                             </div>
-                            <div class="section-body p-5 text-center">
-                                <input type="number" name="pfeiffer_errores" min="0" max="10" class="form-control modern-input fs-1 text-center fw-bold text-warning border-warning" placeholder="0" value="{{ $vgi->pfeiffer_errores ?? '' }}">
-                                <div class="text-muted mt-3 fw-bold">Errores cometidos (0-10)</div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_telefono" value="1" {{ ($vgi->lawton_telefono ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Utiliza el teléfono por iniciativa propia, busca y marca</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_telefono" value="1" {{ ($vgi->lawton_telefono ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Es capaz de marcar bien algunos números conocidos</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_telefono" value="1" {{ ($vgi->lawton_telefono ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Es capaz de contestar, pero no de marcar</label></div>
+                                <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_telefono" value="0" {{ ($vgi->lawton_telefono ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">No utiliza el teléfono en absoluto</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-success">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">2. Preparación de la comida</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_comida" value="1" {{ ($vgi->lawton_comida ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Organiza, prepara y sirve las comidas por sí mismo</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_comida" value="0" {{ ($vgi->lawton_comida ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Prepara comidas si se le dan los ingredientes</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_comida" value="0" {{ ($vgi->lawton_comida ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Prepara, calienta y sirve, pero no sigue dieta</label></div>
+                                <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_comida" value="0" {{ ($vgi->lawton_comida ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Necesita que le preparen y sirvan</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-success">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">3. Responsabilidad respecto a su medicación</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_medicacion" value="1" {{ ($vgi->lawton_medicacion ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Capaz de tomarla a su hora y dosis correcta</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_medicacion" value="0" {{ ($vgi->lawton_medicacion ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Toma su medicación si se le prepara</label></div>
+                                <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_medicacion" value="0" {{ ($vgi->lawton_medicacion ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">No es capaz de administrarse su medicación</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-success">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">4. Cuidado de la casa</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_casa" value="1" {{ ($vgi->lawton_casa ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Mantiene la casa solo o con ayuda ocasional</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_casa" value="1" {{ ($vgi->lawton_casa ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Realiza tareas ligeras (platos, camas)</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_casa" value="1" {{ ($vgi->lawton_casa ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Realiza tareas ligeras pero no mantiene limpieza</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_casa" value="1" {{ ($vgi->lawton_casa ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Necesita ayuda en todas las labores</label></div>
+                                <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_casa" value="0" {{ ($vgi->lawton_casa ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">No participa en ninguna labor</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-success">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">5. Ir de compras</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_compras" value="1" {{ ($vgi->lawton_compras ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Realiza todas las compras independientemente</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_compras" value="0" {{ ($vgi->lawton_compras ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Realiza independientemente pequeñas compras</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_compras" value="0" {{ ($vgi->lawton_compras ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Necesita ir acompañado para comprar</label></div>
+                                <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_compras" value="0" {{ ($vgi->lawton_compras ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Totalmente incapaz de comprar</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-success">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">6. Lavado de ropa</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_ropa" value="1" {{ ($vgi->lawton_ropa ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Lava por sí mismo toda su ropa</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_ropa" value="1" {{ ($vgi->lawton_ropa ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Lava por sí mismo pequeñas prendas</label></div>
+                                <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_ropa" value="0" {{ ($vgi->lawton_ropa ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Todo el lavado debe ser realizado por otro</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-success">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">7. Uso de medios de transporte</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Viaja solo en transporte público o conduce</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Capaz de coger un taxi, pero no otro medio</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Viaja en transporte público acompañado</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="0" {{ ($vgi->lawton_transporte ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Utiliza taxi/auto con ayuda de otros</label></div>
+                                <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="0" {{ ($vgi->lawton_transporte ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">No viaja en absoluto</label></div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-3 border-start border-4 border-success">
+                            <div class="p-3 bg-light"><h6 class="m-0 fw-bold">8. Manejo de asuntos económicos</h6></div>
+                            <div class="p-3">
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_finanzas" value="1" {{ ($vgi->lawton_finanzas ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Maneja asuntos financieros con independencia</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_finanzas" value="0" {{ ($vgi->lawton_finanzas ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Realiza compras diarias, necesita ayuda en grandes</label></div>
+                                <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_finanzas" value="0" {{ ($vgi->lawton_finanzas ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Incapaz de manejar dinero</label></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shadow-lg border-0 bg-success text-white sticky-top" style="top: 100px;">
+                            <div class="card-body text-center p-4">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-calculator me-2"></i>PUNTUACIÓN LAWTON</h5>
+                                <div class="display-1 fw-bold mb-2" id="lawton_score_display">0</div>
+                                <div class="badge bg-white text-success px-3 py-2 fs-6 rounded-pill w-100" id="lawton_result_display">Sin evaluar</div>
+                                
+                                <input type="hidden" name="lawton_total" id="input_lawton_total" value="{{ $vgi->lawton_total ?? 0 }}">
+                                <input type="hidden" name="lawton_valoracion" id="input_lawton_valoracion" value="{{ $vgi->lawton_valoracion ?? '' }}">
+                                
+                                <hr class="border-white opacity-25 my-4">
+                                <div class="text-start small opacity-75">
+                                    <p class="mb-1 fw-bold">Interpretación:</p>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><i class="fas fa-female me-1"></i> <strong>Mujer:</strong> 0-7 Dependiente / 8 Independiente</li>
+                                        <li><i class="fas fa-male me-1"></i> <strong>Hombre:</strong> 0-5 Dependiente / 6-8 Independiente</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="section-container border-info h-100">
-                            <div class="section-header bg-info-light text-info">
-                                <div class="icon-box bg-info text-white"><i class="fas fa-cloud-rain"></i></div>
-                                <h5 class="m-0 fw-bold">Yesavage (Depresión)</h5>
+                </div>
+            </div>
+
+            <!-- NUEVA PESTAÑA: PFEIFFER DETALLADO -->
+            <div id="tab-pfeiffer" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-warning text-white"><i class="fas fa-brain"></i></div>
+                    <h4 class="header-title text-warning">VIII. Escala Cognitiva: Test de Pfeiffer (SPMSQ)</h4>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="section-container">
+                            <div class="section-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 align-middle">
+                                        <thead class="bg-light text-uppercase small text-muted">
+                                            <tr>
+                                                <th class="ps-4 py-3">Pregunta</th>
+                                                <th class="text-center" style="width: 120px;">Correcto</th>
+                                                <th class="text-center" style="width: 120px;">Incorrecto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @php
+                                                $preguntas = [
+                                                    'pf_fecha' => '1. ¿Cuál es la fecha de hoy? (día, mes, año)',
+                                                    'pf_dia' => '2. ¿Qué día de la semana es hoy?',
+                                                    'pf_lugar' => '3. ¿En qué lugar estamos?',
+                                                    'pf_telefono' => '4a. ¿Cuál es su número de teléfono?',
+                                                    'pf_direccion' => '4b. ¿Cuál es su dirección completa? (Si no tiene telf.)',
+                                                    'pf_edad' => '5. ¿Cuántos años tiene?',
+                                                    'pf_nacer' => '6. ¿Dónde nació?',
+                                                    'pf_pres_act' => '7. ¿Nombre del Presidente del Gobierno actual?',
+                                                    'pf_pres_ant' => '8. ¿Nombre del Presidente anterior?',
+                                                    'pf_madre' => '9. Dígame el primer apellido de su madre',
+                                                    'pf_resta' => '10. Restar de 3 en 3 desde 30 (30-3=27, ...)'
+                                                ];
+                                            @endphp
+
+                                            @foreach($preguntas as $key => $pregunta)
+                                            <tr>
+                                                <td class="ps-4 fw-500">{{ $pregunta }}</td>
+                                                <td class="text-center">
+                                                    <div class="form-check d-inline-block">
+                                                        <input class="form-check-input pfeiffer-radio border-success" type="radio" name="{{ $key }}" value="0" {{ ($vgi->$key ?? 0) == 0 ? 'checked' : '' }}>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center bg-soft-danger-hover">
+                                                    <div class="form-check d-inline-block">
+                                                        <input class="form-check-input pfeiffer-radio border-danger bg-danger-subtle" type="radio" name="{{ $key }}" value="1" {{ ($vgi->$key ?? 0) == 1 ? 'checked' : '' }}>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="section-body p-5 text-center">
-                                <input type="number" name="yesavage_total" min="0" class="form-control modern-input fs-1 text-center fw-bold text-info border-info" placeholder="0" value="{{ $vgi->yesavage_total ?? '' }}">
-                                <div class="text-muted mt-3 fw-bold">Puntaje Total</div>
+                        </div>
+                        <div class="alert alert-info mt-3 border-0 shadow-sm">
+                            <i class="fas fa-info-circle me-2"></i> <strong>Nota:</strong> Marque "Incorrecto" si el paciente se equivoca. El puntaje se basa en la cantidad de errores.
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shadow-lg border-0 bg-warning text-dark sticky-top" style="top: 100px;">
+                            <div class="card-body text-center p-4">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-poll me-2"></i>RESULTADO PFEIFFER</h5>
+                                
+                                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
+                                    <div class="display-4 fw-bold text-warning" id="pfeiffer_score_display">0</div>
+                                </div>
+                                <p class="mb-2 fw-bold">ERRORES</p>
+                                
+                                <div class="badge bg-dark text-white px-3 py-2 fs-6 rounded-pill w-100 mb-3" id="pfeiffer_result_display">INTACTO</div>
+                                
+                                <input type="hidden" name="pfeiffer_errores" id="input_pfeiffer_errores" value="{{ $vgi->pfeiffer_errores ?? 0 }}">
+                                <input type="hidden" name="pfeiffer_valoracion" id="input_pfeiffer_valoracion" value="{{ $vgi->pfeiffer_valoracion ?? '' }}">
+                                
+                                <hr class="border-dark opacity-25 my-4">
+                                <div class="text-start small opacity-75">
+                                    <p class="mb-1 fw-bold">Interpretación:</p>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>0-2:</strong> Normal / Intacto</li>
+                                        <li><strong>3-4:</strong> Deterioro Leve</li>
+                                        <li><strong>5-7:</strong> Deterioro Moderado</li>
+                                        <li><strong>8-10:</strong> Deterioro Severo</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -940,6 +1107,17 @@
     /* === ESTILOS ESPECÍFICOS BARTHEL === */
     .barthel-radio { transform: scale(1.3); margin-right: 10px; cursor: pointer; }
     .barthel-radio:checked + label { color: var(--primary); font-weight: bold; }
+
+    /* === ESTILOS ESPECÍFICOS LAWTON === */
+    .lawton-radio { transform: scale(1.3); margin-right: 10px; cursor: pointer; }
+    .lawton-radio:checked + label { color: var(--teal); font-weight: bold; }
+
+    /* === ESTILOS ESPECÍFICOS PFEIFFER === */
+    .pfeiffer-radio { width: 1.5em; height: 1.5em; cursor: pointer; }
+    .pfeiffer-radio:checked[value="1"] { background-color: #dc3545; border-color: #dc3545; } /* Rojo para error */
+    .pfeiffer-radio:checked[value="0"] { background-color: #198754; border-color: #198754; } /* Verde para correcto */
+    .bg-soft-danger-hover:hover { background-color: #fff5f5; }
+    .fw-500 { font-weight: 500; }
 
     /* Colores para los badges del Barthel */
     .bg-orange { background-color: var(--secondary) !important; }
@@ -1140,6 +1318,100 @@
         inputVal.value = result;
     }
 
+    // 7. NUEVA FUNCIÓN: CALCULAR LAWTON
+    function calcularLawton() {
+        let total = 0;
+        const radios = document.querySelectorAll('.lawton-radio:checked');
+        radios.forEach(r => {
+            total += parseInt(r.value);
+        });
+
+        // Actualizar visualización
+        const scoreDisplay = document.getElementById('lawton_score_display');
+        const resultDisplay = document.getElementById('lawton_result_display');
+        const inputTotal = document.getElementById('input_lawton_total');
+        const inputVal = document.getElementById('input_lawton_valoracion');
+        
+        // Obtener sexo para interpretación
+        const sexo = document.getElementById('paciente_sexo') ? document.getElementById('paciente_sexo').value : 'F';
+
+        scoreDisplay.innerText = total;
+        inputTotal.value = total;
+
+        let result = "";
+        let colorClass = "bg-white text-success"; 
+
+        // Interpretación según documento (Ajustada)
+        if (sexo === 'F') {
+            if (total === 8) {
+                result = "INDEPENDIENTE (Mujer)";
+                colorClass = "bg-white text-success";
+            } else {
+                result = "DEPENDIENTE (0-7)";
+                colorClass = "bg-warning text-dark";
+            }
+        } else {
+            // Interpretación Hombres
+            if (total >= 6) {
+                 result = "INDEPENDIENTE (Hombre)";
+                 colorClass = "bg-white text-success";
+            } else {
+                 result = "DEPENDIENTE";
+                 colorClass = "bg-warning text-dark";
+            }
+        }
+
+        resultDisplay.innerText = result;
+        resultDisplay.className = `badge px-3 py-2 fs-6 rounded-pill w-100 ${colorClass}`;
+        inputVal.value = result;
+    }
+
+    // 8. NUEVA FUNCIÓN: CALCULAR PFEIFFER
+    function calcularPfeiffer() {
+        let errores = 0;
+        // Seleccionamos solo los radios marcados con valor 1 (Incorrecto)
+        const radios = document.querySelectorAll('.pfeiffer-radio:checked');
+        
+        radios.forEach(r => {
+            if(r.value == "1") errores++;
+        });
+
+        // Caso especial: Si marcó teléfono Y dirección, usualmente solo cuenta 1 punto si ambos fallan, 
+        // pero seguiremos la lógica simple: Suma todo. 
+        // Si el usuario quiere lógica estricta (max 10), podemos caparlo.
+        if(errores > 10) errores = 10; 
+
+        // Actualizar visualización
+        const scoreDisplay = document.getElementById('pfeiffer_score_display');
+        const resultDisplay = document.getElementById('pfeiffer_result_display');
+        const inputTotal = document.getElementById('input_pfeiffer_errores');
+        const inputVal = document.getElementById('input_pfeiffer_valoracion');
+
+        scoreDisplay.innerText = errores;
+        inputTotal.value = errores;
+
+        let result = "";
+        let colorClass = "bg-success text-white"; // Default
+
+        if (errores <= 2) {
+            result = "NORMAL / INTACTO";
+            colorClass = "bg-success text-white";
+        } else if (errores <= 4) {
+            result = "DETERIORO LEVE";
+            colorClass = "bg-warning text-dark";
+        } else if (errores <= 7) {
+            result = "DETERIORO MODERADO";
+            colorClass = "bg-orange text-white";
+        } else {
+            result = "DETERIORO SEVERO";
+            colorClass = "bg-danger text-white";
+        }
+
+        resultDisplay.innerText = result;
+        resultDisplay.className = `badge px-3 py-2 fs-6 rounded-pill w-100 ${colorClass}`;
+        inputVal.value = result;
+    }
+
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
         const tieneCuidador = {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
@@ -1149,12 +1421,20 @@
         }
         calcularGijon(); // Calcular Gijón al cargar
         calcularBarthel(); // Calcular Barthel al cargar
+        calcularLawton(); // Calcular Lawton al cargar
+        calcularPfeiffer(); // Calcular Pfeiffer al cargar
     });
 
-    // Listeners para Barthel
+    // Listeners para Barthel, Lawton y Pfeiffer
     document.addEventListener("change", function(e) {
         if(e.target.classList.contains('barthel-radio')) {
             calcularBarthel();
+        }
+        if(e.target.classList.contains('lawton-radio')) {
+            calcularLawton();
+        }
+        if(e.target.classList.contains('pfeiffer-radio')) {
+            calcularPfeiffer();
         }
     });
 </script>

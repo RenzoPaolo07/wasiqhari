@@ -57,7 +57,9 @@ class VgiController extends Controller
             // Agrega estos a tu lista en el método store:
             'barthel_comer', 'barthel_aseo', 'barthel_vestirse', 'barthel_banarse',
             'barthel_heces', 'barthel_orina', 'barthel_retrete', 'barthel_escaleras',
-            'barthel_traslado', 'barthel_deambulacion', 'barthel_total'
+            'barthel_traslado', 'barthel_deambulacion', 'barthel_total',
+            'pf_fecha', 'pf_dia', 'pf_lugar', 'pf_telefono', 'pf_direccion', 
+            'pf_edad', 'pf_nacer', 'pf_pres_act', 'pf_pres_ant', 'pf_madre', 'pf_resta',
         ];
 
         foreach ($camposNumericos as $campo) {
