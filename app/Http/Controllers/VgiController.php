@@ -60,6 +60,8 @@ class VgiController extends Controller
             'barthel_traslado', 'barthel_deambulacion', 'barthel_total',
             'pf_fecha', 'pf_dia', 'pf_lugar', 'pf_telefono', 'pf_direccion', 
             'pf_edad', 'pf_nacer', 'pf_pres_act', 'pf_pres_ant', 'pf_madre', 'pf_resta',
+            'rudas_orientacion', 'rudas_praxis', 'rudas_visoconstructiva',
+            'rudas_juicio', 'rudas_lenguaje', 'rudas_memoria', 'rudas_total',
         ];
 
         foreach ($camposNumericos as $campo) {

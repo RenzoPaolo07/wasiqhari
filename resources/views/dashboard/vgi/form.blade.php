@@ -44,7 +44,8 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-barthel')"><i class="fas fa-wheelchair"></i> <span>VI. Barthel</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-lawton')"><i class="fas fa-tasks"></i> <span>VII. Lawton</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-pfeiffer')"><i class="fas fa-brain"></i> <span>VIII. Pfeiffer</span></button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>IX. Física</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-rudas')"><i class="fas fa-puzzle-piece"></i> <span>IX. RUDAS</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>X. Física</span></button>
             </div>
         </div>
 
@@ -943,6 +944,159 @@
                 </div>
             </div>
 
+            <!-- NUEVA PESTAÑA: RUDAS (Rowland Universal Dementia Assessment Scale) -->
+            <div id="tab-rudas" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-indigo text-white"><i class="fas fa-puzzle-piece"></i></div>
+                    <h4 class="header-title text-indigo">IX. Escala RUDAS (Rowland Universal Dementia Assessment Scale)</h4>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">1. Orientación (Máx 8 puntos)</h6></div>
+                            <div class="section-body p-3">
+                                <p class="text-muted small mb-2">Marque si la respuesta es correcta (2 puntos c/u):</p>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input rudas-check" type="checkbox" value="2" name="rudas_orientacion_1" {{ (($vgi->rudas_orientacion ?? 0) >= 2) ? 'checked' : '' }}>
+                                    <label class="form-check-label">¿En qué lugar estamos ahora?</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input rudas-check" type="checkbox" value="2" name="rudas_orientacion_2" {{ (($vgi->rudas_orientacion ?? 0) >= 4) ? 'checked' : '' }}>
+                                    <label class="form-check-label">¿En qué ciudad o distrito nos encontramos?</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input rudas-check" type="checkbox" value="2" name="rudas_orientacion_3" {{ (($vgi->rudas_orientacion ?? 0) >= 6) ? 'checked' : '' }}>
+                                    <label class="form-check-label">¿Qué fecha es hoy? (día, mes, año)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input rudas-check" type="checkbox" value="2" name="rudas_orientacion_4" {{ (($vgi->rudas_orientacion ?? 0) == 8) ? 'checked' : '' }}>
+                                    <label class="form-check-label">¿Qué día de la semana es hoy?</label>
+                                </div>
+                                <input type="hidden" name="rudas_orientacion" id="val_rudas_1" value="{{ $vgi->rudas_orientacion ?? 0 }}">
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">2. Funciones Motoras Práxicas (Máx 2)</h6></div>
+                            <div class="section-body p-3">
+                                <div class="row align-items-center">
+                                    <div class="col-md-7">
+                                        <p class="mb-2">Gesto a imitar: <strong>Puño -> Canto -> Palma</strong></p>
+                                        
+                                        <img src="https://i.postimg.cc/wT6ygCJz/Captura-de-pantalla-2026-01-06-235601.png" alt="Imagen: Puño - Canto - Palma">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="label-input">Puntaje obtenido:</label>
+                                        <input type="number" name="rudas_praxis" id="val_rudas_2" min="0" max="2" class="form-control modern-input text-center fs-4 fw-bold rudas-input" value="{{ $vgi->rudas_praxis ?? 0 }}">
+                                        <small class="text-muted d-block text-center mt-1">0 a 2 puntos</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">3. Praxis Visoconstructiva (Máx 4)</h6></div>
+                            <div class="section-body p-3">
+                                <div class="row align-items-center">
+                                    <div class="col-md-7">
+                                        <p class="mb-2">Copiar un cubo o dos pentágonos superpuestos.</p>
+                                        
+                                        <img src="https://stimuluspro.com/www/book/imagenes/891/test-MEC.png" alt="Imagen: Cubo / Pentágonos">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="label-input">Puntaje obtenido:</label>
+                                        <input type="number" name="rudas_visoconstructiva" id="val_rudas_3" min="0" max="4" class="form-control modern-input text-center fs-4 fw-bold rudas-input" value="{{ $vgi->rudas_visoconstructiva ?? 0 }}">
+                                        <small class="text-muted d-block text-center mt-1">0 a 4 puntos</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">4. Juicio / Función Ejecutiva (Máx 4)</h6></div>
+                            <div class="section-body p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-0 fw-bold">Pregunta:</p>
+                                    <p class="mb-0 fst-italic">"Si hubiera humo en la cocina, ¿qué haría?"</p>
+                                </div>
+                                <div style="width: 100px;">
+                                    <input type="number" name="rudas_juicio" id="val_rudas_4" min="0" max="4" class="form-control modern-input text-center fs-4 fw-bold rudas-input" value="{{ $vgi->rudas_juicio ?? 0 }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">5. Lenguaje (Máx 6)</h6></div>
+                            <div class="section-body p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-0">Denominación de objetos + Repetición oral.</p>
+                                </div>
+                                <div style="width: 100px;">
+                                    <input type="number" name="rudas_lenguaje" id="val_rudas_5" min="0" max="6" class="form-control modern-input text-center fs-4 fw-bold rudas-input" value="{{ $vgi->rudas_lenguaje ?? 0 }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">6. Memoria (Máx 6)</h6></div>
+                            <div class="section-body p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-0">Aprendizaje y recuerdo diferido de 5 palabras.</p>
+                                </div>
+                                <div style="width: 100px;">
+                                    <input type="number" name="rudas_memoria" id="val_rudas_6" min="0" max="6" class="form-control modern-input text-center fs-4 fw-bold rudas-input" value="{{ $vgi->rudas_memoria ?? 0 }}">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="card shadow-lg border-0 bg-white sticky-top" style="top: 100px;">
+                            <div class="card-header bg-indigo text-white py-3">
+                                <h5 class="m-0 fw-bold"><i class="fas fa-calculator me-2"></i>Registro Final RUDAS</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <table class="table table-striped mb-0">
+                                    <thead class="small text-uppercase text-muted">
+                                        <tr>
+                                            <th class="ps-4">Dominio</th>
+                                            <th class="text-end pe-4">Puntaje</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="ps-4">1. Orientación</td><td class="text-end pe-4 fw-bold"><span id="txt_rudas_1">0</span> / 8</td></tr>
+                                        <tr><td class="ps-4">2. Función motora</td><td class="text-end pe-4 fw-bold"><span id="txt_rudas_2">0</span> / 2</td></tr>
+                                        <tr><td class="ps-4">3. Visoconstructiva</td><td class="text-end pe-4 fw-bold"><span id="txt_rudas_3">0</span> / 4</td></tr>
+                                        <tr><td class="ps-4">4. Juicio</td><td class="text-end pe-4 fw-bold"><span id="txt_rudas_4">0</span> / 4</td></tr>
+                                        <tr><td class="ps-4">5. Lenguaje</td><td class="text-end pe-4 fw-bold"><span id="txt_rudas_5">0</span> / 6</td></tr>
+                                        <tr><td class="ps-4">6. Memoria</td><td class="text-end pe-4 fw-bold"><span id="txt_rudas_6">0</span> / 6</td></tr>
+                                        <tr class="bg-indigo-light">
+                                            <td class="ps-4 fw-bold text-indigo">TOTAL</td>
+                                            <td class="text-end pe-4 fs-4 fw-bold text-indigo"><span id="rudas_total_display">0</span> / 30</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <div class="p-3 text-center border-top">
+                                    <span class="badge w-100 py-2 fs-6" id="rudas_interpretation_badge">Sin evaluar</span>
+                                </div>
+
+                                <input type="hidden" name="rudas_total" id="input_rudas_total" value="{{ $vgi->rudas_total ?? 0 }}">
+                                <input type="hidden" name="rudas_valoracion" id="input_rudas_valoracion" value="{{ $vgi->rudas_valoracion ?? '' }}">
+                            </div>
+                            <div class="card-footer bg-light p-3 small text-muted">
+                                <strong>Interpretación:</strong><br>
+                                • 23–30: Rango esperado.<br>
+                                • ≤ 22: Sospecha de deterioro cognitivo.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="tab-fisica" class="vgi-tab-content">
                 <div class="section-container mb-4">
                     <div class="section-header bg-purple-light text-purple">
@@ -1040,6 +1194,9 @@
     .bg-orange-light { background-color: var(--secondary-light); }
     .bg-teal { background-color: var(--teal); }
     .bg-teal-light { background-color: var(--teal-light); }
+    .bg-indigo { background-color: #6610f2; }
+    .text-indigo { color: #6610f2; }
+    .bg-indigo-light { background-color: #f3ebff; }
 
     /* === INPUTS & FORMS (Con Iconos) === */
     .label-title { font-size: 0.8rem; font-weight: 700; color: #adb5bd; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
@@ -1118,6 +1275,11 @@
     .pfeiffer-radio:checked[value="0"] { background-color: #198754; border-color: #198754; } /* Verde para correcto */
     .bg-soft-danger-hover:hover { background-color: #fff5f5; }
     .fw-500 { font-weight: 500; }
+
+    /* === ESTILOS ESPECÍFICOS RUDAS === */
+    .rudas-check { transform: scale(1.3); margin-right: 10px; cursor: pointer; }
+    .border-dashed { border-style: dashed !important; }
+    .rudas-input { border-color: #6610f2; }
 
     /* Colores para los badges del Barthel */
     .bg-orange { background-color: var(--secondary) !important; }
@@ -1412,6 +1574,52 @@
         inputVal.value = result;
     }
 
+    // 9. NUEVA FUNCIÓN: CALCULAR RUDAS
+    function calcularRudas() {
+        // 1. Orientación (Checkboxes)
+        let score1 = 0;
+        document.querySelectorAll('.rudas-check:checked').forEach(c => score1 += parseInt(c.value));
+        document.getElementById('val_rudas_1').value = score1;
+        document.getElementById('txt_rudas_1').innerText = score1;
+
+        // 2-6. Inputs numéricos
+        const s2 = parseInt(document.getElementById('val_rudas_2').value) || 0;
+        const s3 = parseInt(document.getElementById('val_rudas_3').value) || 0;
+        const s4 = parseInt(document.getElementById('val_rudas_4').value) || 0;
+        const s5 = parseInt(document.getElementById('val_rudas_5').value) || 0;
+        const s6 = parseInt(document.getElementById('val_rudas_6').value) || 0;
+
+        // Actualizar tabla resumen
+        document.getElementById('txt_rudas_2').innerText = s2;
+        document.getElementById('txt_rudas_3').innerText = s3;
+        document.getElementById('txt_rudas_4').innerText = s4;
+        document.getElementById('txt_rudas_5').innerText = s5;
+        document.getElementById('txt_rudas_6').innerText = s6;
+
+        // Total
+        const total = score1 + s2 + s3 + s4 + s5 + s6;
+        document.getElementById('rudas_total_display').innerText = total;
+        document.getElementById('input_rudas_total').value = total;
+
+        // Interpretación
+        const badge = document.getElementById('rudas_interpretation_badge');
+        const inputVal = document.getElementById('input_rudas_valoracion');
+        let text = "";
+        let color = "";
+
+        if (total <= 22) {
+            text = "SOSPECHA DE DETERIORO COGNITIVO";
+            color = "bg-danger";
+        } else {
+            text = "RANGO ESPERADO";
+            color = "bg-success";
+        }
+
+        badge.innerText = text;
+        badge.className = `badge w-100 py-2 fs-6 ${color}`;
+        inputVal.value = text;
+    }
+
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
         const tieneCuidador = {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
@@ -1423,9 +1631,10 @@
         calcularBarthel(); // Calcular Barthel al cargar
         calcularLawton(); // Calcular Lawton al cargar
         calcularPfeiffer(); // Calcular Pfeiffer al cargar
+        calcularRudas(); // Calcular RUDAS al cargar
     });
 
-    // Listeners para Barthel, Lawton y Pfeiffer
+    // Listeners para Barthel, Lawton, Pfeiffer y RUDAS
     document.addEventListener("change", function(e) {
         if(e.target.classList.contains('barthel-radio')) {
             calcularBarthel();
@@ -1435,6 +1644,15 @@
         }
         if(e.target.classList.contains('pfeiffer-radio')) {
             calcularPfeiffer();
+        }
+        if(e.target.classList.contains('rudas-check')) {
+            calcularRudas();
+        }
+    });
+    
+    document.addEventListener("input", function(e) {
+        if(e.target.classList.contains('rudas-input')) {
+            calcularRudas();
         }
     });
 </script>
