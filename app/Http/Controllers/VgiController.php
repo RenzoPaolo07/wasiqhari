@@ -62,6 +62,15 @@ class VgiController extends Controller
             'pf_edad', 'pf_nacer', 'pf_pres_act', 'pf_pres_ant', 'pf_madre', 'pf_resta',
             'rudas_orientacion', 'rudas_praxis', 'rudas_visoconstructiva',
             'rudas_juicio', 'rudas_lenguaje', 'rudas_memoria', 'rudas_total',
+            // Agrega a la lista:
+            'mmse_tiempo_anio', 'mmse_tiempo_estacion', 'mmse_tiempo_fecha', 'mmse_tiempo_dia', 'mmse_tiempo_mes',
+            'mmse_lugar_pais', 'mmse_lugar_dep', 'mmse_lugar_dist', 'mmse_lugar_hosp', 'mmse_lugar_piso',
+            'mmse_mem_arbol', 'mmse_mem_puente', 'mmse_mem_farol',
+            'mmse_atencion_1', 'mmse_atencion_2', 'mmse_atencion_3', 'mmse_atencion_4', 'mmse_atencion_5',
+            'mmse_rec_arbol', 'mmse_rec_puente', 'mmse_rec_farol',
+            'mmse_nom_lapiz', 'mmse_nom_reloj', 'mmse_repeticion',
+            'mmse_orden_mano', 'mmse_orden_doblar', 'mmse_orden_suelo',
+            'mmse_leer', 'mmse_escribir', 'mmse_copiar', 'mmse_total_final'
         ];
 
         foreach ($camposNumericos as $campo) {

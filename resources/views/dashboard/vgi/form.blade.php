@@ -45,7 +45,8 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-lawton')"><i class="fas fa-tasks"></i> <span>VII. Lawton</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-pfeiffer')"><i class="fas fa-brain"></i> <span>VIII. Pfeiffer</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-rudas')"><i class="fas fa-puzzle-piece"></i> <span>IX. RUDAS</span></button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>X. Física</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-mmse')"><i class="fas fa-brain"></i> <span>X. MMSE</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>XI. Física</span></button>
             </div>
         </div>
 
@@ -1097,6 +1098,213 @@
                 </div>
             </div>
 
+            <!-- NUEVA PESTAÑA: MMSE DE FOLSTEIN -->
+            <div id="tab-mmse" class="vgi-tab-content">
+                
+                <div class="alert alert-danger d-flex align-items-center shadow-sm rounded-3 mb-4 border-danger">
+                    <i class="fas fa-user-shield fs-1 me-3"></i>
+                    <div>
+                        <h5 class="alert-heading fw-bold mb-1">SOLO PERSONAL CAPACITADO</h5>
+                        <p class="mb-0 small">Esta evaluación clínica (MMSE Folstein) debe ser administrada exclusivamente por profesionales de la salud entrenados (Geriatras, Neurólogos, Psicólogos).</p>
+                    </div>
+                </div>
+
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-dark text-white"><i class="fas fa-brain"></i></div>
+                    <h4 class="header-title text-dark">X. MMSE de Folstein (Mini Mental State Examination)</h4>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">1. Orientación (Máx 10 puntos)</h6></div>
+                            <div class="section-body p-3">
+                                <div class="row">
+                                    <div class="col-md-6 border-end">
+                                        <p class="fw-bold small text-muted text-uppercase mb-2">Tiempo (5 pts)</p>
+                                        @foreach(['mmse_tiempo_anio'=>'Año', 'mmse_tiempo_estacion'=>'Estación', 'mmse_tiempo_fecha'=>'Fecha', 'mmse_tiempo_dia'=>'Día', 'mmse_tiempo_mes'=>'Mes'] as $key => $label)
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input mmse-check" type="checkbox" name="{{ $key }}" value="1" {{ ($vgi->$key ?? 0) == 1 ? 'checked' : '' }}>
+                                            <label class="form-check-label">{{ $label }}</label>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="col-md-6 ps-4">
+                                        <p class="fw-bold small text-muted text-uppercase mb-2">Lugar (5 pts)</p>
+                                        @foreach(['mmse_lugar_pais'=>'País', 'mmse_lugar_dep'=>'Departamento', 'mmse_lugar_dist'=>'Distrito', 'mmse_lugar_hosp'=>'Hospital / Lugar', 'mmse_lugar_piso'=>'Piso / Consultorio'] as $key => $label)
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input mmse-check" type="checkbox" name="{{ $key }}" value="1" {{ ($vgi->$key ?? 0) == 1 ? 'checked' : '' }}>
+                                            <label class="form-check-label">{{ $label }}</label>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">2. Memoria Inmediata (Máx 3 puntos)</h6></div>
+                            <div class="section-body p-3">
+                                <p class="small text-muted mb-2">Repetir 3 nombres. Marque si lo logra al primer intento.</p>
+                                <div class="d-flex gap-4 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input mmse-check" type="checkbox" name="mmse_mem_arbol" value="1" {{ ($vgi->mmse_mem_arbol ?? 0) == 1 ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-bold">Árbol</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input mmse-check" type="checkbox" name="mmse_mem_puente" value="1" {{ ($vgi->mmse_mem_puente ?? 0) == 1 ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-bold">Puente</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input mmse-check" type="checkbox" name="mmse_mem_farol" value="1" {{ ($vgi->mmse_mem_farol ?? 0) == 1 ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-bold">Farol</label>
+                                    </div>
+                                </div>
+                                <div class="input-group input-group-sm w-50">
+                                    <span class="input-group-text">N° de ensayos necesarios:</span>
+                                    <input type="number" name="mmse_mem_intentos" class="form-control" value="{{ $vgi->mmse_mem_intentos ?? '' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">3. Atención y Cálculo (Máx 5 puntos)</h6></div>
+                            <div class="section-body p-3">
+                                <p class="small text-muted mb-2">Restar 7 de 100 consecutivamente <strong>O</strong> deletrear MUNDO al revés. (Marque 1 por cada acierto).</p>
+                                <div class="d-flex justify-content-between text-center px-3">
+                                    <div>
+                                        <label class="d-block small fw-bold">93 / O</label>
+                                        <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_1" value="1" {{ ($vgi->mmse_atencion_1 ?? 0) == 1 ? 'checked' : '' }}>
+                                    </div>
+                                    <div>
+                                        <label class="d-block small fw-bold">86 / D</label>
+                                        <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_2" value="1" {{ ($vgi->mmse_atencion_2 ?? 0) == 1 ? 'checked' : '' }}>
+                                    </div>
+                                    <div>
+                                        <label class="d-block small fw-bold">79 / N</label>
+                                        <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_3" value="1" {{ ($vgi->mmse_atencion_3 ?? 0) == 1 ? 'checked' : '' }}>
+                                    </div>
+                                    <div>
+                                        <label class="d-block small fw-bold">72 / U</label>
+                                        <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_4" value="1" {{ ($vgi->mmse_atencion_4 ?? 0) == 1 ? 'checked' : '' }}>
+                                    </div>
+                                    <div>
+                                        <label class="d-block small fw-bold">65 / M</label>
+                                        <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_5" value="1" {{ ($vgi->mmse_atencion_5 ?? 0) == 1 ? 'checked' : '' }}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">4. Recuerdo Diferido (Máx 3 puntos)</h6></div>
+                            <div class="section-body p-3">
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input mmse-check" type="checkbox" name="mmse_rec_arbol" value="1" {{ ($vgi->mmse_rec_arbol ?? 0) == 1 ? 'checked' : '' }}>
+                                        <label class="form-check-label">Árbol</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input mmse-check" type="checkbox" name="mmse_rec_puente" value="1" {{ ($vgi->mmse_rec_puente ?? 0) == 1 ? 'checked' : '' }}>
+                                        <label class="form-check-label">Puente</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input mmse-check" type="checkbox" name="mmse_rec_farol" value="1" {{ ($vgi->mmse_rec_farol ?? 0) == 1 ? 'checked' : '' }}>
+                                        <label class="form-check-label">Farol</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-light"><h6 class="m-0 fw-bold">5. Lenguaje y Construcción (Máx 9 puntos)</h6></div>
+                            <div class="section-body p-3">
+                                <div class="row g-3">
+                                    <div class="col-12 border-bottom pb-2">
+                                        <span class="fw-bold small d-block mb-1">Denominación:</span>
+                                        <div class="d-flex gap-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input mmse-check" type="checkbox" name="mmse_nom_lapiz" value="1" {{ ($vgi->mmse_nom_lapiz ?? 0) == 1 ? 'checked' : '' }}>
+                                                <label class="form-check-label">Lápiz</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input mmse-check" type="checkbox" name="mmse_nom_reloj" value="1" {{ ($vgi->mmse_nom_reloj ?? 0) == 1 ? 'checked' : '' }}>
+                                                <label class="form-check-label">Reloj</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12 border-bottom pb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input mmse-check" type="checkbox" name="mmse_repeticion" value="1" {{ ($vgi->mmse_repeticion ?? 0) == 1 ? 'checked' : '' }}>
+                                            <label class="form-check-label">Repite: <em>"En un trigal había 5 perros"</em></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 border-bottom pb-2">
+                                        <span class="fw-bold small d-block mb-1">Órdenes (3 pts):</span>
+                                        <div class="form-check"><input class="form-check-input mmse-check" type="checkbox" name="mmse_orden_mano" value="1" {{ ($vgi->mmse_orden_mano ?? 0) == 1 ? 'checked' : '' }}><label>Coja este papel con mano derecha</label></div>
+                                        <div class="form-check"><input class="form-check-input mmse-check" type="checkbox" name="mmse_orden_doblar" value="1" {{ ($vgi->mmse_orden_doblar ?? 0) == 1 ? 'checked' : '' }}><label>Dóblelo por la mitad</label></div>
+                                        <div class="form-check"><input class="form-check-input mmse-check" type="checkbox" name="mmse_orden_suelo" value="1" {{ ($vgi->mmse_orden_suelo ?? 0) == 1 ? 'checked' : '' }}><label>Póngalo en el suelo</label></div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input mmse-check" type="checkbox" name="mmse_leer" value="1" {{ ($vgi->mmse_leer ?? 0) == 1 ? 'checked' : '' }}>
+                                            <label class="form-check-label">Lee y ejecuta: <em>"CIERRE LOS OJOS"</em></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input mmse-check" type="checkbox" name="mmse_escribir" value="1" {{ ($vgi->mmse_escribir ?? 0) == 1 ? 'checked' : '' }}>
+                                            <label class="form-check-label">Escribe frase con sujeto y predicado</label>
+                                        </div>
+                                        <div class="form-check d-flex align-items-center">
+                                            <input class="form-check-input mmse-check" type="checkbox" name="mmse_copiar" value="1" {{ ($vgi->mmse_copiar ?? 0) == 1 ? 'checked' : '' }}>
+                                            <div class="ms-2">
+                                                <label class="form-check-label d-block">Copiar el dibujo (Pentágonos)</label>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shadow-lg border-0 bg-dark text-white sticky-top" style="top: 100px;">
+                            <div class="card-body text-center p-4">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-calculator me-2"></i>PUNTAJE MMSE</h5>
+                                
+                                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
+                                    <div class="display-4 fw-bold text-dark" id="mmse_score_display">0</div>
+                                </div>
+                                <p class="mb-2 fw-bold text-uppercase text-white-50">Sobre 30 puntos</p>
+                                
+                                <div class="badge bg-secondary px-3 py-2 fs-6 rounded-pill w-100 mb-3" id="mmse_result_display">Sin evaluar</div>
+                                
+                                <input type="hidden" name="mmse_total_final" id="input_mmse_total" value="{{ $vgi->mmse_total_final ?? 0 }}">
+                                <input type="hidden" name="mmse_valoracion_final" id="input_mmse_valoracion" value="{{ $vgi->mmse_valoracion_final ?? '' }}">
+                                
+                                <hr class="border-white opacity-25 my-4">
+                                <div class="text-start small opacity-75">
+                                    <p class="mb-1 fw-bold">Referencia (Folstein):</p>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><span class="text-success">●</span> 27-30: Normal</li>
+                                        <li><span class="text-warning">●</span> 24-26: Sospecha Patológica</li>
+                                        <li><span class="text-warning">●</span> 12-24: Deterioro</li>
+                                        <li><span class="text-danger">●</span> 9-12: Demencia</li>
+                                        <li><span class="text-danger">●</span> <9: Demencia Severa</li>
+                                    </ul>
+                                    <p class="mt-2 fst-italic" style="font-size: 0.8em;">*Ajustar según nivel educativo.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="tab-fisica" class="vgi-tab-content">
                 <div class="section-container mb-4">
                     <div class="section-header bg-purple-light text-purple">
@@ -1280,6 +1488,10 @@
     .rudas-check { transform: scale(1.3); margin-right: 10px; cursor: pointer; }
     .border-dashed { border-style: dashed !important; }
     .rudas-input { border-color: #6610f2; }
+
+    /* === ESTILOS ESPECÍFICOS MMSE === */
+    .scale-15 { transform: scale(1.5); margin-top: 5px; }
+    .mmse-check { width: 1.3em; height: 1.3em; cursor: pointer; }
 
     /* Colores para los badges del Barthel */
     .bg-orange { background-color: var(--secondary) !important; }
@@ -1620,6 +1832,47 @@
         inputVal.value = text;
     }
 
+    // 10. NUEVA FUNCIÓN: CALCULAR MMSE
+    function calcularMMSE() {
+        let total = 0;
+        // Simplemente contamos cuántos checkboxes de la clase mmse-check están marcados
+        document.querySelectorAll('.mmse-check:checked').forEach(c => {
+            total += parseInt(c.value);
+        });
+
+        const scoreDisplay = document.getElementById('mmse_score_display');
+        const resultDisplay = document.getElementById('mmse_result_display');
+        const inputTotal = document.getElementById('input_mmse_total');
+        const inputVal = document.getElementById('input_mmse_valoracion');
+
+        scoreDisplay.innerText = total;
+        inputTotal.value = total;
+
+        let result = "";
+        let colorClass = "bg-secondary"; 
+
+        if (total >= 27) {
+            result = "NORMAL";
+            colorClass = "bg-success";
+        } else if (total >= 24) {
+            result = "SOSPECHA PATOLÓGICA";
+            colorClass = "bg-warning text-dark";
+        } else if (total >= 12) {
+            result = "DETERIORO";
+            colorClass = "bg-orange text-white";
+        } else if (total >= 9) {
+            result = "DEMENCIA";
+            colorClass = "bg-danger";
+        } else {
+            result = "DEMENCIA SEVERA";
+            colorClass = "bg-danger";
+        }
+
+        resultDisplay.innerText = result;
+        resultDisplay.className = `badge px-3 py-2 fs-6 rounded-pill w-100 mb-3 ${colorClass}`;
+        inputVal.value = result;
+    }
+
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
         const tieneCuidador = {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
@@ -1632,9 +1885,10 @@
         calcularLawton(); // Calcular Lawton al cargar
         calcularPfeiffer(); // Calcular Pfeiffer al cargar
         calcularRudas(); // Calcular RUDAS al cargar
+        calcularMMSE(); // Calcular MMSE al cargar
     });
 
-    // Listeners para Barthel, Lawton, Pfeiffer y RUDAS
+    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS y MMSE
     document.addEventListener("change", function(e) {
         if(e.target.classList.contains('barthel-radio')) {
             calcularBarthel();
@@ -1647,6 +1901,9 @@
         }
         if(e.target.classList.contains('rudas-check')) {
             calcularRudas();
+        }
+        if(e.target.classList.contains('mmse-check')) {
+            calcularMMSE();
         }
     });
     
