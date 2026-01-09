@@ -70,7 +70,13 @@ class VgiController extends Controller
             'mmse_rec_arbol', 'mmse_rec_puente', 'mmse_rec_farol',
             'mmse_nom_lapiz', 'mmse_nom_reloj', 'mmse_repeticion',
             'mmse_orden_mano', 'mmse_orden_doblar', 'mmse_orden_suelo',
-            'mmse_leer', 'mmse_escribir', 'mmse_copiar', 'mmse_total_final'
+            'mmse_leer', 'mmse_escribir', 'mmse_copiar', 'mmse_total_final',
+            'minicog_palabra_mesa', 'minicog_palabra_llave', 'minicog_palabra_libro',
+            'minicog_reloj_puntaje', 'minicog_total',
+            'gds_insatisfecho', 'gds_impotente', 'gds_memoria', 'gds_desgano', 'gds_total',
+            'ysg_1', 'ysg_2', 'ysg_3', 'ysg_4', 'ysg_5', 
+            'ysg_6', 'ysg_7', 'ysg_8', 'ysg_9', 'ysg_10', 
+            'ysg_11', 'ysg_12', 'ysg_13', 'ysg_14', 'ysg_15',
         ];
 
         foreach ($camposNumericos as $campo) {
