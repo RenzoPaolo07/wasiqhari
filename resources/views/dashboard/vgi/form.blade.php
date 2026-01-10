@@ -1447,200 +1447,178 @@
                 </div>
             </div>
 
-            <!-- NUEVA PESTAÑA: GDS-4 Y YESAVAGE -->
+            <!-- PESTAÑA: GDS-4 Y YESAVAGE -->
             <div id="tab-gds" class="vgi-tab-content">
-                
-                <div class="locked-wrapper">
-                    <div class="lock-overlay" id="gds_lock_screen">
-                        <div class="lock-card border-warning">
-                            <div class="mb-3 text-warning">
-                                <i class="fas fa-sad-tear fa-4x"></i>
-                                <i class="fas fa-lock fa-2x" style="margin-left: -15px; vertical-align: bottom; color: #333; background: white; border-radius: 50%;"></i>
+                <!-- Se quitó el bloqueo de seguridad - acceso directo -->
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-warning text-white"><i class="fas fa-heart-broken"></i></div>
+                    <h4 class="header-title text-warning">XII. Evaluación Afectiva: GDS-4 y Yesavage</h4>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="section-container mb-4">
+                            <div class="section-header bg-soft-gray">
+                                <h5 class="m-0 fw-bold text-dark"><i class="fas fa-filter me-2"></i>Escala Abreviada GDS-4</h5>
                             </div>
-                            <h4 class="fw-bold text-dark">Evaluación Afectiva Protegida</h4>
-                            <p class="text-muted small">Esta escala es exclusiva para personal clínico autorizado.</p>
-                            <input type="password" id="gds_pin" class="pin-input" placeholder="****" maxlength="4">
-                            <button type="button" class="btn btn-warning w-100 fw-bold py-2 rounded-pill shadow-sm text-dark" onclick="unlockGDS()">
-                                <i class="fas fa-unlock me-2"></i> DESBLOQUEAR
-                            </button>
-                            <p id="gds_pin_error" class="text-danger small mt-2 fw-bold" style="display:none;"><i class="fas fa-times-circle"></i> PIN Incorrecto</p>
+                            <div class="section-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 align-middle">
+                                        <thead class="bg-light text-uppercase small text-muted">
+                                            <tr>
+                                                <th class="ps-4 py-3">Pregunta</th>
+                                                <th class="text-center" style="width: 100px;">SI (1)</th>
+                                                <th class="text-center" style="width: 100px;">NO (0)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="ps-4 fw-500">1. ¿Está insatisfecho con su vida?</td>
+                                                <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_insatisfecho" value="1" {{ ($vgi->gds_insatisfecho ?? 0) == 1 ? 'checked' : '' }}></td>
+                                                <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_insatisfecho" value="0" {{ ($vgi->gds_insatisfecho ?? 0) == 0 ? 'checked' : '' }}></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="ps-4 fw-500">2. ¿Se siente impotente o indefenso?</td>
+                                                <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_impotente" value="1" {{ ($vgi->gds_impotente ?? 0) == 1 ? 'checked' : '' }}></td>
+                                                <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_impotente" value="0" {{ ($vgi->gds_impotente ?? 0) == 0 ? 'checked' : '' }}></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="ps-4 fw-500">3. ¿Tiene problemas de memoria?</td>
+                                                <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_memoria" value="1" {{ ($vgi->gds_memoria ?? 0) == 1 ? 'checked' : '' }}></td>
+                                                <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_memoria" value="0" {{ ($vgi->gds_memoria ?? 0) == 0 ? 'checked' : '' }}></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="ps-4 fw-500">4. ¿Siente desgano respecto a actividades?</td>
+                                                <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_desgano" value="1" {{ ($vgi->gds_desgano ?? 0) == 1 ? 'checked' : '' }}></td>
+                                                <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_desgano" value="0" {{ ($vgi->gds_desgano ?? 0) == 0 ? 'checked' : '' }}></td>
+                                            </tr>
+                                            <tr class="bg-warning bg-opacity-10 border-top">
+                                                <td class="ps-4 fw-bold text-dark">PUNTAJE TOTAL GDS-4</td>
+                                                <td colspan="2" class="text-center fs-4 fw-bold text-warning" id="gds4_score">0</td>
+                                                <input type="hidden" name="gds_total" id="input_gds_total" value="{{ $vgi->gds_total ?? 0 }}">
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-light border-top">
+                                <div class="alert alert-info mb-0 d-flex align-items-center" id="gds_msg_normal">
+                                    <i class="fas fa-check-circle fs-4 me-3"></i>
+                                    <div><strong>Normal:</strong> Menos de 2 puntos. No se requiere test adicional.</div>
+                                </div>
+                                <div class="alert alert-danger mb-0 d-flex align-items-center" id="gds_msg_risk" style="display:none;">
+                                    <i class="fas fa-exclamation-triangle fs-4 me-3"></i>
+                                    <div><strong>Riesgo Detectado:</strong> 2 o más puntos. <u>Se ha desplegado el Test de Yesavage abajo.</u></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="locked-content" id="gds_content">
-                        
-                        <div class="section-header mb-4">
-                            <div class="header-icon bg-warning text-white"><i class="fas fa-heart-broken"></i></div>
-                            <h4 class="header-title text-warning">XII. Evaluación Afectiva: GDS-4 y Yesavage</h4>
+                <div id="yesavage_section" style="display: none; animation: slideDown 0.5s ease;">
+                    <div class="section-container border-danger mb-4">
+                        <div class="section-header bg-danger text-white">
+                            <h5 class="m-0 fw-bold"><i class="fas fa-list-ol me-2"></i>Test de Yesavage (15 Ítems)</h5>
                         </div>
-
-                        <div class="row justify-content-center">
-                            <div class="col-lg-10">
-                                <div class="section-container mb-4">
-                                    <div class="section-header bg-soft-gray">
-                                        <h5 class="m-0 fw-bold text-dark"><i class="fas fa-filter me-2"></i>Escala Abreviada GDS-4</h5>
-                                    </div>
-                                    <div class="section-body p-0">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover mb-0 align-middle">
-                                                <thead class="bg-light text-uppercase small text-muted">
-                                                    <tr>
-                                                        <th class="ps-4 py-3">Pregunta</th>
-                                                        <th class="text-center" style="width: 100px;">SI (1)</th>
-                                                        <th class="text-center" style="width: 100px;">NO (0)</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="ps-4 fw-500">1. ¿Está insatisfecho con su vida?</td>
-                                                        <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_insatisfecho" value="1" {{ ($vgi->gds_insatisfecho ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                        <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_insatisfecho" value="0" {{ ($vgi->gds_insatisfecho ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="ps-4 fw-500">2. ¿Se siente impotente o indefenso?</td>
-                                                        <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_impotente" value="1" {{ ($vgi->gds_impotente ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                        <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_impotente" value="0" {{ ($vgi->gds_impotente ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="ps-4 fw-500">3. ¿Tiene problemas de memoria?</td>
-                                                        <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_memoria" value="1" {{ ($vgi->gds_memoria ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                        <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_memoria" value="0" {{ ($vgi->gds_memoria ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="ps-4 fw-500">4. ¿Siente desgano respecto a actividades?</td>
-                                                        <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_desgano" value="1" {{ ($vgi->gds_desgano ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                        <td class="text-center"><input class="form-check-input gds4-radio scale-13" type="radio" name="gds_desgano" value="0" {{ ($vgi->gds_desgano ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                    </tr>
-                                                    <tr class="bg-warning bg-opacity-10 border-top">
-                                                        <td class="ps-4 fw-bold text-dark">PUNTAJE TOTAL GDS-4</td>
-                                                        <td colspan="2" class="text-center fs-4 fw-bold text-warning" id="gds4_score">0</td>
-                                                        <input type="hidden" name="gds_total" id="input_gds_total" value="{{ $vgi->gds_total ?? 0 }}">
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <div class="p-3 bg-light border-top">
-                                        <div class="alert alert-info mb-0 d-flex align-items-center" id="gds_msg_normal">
-                                            <i class="fas fa-check-circle fs-4 me-3"></i>
-                                            <div><strong>Normal:</strong> Menos de 2 puntos. No se requiere test adicional.</div>
-                                        </div>
-                                        <div class="alert alert-danger mb-0 d-flex align-items-center" id="gds_msg_risk" style="display:none;">
-                                            <i class="fas fa-exclamation-triangle fs-4 me-3"></i>
-                                            <div><strong>Riesgo Detectado:</strong> 2 o más puntos. <u>Se ha desplegado el Test de Yesavage abajo.</u></div>
-                                        </div>
-                                    </div>
+                        <div class="section-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0 align-middle">
+                                    <thead class="bg-light text-uppercase small text-muted">
+                                        <tr>
+                                            <th class="ps-4 py-3">Pregunta</th>
+                                            <th class="text-center" style="width: 100px;">SI</th>
+                                            <th class="text-center" style="width: 100px;">NO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="ps-4">1. ¿Está satisfecho con su vida?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_1" value="0" {{ ($vgi->ysg_1 ?? 0) == 0 ? 'checked' : '' }}></td> <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_1" value="1" {{ ($vgi->ysg_1 ?? 0) == 1 ? 'checked' : '' }}></td> </tr>
+                                        <tr>
+                                            <td class="ps-4">2. ¿Ha renunciado a muchas actividades?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_2" value="1" {{ ($vgi->ysg_2 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_2" value="0" {{ ($vgi->ysg_2 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">3. ¿Siente que su vida está vacía?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_3" value="1" {{ ($vgi->ysg_3 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_3" value="0" {{ ($vgi->ysg_3 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">4. ¿Se encuentra a menudo aburrido?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_4" value="1" {{ ($vgi->ysg_4 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_4" value="0" {{ ($vgi->ysg_4 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">5. ¿Tiene a menudo buen ánimo?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_5" value="0" {{ ($vgi->ysg_5 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_5" value="1" {{ ($vgi->ysg_5 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">6. ¿Teme que algo malo le pase?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_6" value="1" {{ ($vgi->ysg_6 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_6" value="0" {{ ($vgi->ysg_6 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">7. ¿Se siente feliz muchas veces?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_7" value="0" {{ ($vgi->ysg_7 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_7" value="1" {{ ($vgi->ysg_7 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">8. ¿Se siente a menudo abandonado/a?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_8" value="1" {{ ($vgi->ysg_8 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_8" value="0" {{ ($vgi->ysg_8 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">9. ¿Prefiere quedarse en casa a salir?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_9" value="1" {{ ($vgi->ysg_9 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_9" value="0" {{ ($vgi->ysg_9 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">10. ¿Cree tener más problemas de memoria que el resto?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_10" value="1" {{ ($vgi->ysg_10 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_10" value="0" {{ ($vgi->ysg_10 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">11. ¿Piensa que es maravilloso vivir?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_11" value="0" {{ ($vgi->ysg_11 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_11" value="1" {{ ($vgi->ysg_11 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">12. ¿Le cuesta iniciar nuevos proyectos?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_12" value="1" {{ ($vgi->ysg_12 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_12" value="0" {{ ($vgi->ysg_12 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">13. ¿Se siente lleno/a de energía?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_13" value="0" {{ ($vgi->ysg_13 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_13" value="1" {{ ($vgi->ysg_13 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">14. ¿Siente que su situación es desesperada?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_14" value="1" {{ ($vgi->ysg_14 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_14" value="0" {{ ($vgi->ysg_14 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="ps-4">15. ¿Cree que mucha gente está mejor que usted?</td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_15" value="1" {{ ($vgi->ysg_15 ?? 0) == 1 ? 'checked' : '' }}></td>
+                                            <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_15" value="0" {{ ($vgi->ysg_15 ?? 0) == 0 ? 'checked' : '' }}></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="p-4 bg-danger bg-opacity-10 border-top d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="fw-bold mb-1">Resultado Yesavage:</h5>
+                                    <div id="ysg_interpretation" class="badge bg-secondary fs-6">Sin evaluar</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fs-1 fw-bold text-danger" id="ysg_score">0</span>
+                                    <span class="text-muted fw-bold">/ 15</span>
+                                    <input type="hidden" name="yesavage_total" id="input_yesavage_total" value="{{ $vgi->yesavage_total ?? 0 }}">
                                 </div>
                             </div>
                         </div>
-
-                        <div id="yesavage_section" style="display: none; animation: slideDown 0.5s ease;">
-                            <div class="section-container border-danger mb-4">
-                                <div class="section-header bg-danger text-white">
-                                    <h5 class="m-0 fw-bold"><i class="fas fa-list-ol me-2"></i>Test de Yesavage (15 Ítems)</h5>
-                                </div>
-                                <div class="section-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover mb-0 align-middle">
-                                            <thead class="bg-light text-uppercase small text-muted">
-                                                <tr>
-                                                    <th class="ps-4 py-3">Pregunta</th>
-                                                    <th class="text-center" style="width: 100px;">SI</th>
-                                                    <th class="text-center" style="width: 100px;">NO</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td class="ps-4">1. ¿Está satisfecho con su vida?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_1" value="0" {{ ($vgi->ysg_1 ?? 0) == 0 ? 'checked' : '' }}></td> <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_1" value="1" {{ ($vgi->ysg_1 ?? 0) == 1 ? 'checked' : '' }}></td> </tr>
-                                                <tr>
-                                                    <td class="ps-4">2. ¿Ha renunciado a muchas actividades?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_2" value="1" {{ ($vgi->ysg_2 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_2" value="0" {{ ($vgi->ysg_2 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">3. ¿Siente que su vida está vacía?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_3" value="1" {{ ($vgi->ysg_3 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_3" value="0" {{ ($vgi->ysg_3 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">4. ¿Se encuentra a menudo aburrido?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_4" value="1" {{ ($vgi->ysg_4 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_4" value="0" {{ ($vgi->ysg_4 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">5. ¿Tiene a menudo buen ánimo?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_5" value="0" {{ ($vgi->ysg_5 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_5" value="1" {{ ($vgi->ysg_5 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">6. ¿Teme que algo malo le pase?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_6" value="1" {{ ($vgi->ysg_6 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_6" value="0" {{ ($vgi->ysg_6 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">7. ¿Se siente feliz muchas veces?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_7" value="0" {{ ($vgi->ysg_7 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_7" value="1" {{ ($vgi->ysg_7 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">8. ¿Se siente a menudo abandonado/a?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_8" value="1" {{ ($vgi->ysg_8 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_8" value="0" {{ ($vgi->ysg_8 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">9. ¿Prefiere quedarse en casa a salir?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_9" value="1" {{ ($vgi->ysg_9 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_9" value="0" {{ ($vgi->ysg_9 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">10. ¿Cree tener más problemas de memoria que el resto?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_10" value="1" {{ ($vgi->ysg_10 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_10" value="0" {{ ($vgi->ysg_10 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">11. ¿Piensa que es maravilloso vivir?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_11" value="0" {{ ($vgi->ysg_11 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_11" value="1" {{ ($vgi->ysg_11 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">12. ¿Le cuesta iniciar nuevos proyectos?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_12" value="1" {{ ($vgi->ysg_12 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_12" value="0" {{ ($vgi->ysg_12 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">13. ¿Se siente lleno/a de energía?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_13" value="0" {{ ($vgi->ysg_13 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_13" value="1" {{ ($vgi->ysg_13 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">14. ¿Siente que su situación es desesperada?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_14" value="1" {{ ($vgi->ysg_14 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_14" value="0" {{ ($vgi->ysg_14 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="ps-4">15. ¿Cree que mucha gente está mejor que usted?</td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_15" value="1" {{ ($vgi->ysg_15 ?? 0) == 1 ? 'checked' : '' }}></td>
-                                                    <td class="text-center"><input class="form-check-input ysg-radio scale-13" type="radio" name="ysg_15" value="0" {{ ($vgi->ysg_15 ?? 0) == 0 ? 'checked' : '' }}></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="p-4 bg-danger bg-opacity-10 border-top d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h5 class="fw-bold mb-1">Resultado Yesavage:</h5>
-                                            <div id="ysg_interpretation" class="badge bg-secondary fs-6">Sin evaluar</div>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="fs-1 fw-bold text-danger" id="ysg_score">0</span>
-                                            <span class="text-muted fw-bold">/ 15</span>
-                                            <input type="hidden" name="yesavage_total" id="input_yesavage_total" value="{{ $vgi->yesavage_total ?? 0 }}">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -2356,29 +2334,6 @@
         document.getElementById('input_minicog_total').value = total;
         document.getElementById('input_minicog_valoracion').value = result;
     }
-
-    // === NUEVO: DESBLOQUEO GDS ===
-    function unlockGDS() {
-        const pin = document.getElementById('gds_pin').value;
-        const correctPin = "2026"; 
-        
-        if(pin === correctPin) {
-            document.getElementById('gds_lock_screen').style.opacity = '0';
-            setTimeout(() => { document.getElementById('gds_lock_screen').style.display = 'none'; }, 500);
-            document.getElementById('gds_content').classList.add('unlocked');
-        } else {
-            document.getElementById('gds_pin_error').style.display = 'block';
-            document.getElementById('gds_pin').value = '';
-        }
-    }
-    
-    // Permitir Enter en GDS
-    document.getElementById('gds_pin').addEventListener("keypress", function(e) { 
-        if (e.key === "Enter") { 
-            e.preventDefault(); 
-            unlockGDS(); 
-        } 
-    });
 
     // === NUEVO: CÁLCULO GDS-4 ===
     function calculateGDS4() {
