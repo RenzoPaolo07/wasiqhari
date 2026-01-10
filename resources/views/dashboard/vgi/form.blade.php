@@ -48,8 +48,9 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mmse')"><i class="fas fa-brain"></i> <span>X. MMSE</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-minicog')"><i class="fas fa-stopwatch"></i> <span>XI. Mini-Cog</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-gds')"><i class="fas fa-sad-tear"></i> <span>XII. GDS-4</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-mna')"><i class="fas fa-utensils"></i> <span>XIII. Nutrición</span></button>
                 
-                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>XIII. Física</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>XIV. Física</span></button>
             </div>
         </div>
 
@@ -1623,6 +1624,150 @@
                 </div>
             </div>
 
+            <!-- NUEVA PESTAÑA: MNA (Mini Nutritional Assessment) -->
+            <div id="tab-mna" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-success text-white"><i class="fas fa-utensils"></i></div>
+                    <h4 class="header-title text-success">XIII. Evaluación Nutricional: Mini Nutritional Assessment (MNA-SF)</h4>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="section-container">
+                            <div class="section-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 align-middle">
+                                        <thead class="bg-light text-uppercase small text-muted">
+                                            <tr>
+                                                <th class="ps-4 py-3">Pregunta</th>
+                                                <th class="text-center" style="width: 250px;">Respuesta</th>
+                                                <th class="text-center" style="width: 80px;">Pts</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <strong>A. ¿Ha comido menos en los últimos 3 meses?</strong><br>
+                                                    <span class="text-muted small">(Por falta de apetito, problemas digestivos, deglución)</span>
+                                                </td>
+                                                <td>
+                                                    <select name="mna_a" class="form-select form-select-sm mna-select">
+                                                        <option value="0" {{ ($vgi->mna_a ?? 0) == 0 ? 'selected' : '' }}>0 = Apetito grave (Pérdida severa)</option>
+                                                        <option value="1" {{ ($vgi->mna_a ?? 0) == 1 ? 'selected' : '' }}>1 = Apetito moderado (Pérdida mod.)</option>
+                                                        <option value="2" {{ ($vgi->mna_a ?? 0) == 2 ? 'selected' : '' }}>2 = Sin pérdida de apetito</option>
+                                                    </select>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_mna_a">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <strong>B. ¿Pérdida de peso reciente (3 meses)?</strong>
+                                                </td>
+                                                <td>
+                                                    <select name="mna_b" class="form-select form-select-sm mna-select">
+                                                        <option value="0" {{ ($vgi->mna_b ?? 0) == 0 ? 'selected' : '' }}>0 = Pérdida > 3 kg</option>
+                                                        <option value="1" {{ ($vgi->mna_b ?? 0) == 1 ? 'selected' : '' }}>1 = No lo sabe</option>
+                                                        <option value="2" {{ ($vgi->mna_b ?? 0) == 2 ? 'selected' : '' }}>2 = Pérdida entre 1 y 3 kg</option>
+                                                        <option value="3" {{ ($vgi->mna_b ?? 0) == 3 ? 'selected' : '' }}>3 = No ha perdido peso</option>
+                                                    </select>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_mna_b">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <strong>C. Movilidad</strong>
+                                                </td>
+                                                <td>
+                                                    <select name="mna_c" class="form-select form-select-sm mna-select">
+                                                        <option value="0" {{ ($vgi->mna_c ?? 0) == 0 ? 'selected' : '' }}>0 = De la cama al sillón</option>
+                                                        <option value="1" {{ ($vgi->mna_c ?? 0) == 1 ? 'selected' : '' }}>1 = Autonomía en interior</option>
+                                                        <option value="2" {{ ($vgi->mna_c ?? 0) == 2 ? 'selected' : '' }}>2 = Sale del domicilio</option>
+                                                    </select>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_mna_c">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <strong>D. ¿Ha tenido enfermedad aguda o estrés psicológico (3 meses)?</strong>
+                                                </td>
+                                                <td>
+                                                    <select name="mna_d" class="form-select form-select-sm mna-select">
+                                                        <option value="0" {{ ($vgi->mna_d ?? 0) == 0 ? 'selected' : '' }}>0 = Sí</option>
+                                                        <option value="2" {{ ($vgi->mna_d ?? 0) == 2 ? 'selected' : '' }}>2 = No</option>
+                                                    </select>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_mna_d">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <strong>E. Problemas neuropsicológicos</strong>
+                                                </td>
+                                                <td>
+                                                    <select name="mna_e" class="form-select form-select-sm mna-select">
+                                                        <option value="0" {{ ($vgi->mna_e ?? 0) == 0 ? 'selected' : '' }}>0 = Demencia/Depresión grave</option>
+                                                        <option value="1" {{ ($vgi->mna_e ?? 0) == 1 ? 'selected' : '' }}>1 = Demencia moderada</option>
+                                                        <option value="2" {{ ($vgi->mna_e ?? 0) == 2 ? 'selected' : '' }}>2 = Sin problemas</option>
+                                                    </select>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_mna_e">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <strong>F. Índice de Masa Corporal (IMC)</strong><br>
+                                                    <span class="text-muted small">IMC actual: <strong id="mna_current_bmi">{{ $vgi->imc ?? '--' }}</strong> (Calculado en Pestaña II)</span><br>
+                                                    <span class="text-danger small fst-italic">*Si no se puede IMC, medir pantorrilla.</span>
+                                                </td>
+                                                <td>
+                                                    <select name="mna_f" class="form-select form-select-sm mna-select">
+                                                        <option value="0" {{ ($vgi->mna_f ?? 0) == 0 ? 'selected' : '' }}>0 = IMC < 19 (o Pantorrilla < 31)</option>
+                                                        <option value="1" {{ ($vgi->mna_f ?? 0) == 1 ? 'selected' : '' }}>1 = IMC 19 - < 21</option>
+                                                        <option value="2" {{ ($vgi->mna_f ?? 0) == 2 ? 'selected' : '' }}>2 = IMC 21 - < 23</option>
+                                                        <option value="3" {{ ($vgi->mna_f ?? 0) == 3 ? 'selected' : '' }}>3 = IMC ≥ 23 (o Pantorrilla ≥ 31)</option>
+                                                    </select>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_mna_f">0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shadow-lg border-0 bg-success text-white sticky-top" style="top: 100px;">
+                            <div class="card-body text-center p-4">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-apple-alt me-2"></i>PUNTAJE MNA</h5>
+                                
+                                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
+                                    <div class="display-4 fw-bold text-success" id="mna_score_display">0</div>
+                                </div>
+                                <p class="mb-2 fw-bold text-uppercase text-white-50">Máximo 14 Puntos</p>
+                                
+                                <div class="badge bg-white text-success px-3 py-2 fs-6 rounded-pill w-100 mb-3" id="mna_result_display">Sin evaluar</div>
+                                
+                                <input type="hidden" name="mna_puntaje" id="input_mna_puntaje" value="{{ $vgi->mna_puntaje ?? 0 }}">
+                                <input type="hidden" name="mna_valoracion" id="input_mna_valoracion" value="{{ $vgi->mna_valoracion ?? '' }}">
+                                
+                                <hr class="border-white opacity-25 my-4">
+                                <div class="text-start small opacity-75">
+                                    <ul class="list-unstyled mb-0 d-grid gap-1">
+                                        <li><span class="badge bg-white text-success me-2">12-14</span> Estado Normal</li>
+                                        <li><span class="badge bg-white text-warning me-2">8-11</span> Riesgo de Malnutrición</li>
+                                        <li><span class="badge bg-white text-danger me-2">0-7</span> Malnutrición</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- PESTAÑA: FÍSICA -->
             <div id="tab-fisica" class="vgi-tab-content">
                 <div class="section-container mb-4">
@@ -2385,6 +2530,76 @@
         badge.className = `badge fs-6 ${color}`;
     }
 
+    // 11. NUEVA FUNCIÓN: CALCULAR MNA
+    function calcularMNA() {
+        let total = 0;
+        
+        // Sumar selects
+        document.querySelectorAll('.mna-select').forEach(select => {
+            let val = parseInt(select.value);
+            total += val;
+            
+            // Actualizar la celda de puntaje individual
+            let row = select.closest('tr');
+            let scoreCell = row.querySelector('.text-center.fw-bold');
+            if(scoreCell) scoreCell.innerText = val;
+        });
+
+        // Actualizar visualización total
+        const scoreDisplay = document.getElementById('mna_score_display');
+        const resultDisplay = document.getElementById('mna_result_display');
+        const inputTotal = document.getElementById('input_mna_puntaje');
+        const inputVal = document.getElementById('input_mna_valoracion');
+        const cardBg = scoreDisplay.closest('.card'); // Para cambiar color de fondo
+
+        scoreDisplay.innerText = total;
+        inputTotal.value = total;
+
+        let result = "";
+        let colorClass = "";
+        let cardClass = ""; // bg-success, bg-warning, bg-danger
+
+        if (total >= 12) {
+            result = "ESTADO NUTRICIONAL NORMAL";
+            colorClass = "text-success";
+            cardClass = "bg-success";
+        } else if (total >= 8) {
+            result = "RIESGO DE MALNUTRICIÓN";
+            colorClass = "text-warning";
+            cardClass = "bg-warning";
+        } else {
+            result = "MALNUTRICIÓN";
+            colorClass = "text-danger";
+            cardClass = "bg-danger";
+        }
+
+        // Actualizar Badge
+        resultDisplay.innerText = result;
+        resultDisplay.className = `badge bg-white ${colorClass} px-3 py-2 fs-6 rounded-pill w-100 mb-3`;
+        inputVal.value = result;
+
+        // Actualizar Color de Tarjeta
+        cardBg.className = `card shadow-lg border-0 text-white sticky-top ${cardClass}`;
+        scoreDisplay.className = `display-4 fw-bold ${colorClass}`;
+    }
+
+    // Auto-select IMC if available
+    function autoSelectMNA_BMI() {
+        // Obtenemos el IMC del input de la pestaña II
+        const bmi = parseFloat(document.getElementById('imc').value);
+        if(!isNaN(bmi) && bmi > 0) {
+            const select = document.querySelector('select[name="mna_f"]');
+            if(bmi < 19) select.value = "0";
+            else if(bmi < 21) select.value = "1";
+            else if(bmi < 23) select.value = "2";
+            else select.value = "3";
+            
+            // Actualizar visual
+            document.getElementById('mna_current_bmi').innerText = bmi;
+            calcularMNA(); // Recalcular con el nuevo valor
+        }
+    }
+
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
         const tieneCuidador = {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
@@ -2401,9 +2616,13 @@
         calcularMinicog(); // Calcular Mini-Cog al cargar
         calculateGDS4(); // Chequear si hay que mostrar Yesavage al cargar
         calculateYesavage(); // Calcular Yesavage si existe
+        calcularMNA(); // Calcular MNA al cargar
+        
+        // Intentar autoseleccionar IMC al cargar (si ya estaba guardado o calculado)
+        setTimeout(autoSelectMNA_BMI, 500); 
     });
 
-    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS y Yesavage
+    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS, Yesavage y MNA
     document.addEventListener("change", function(e) {
         if(e.target.classList.contains('barthel-radio')) {
             calcularBarthel();
@@ -2429,12 +2648,21 @@
         if(e.target.classList.contains('ysg-radio')) {
             calculateYesavage();
         }
+        if(e.target.classList.contains('mna-select')) {
+            calcularMNA();
+        }
     });
     
     document.addEventListener("input", function(e) {
         if(e.target.classList.contains('rudas-input')) {
             calcularRudas();
         }
+        if(e.target.id === 'peso' || e.target.id === 'talla') {
+            setTimeout(autoSelectMNA_BMI, 100);
+        }
     });
+    
+    // Listener específico para IMC
+    document.getElementById('imc').addEventListener('change', autoSelectMNA_BMI);
 </script>
 @endpush

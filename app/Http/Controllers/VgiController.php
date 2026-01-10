@@ -77,6 +77,7 @@ class VgiController extends Controller
             'ysg_1', 'ysg_2', 'ysg_3', 'ysg_4', 'ysg_5', 
             'ysg_6', 'ysg_7', 'ysg_8', 'ysg_9', 'ysg_10', 
             'ysg_11', 'ysg_12', 'ysg_13', 'ysg_14', 'ysg_15',
+            'mna_a', 'mna_b', 'mna_c', 'mna_d', 'mna_e', 'mna_f',
         ];
 
         foreach ($camposNumericos as $campo) {
