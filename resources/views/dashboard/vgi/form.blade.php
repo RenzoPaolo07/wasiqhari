@@ -49,8 +49,8 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-minicog')"><i class="fas fa-stopwatch"></i> <span>XI. Mini-Cog</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-gds')"><i class="fas fa-sad-tear"></i> <span>XII. GDS-4</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mna')"><i class="fas fa-utensils"></i> <span>XIII. Nutrición</span></button>
-                
-                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>XIV. Física</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-sarcf')"><i class="fas fa-dumbbell"></i> <span>XIV. SCAR-F</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>XV. Física</span></button>
             </div>
         </div>
 
@@ -816,6 +816,7 @@
                                 <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Viaja solo en transporte público o conduce</label></div>
                                 <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Capaz de coger un taxi, pero no otro medio</label></div>
                                 <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Viaja en transporte público acompañado</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="0" {{ ($vgi->lawton_transporte ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="trans_3">Viaja en transporte público acompañado</label></div>
                                 <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="0" {{ ($vgi->lawton_transporte ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Utiliza taxi/auto con ayuda de otros</label></div>
                                 <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="0" {{ ($vgi->lawton_transporte ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">No viaja en absoluto</label></div>
                             </div>
@@ -1708,7 +1709,7 @@
                                                 </td>
                                                 <td>
                                                     <select name="mna_e" class="form-select form-select-sm mna-select">
-                                                        <option value="0" {{ ($vgi->mna_e ?? 0) == 0 ? 'selected' : '' }}>0 = Demencia/Depresión grave</option>
+                                                        <option value="0" {{ ($vgi->mna_e ?? 0) == 0 ? 'selected' : '' }}>0 = Demencia/Depresión grave</label>
                                                         <option value="1" {{ ($vgi->mna_e ?? 0) == 1 ? 'selected' : '' }}>1 = Demencia moderada</option>
                                                         <option value="2" {{ ($vgi->mna_e ?? 0) == 2 ? 'selected' : '' }}>2 = Sin problemas</option>
                                                     </select>
@@ -1760,6 +1761,140 @@
                                         <li><span class="badge bg-white text-success me-2">12-14</span> Estado Normal</li>
                                         <li><span class="badge bg-white text-warning me-2">8-11</span> Riesgo de Malnutrición</li>
                                         <li><span class="badge bg-white text-danger me-2">0-7</span> Malnutrición</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA: ESCALA SCAR-F (Sarcopenia) -->
+            <div id="tab-sarcf" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-secondary text-white"><i class="fas fa-dumbbell"></i></div>
+                    <h4 class="header-title text-secondary">XIV. Escala SCAR-F (Sarcopenia)</h4>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="section-container">
+                            <div class="section-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 align-middle">
+                                        <thead class="bg-light text-uppercase small text-muted">
+                                            <tr>
+                                                <th class="ps-4 py-3">Ítem / Pregunta</th>
+                                                <th class="text-center" style="width: 250px;">Respuesta</th>
+                                                <th class="text-center" style="width: 80px;">Pts</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <span class="badge bg-secondary mb-1">S</span> Fuerza<br>
+                                                    <small class="text-muted">¿Qué tanta dificultad tiene para llevar o cargar 4.5 kg?</small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_fuerza" value="0" {{ ($vgi->sarcf_fuerza ?? 0) == 0 ? 'checked' : '' }}> Ninguna (0)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_fuerza" value="1" {{ ($vgi->sarcf_fuerza ?? 0) == 1 ? 'checked' : '' }}> Alguna (1)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_fuerza" value="2" {{ ($vgi->sarcf_fuerza ?? 0) == 2 ? 'checked' : '' }}> Mucha / Incapaz (2)</label>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_sarcf_1">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <span class="badge bg-secondary mb-1">A</span> Asistencia para caminar<br>
+                                                    <small class="text-muted">¿Qué tanta dificultad tiene para cruzar caminando un cuarto?</small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_asistencia" value="0" {{ ($vgi->sarcf_asistencia ?? 0) == 0 ? 'checked' : '' }}> Ninguna (0)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_asistencia" value="1" {{ ($vgi->sarcf_asistencia ?? 0) == 1 ? 'checked' : '' }}> Alguna (1)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_asistencia" value="2" {{ ($vgi->sarcf_asistencia ?? 0) == 2 ? 'checked' : '' }}> Mucha / Incapaz (2)</label>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_sarcf_2">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <span class="badge bg-secondary mb-1">R</span> Levantarse de una silla<br>
+                                                    <small class="text-muted">¿Qué tanta dificultad tiene para levantarse de una silla o cama?</small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_levantarse" value="0" {{ ($vgi->sarcf_levantarse ?? 0) == 0 ? 'checked' : '' }}> Ninguna (0)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_levantarse" value="1" {{ ($vgi->sarcf_levantarse ?? 0) == 1 ? 'checked' : '' }}> Alguna (1)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_levantarse" value="2" {{ ($vgi->sarcf_levantarse ?? 0) == 2 ? 'checked' : '' }}> Mucha / Incapaz (2)</label>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_sarcf_3">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <span class="badge bg-secondary mb-1">C</span> Subir escaleras<br>
+                                                    <small class="text-muted">¿Qué tanta dificultad tiene para subir 10 escalones?</small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_escaleras" value="0" {{ ($vgi->sarcf_escaleras ?? 0) == 0 ? 'checked' : '' }}> Ninguna (0)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_escaleras" value="1" {{ ($vgi->sarcf_escaleras ?? 0) == 1 ? 'checked' : '' }}> Alguna (1)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_escaleras" value="2" {{ ($vgi->sarcf_escaleras ?? 0) == 2 ? 'checked' : '' }}> Mucha / Incapaz (2)</label>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_sarcf_4">0</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-500">
+                                                    <span class="badge bg-secondary mb-1">F</span> Caídas<br>
+                                                    <small class="text-muted">¿Cuántas veces se ha caído en el último año?</small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_caidas" value="0" {{ ($vgi->sarcf_caidas ?? 0) == 0 ? 'checked' : '' }}> Ninguna (0)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_caidas" value="1" {{ ($vgi->sarcf_caidas ?? 0) == 1 ? 'checked' : '' }}> Alguna (1-3) (1)</label>
+                                                        <label class="sarcf-label"><input type="radio" class="sarcf-radio" name="sarcf_caidas" value="2" {{ ($vgi->sarcf_caidas ?? 0) == 2 ? 'checked' : '' }}> Mucha (≥4) (2)</label>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center fw-bold bg-light" id="score_sarcf_5">0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-light border rounded">
+                            <p class="small text-muted mb-0"><i class="fas fa-info-circle me-1"></i> Esta escala es un predictor rápido de sarcopenia.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shadow-lg border-0 bg-secondary text-white sticky-top" style="top: 100px;">
+                            <div class="card-body text-center p-4">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-dumbbell me-2"></i>PUNTAJE SCAR-F</h5>
+                                
+                                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
+                                    <div class="display-4 fw-bold text-secondary" id="sarcf_score_display">0</div>
+                                </div>
+                                <p class="mb-2 fw-bold text-uppercase text-white-50">Máximo 10 Puntos</p>
+                                
+                                <div class="badge bg-white text-secondary px-3 py-2 fs-6 rounded-pill w-100 mb-3" id="sarcf_result_display">Sin evaluar</div>
+                                
+                                <input type="hidden" name="sarcf_total" id="input_sarcf_total" value="{{ $vgi->sarcf_total ?? 0 }}">
+                                <input type="hidden" name="sarcf_valoracion" id="input_sarcf_valoracion" value="{{ $vgi->sarcf_valoracion ?? '' }}">
+                                
+                                <hr class="border-white opacity-25 my-4">
+                                <div class="text-start small opacity-75">
+                                    <ul class="list-unstyled mb-0 d-grid gap-2">
+                                        <li><span class="badge bg-white text-success me-2">0 - 3</span> <strong>Sin Sarcopenia</strong></li>
+                                        <li><span class="badge bg-white text-danger me-2">4 - 10</span> <strong>Sarcopenia Probable</strong></li>
                                     </ul>
                                 </div>
                             </div>
@@ -2028,6 +2163,9 @@
     .scale-13 { transform: scale(1.3); cursor: pointer; }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* Nuevos estilos para SCAR-F */
+    .sarcf-label { cursor: pointer; display: block; padding: 2px 0; font-size: 0.95rem; }
+    .sarcf-radio { margin-right: 8px; transform: scale(1.2); }
 </style>
 @endpush
 
@@ -2583,6 +2721,60 @@
         scoreDisplay.className = `display-4 fw-bold ${colorClass}`;
     }
 
+    // 12. NUEVA FUNCIÓN: CALCULAR SCAR-F
+    function calcularSarcF() {
+        let total = 0;
+        let rowCount = 1;
+        
+        // Iterar grupos de radio (sarcf_fuerza, etc.)
+        const groups = ['sarcf_fuerza', 'sarcf_asistencia', 'sarcf_levantarse', 'sarcf_escaleras', 'sarcf_caidas'];
+        
+        groups.forEach(groupName => {
+            const el = document.querySelector(`input[name="${groupName}"]:checked`);
+            let val = 0;
+            if(el) {
+                val = parseInt(el.value);
+                total += val;
+                // Actualizar celda individual
+                document.getElementById(`score_sarcf_${rowCount}`).innerText = val;
+            }
+            rowCount++;
+        });
+
+        // Actualizar visualización total
+        const scoreDisplay = document.getElementById('sarcf_score_display');
+        const resultDisplay = document.getElementById('sarcf_result_display');
+        const inputTotal = document.getElementById('input_sarcf_total');
+        const inputVal = document.getElementById('input_sarcf_valoracion');
+        const cardBg = scoreDisplay.closest('.card');
+
+        scoreDisplay.innerText = total;
+        inputTotal.value = total;
+
+        let result = "";
+        let colorClass = ""; // texto del badge
+        let cardClass = ""; // fondo de la tarjeta lateral
+
+        if (total >= 4) {
+            result = "SARCOPENIA";
+            colorClass = "text-danger";
+            cardClass = "bg-danger";
+        } else {
+            result = "SIN SARCOPENIA";
+            colorClass = "text-success";
+            cardClass = "bg-success"; // O puedes usar secondary si prefieres neutro
+        }
+
+        // Actualizar Badge
+        resultDisplay.innerText = result;
+        resultDisplay.className = `badge bg-white ${colorClass} px-3 py-2 fs-6 rounded-pill w-100 mb-3`;
+        inputVal.value = result;
+
+        // Actualizar Color de Tarjeta
+        cardBg.className = `card shadow-lg border-0 text-white sticky-top ${cardClass}`;
+        scoreDisplay.className = `display-4 fw-bold ${colorClass}`;
+    }
+
     // Auto-select IMC if available
     function autoSelectMNA_BMI() {
         // Obtenemos el IMC del input de la pestaña II
@@ -2617,12 +2809,13 @@
         calculateGDS4(); // Chequear si hay que mostrar Yesavage al cargar
         calculateYesavage(); // Calcular Yesavage si existe
         calcularMNA(); // Calcular MNA al cargar
+        calcularSarcF(); // Calcular SCAR-F al cargar
         
         // Intentar autoseleccionar IMC al cargar (si ya estaba guardado o calculado)
         setTimeout(autoSelectMNA_BMI, 500); 
     });
 
-    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS, Yesavage y MNA
+    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS, Yesavage, MNA y SCAR-F
     document.addEventListener("change", function(e) {
         if(e.target.classList.contains('barthel-radio')) {
             calcularBarthel();
@@ -2650,6 +2843,9 @@
         }
         if(e.target.classList.contains('mna-select')) {
             calcularMNA();
+        }
+        if(e.target.classList.contains('sarcf-radio')) {
+            calcularSarcF();
         }
     });
     
