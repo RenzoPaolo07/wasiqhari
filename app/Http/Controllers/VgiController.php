@@ -80,6 +80,7 @@ class VgiController extends Controller
             'mna_a', 'mna_b', 'mna_c', 'mna_d', 'mna_e', 'mna_f',
             'sarcf_fuerza', 'sarcf_asistencia', 'sarcf_levantarse', 
             'sarcf_escaleras', 'sarcf_caidas', 'sarcf_total',
+            'marcha_segundos', 'marcha_velocidad', 'tug_segundos',
         ];
 
         foreach ($camposNumericos as $campo) {

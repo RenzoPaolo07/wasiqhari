@@ -50,7 +50,8 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-gds')"><i class="fas fa-sad-tear"></i> <span>XII. GDS-4</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mna')"><i class="fas fa-utensils"></i> <span>XIII. Nutrición</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-sarcf')"><i class="fas fa-dumbbell"></i> <span>XIV. SCAR-F</span></button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-fisica')"><i class="fas fa-apple-alt"></i> <span>XV. Física</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-marcha')"><i class="fas fa-walking"></i> <span>XV. Marcha/TUG</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-plan')"><i class="fas fa-file-prescription"></i> <span>XVI. Plan</span></button>
             </div>
         </div>
 
@@ -815,8 +816,7 @@
                             <div class="p-3">
                                 <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Viaja solo en transporte público o conduce</label></div>
                                 <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Capaz de coger un taxi, pero no otro medio</label></div>
-                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="form-check-label">Viaja en transporte público acompañado</label></div>
-                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="0" {{ ($vgi->lawton_transporte ?? 0) == 0 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="trans_3">Viaja en transporte público acompañado</label></div>
+                                <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="1" {{ ($vgi->lawton_transporte ?? 0) == 1 ? 'checked' : '' }}><label class="btn btn-outline-secondary btn-sm px-3" for="trans_3">Viaja en transporte público acompañado</label></div>
                                 <div class="form-check mb-2"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="0" {{ ($vgi->lawton_transporte ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">Utiliza taxi/auto con ayuda de otros</label></div>
                                 <div class="form-check"><input class="form-check-input lawton-radio" type="radio" name="lawton_transporte" value="0" {{ ($vgi->lawton_transporte ?? 0) == 0 ? 'checked' : '' }}><label class="form-check-label">No viaja en absoluto</label></div>
                             </div>
@@ -1903,34 +1903,127 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA: FÍSICA -->
-            <div id="tab-fisica" class="vgi-tab-content">
-                <div class="section-container mb-4">
-                    <div class="section-header bg-purple-light text-purple">
-                        <div class="icon-box bg-purple text-white"><i class="fas fa-apple-alt"></i></div>
-                        <h5 class="m-0 fw-bold">Estado Nutricional y Físico</h5>
-                    </div>
-                    <div class="section-body p-4">
-                        <div class="row g-4 text-center justify-content-center">
-                            <div class="col-md-3">
-                                <label class="label-input d-block mb-2">MNA (Nutrición)</label>
-                                <input type="number" name="mna_puntaje" min="0" class="form-control modern-input text-center fs-4" value="{{ $vgi->mna_puntaje ?? '' }}">
+            <!-- NUEVA PESTAÑA: MARCHA/TUG -->
+            <div id="tab-marcha" class="vgi-tab-content">
+                
+                <div class="locked-wrapper">
+                    <div class="lock-overlay" id="marcha_lock_screen">
+                        <div class="lock-card border-info">
+                            <div class="mb-3 text-info">
+                                <i class="fas fa-stopwatch fa-4x"></i>
+                                <i class="fas fa-lock fa-2x" style="margin-left: -15px; vertical-align: bottom; color: #333; background: white; border-radius: 50%;"></i>
                             </div>
-                            <div class="col-md-3">
-                                <label class="label-input d-block mb-2">Velocidad Marcha</label>
-                                <input type="number" step="0.1" min="0" name="velocidad_marcha" class="form-control modern-input text-center fs-4" value="{{ $vgi->velocidad_marcha ?? '' }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="label-input d-block mb-2">FRAIL (Fragilidad)</label>
-                                <input type="number" name="frail_puntaje" min="0" max="5" class="form-control modern-input text-center fs-4" value="{{ $vgi->frail_puntaje ?? '' }}">
-                            </div>
+                            <h4 class="fw-bold text-dark">Evaluación Física Protegida</h4>
+                            <p class="text-muted small">Pruebas de ejecución física. Solo personal capacitado.</p>
+                            <input type="password" id="marcha_pin" class="pin-input" placeholder="****" maxlength="4">
+                            <button type="button" class="btn btn-info w-100 fw-bold py-2 rounded-pill shadow-sm text-white" onclick="unlockMarcha()">
+                                <i class="fas fa-unlock me-2"></i> DESBLOQUEAR
+                            </button>
+                            <p id="marcha_pin_error" class="text-danger small mt-2 fw-bold" style="display:none;"><i class="fas fa-times-circle"></i> PIN Incorrecto</p>
                         </div>
                     </div>
+
+                    <div class="locked-content" id="marcha_content">
+                        
+                        <div class="section-header mb-4">
+                            <div class="header-icon bg-info text-white"><i class="fas fa-walking"></i></div>
+                            <h4 class="header-title text-info">XV. Evaluación de la Velocidad de la Marcha y TUG</h4>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-lg-6">
+                                <div class="section-container h-100">
+                                    <div class="section-header bg-light">
+                                        <h5 class="m-0 fw-bold text-dark"><i class="fas fa-tachometer-alt me-2"></i>Velocidad de Marcha (8m)</h5>
+                                    </div>
+                                    <div class="section-body p-4 text-center">
+                                        <p class="text-muted small mb-4">Mida el tiempo que tarda en recorrer <strong>8 metros</strong> a paso habitual.</p>
+                                        
+                                        <div class="bg-soft-gray p-3 rounded-3 mb-3 d-inline-block">
+                                            <label class="label-title text-muted mb-1">TIEMPO (Segundos)</label>
+                                            <input type="number" step="0.01" min="0" id="marcha_segundos" name="marcha_segundos" 
+                                                   class="form-control text-center fw-bold fs-1 border-0 bg-transparent text-dark p-0" 
+                                                   placeholder="0.00" value="{{ $vgi->marcha_segundos ?? '' }}" 
+                                                   oninput="calcularMarcha()">
+                                        </div>
+
+                                        <div class="divider-line my-3"></div>
+
+                                        <div class="row align-items-center">
+                                            <div class="col-6 text-end border-end pe-4">
+                                                <small class="d-block text-muted">Velocidad:</small>
+                                                <span class="fs-3 fw-bold text-info" id="marcha_velocidad_display">0.00</span> 
+                                                <span class="small text-muted">m/s</span>
+                                                <input type="hidden" name="marcha_velocidad" id="input_marcha_velocidad" value="{{ $vgi->marcha_velocidad ?? 0 }}">
+                                            </div>
+                                            <div class="col-6 text-start ps-4">
+                                                <div id="marcha_badge" class="badge bg-secondary">Sin evaluar</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-light border mt-3 text-start small">
+                                            <strong>Criterio (8m):</strong><br>
+                                            <span class="text-success">●</span> ≥ 0.8 m/s: Normal<br>
+                                            <span class="text-danger">●</span> < 0.8 m/s: Riesgo / Fragilidad
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="section-container h-100">
+                                    <div class="section-header bg-light">
+                                        <h5 class="m-0 fw-bold text-dark"><i class="fas fa-chair me-2"></i>Get Up and Go (TUG)</h5>
+                                    </div>
+                                    <div class="section-body p-4 text-center">
+                                        <p class="text-muted small mb-3">Levantarse, caminar 3m, girar, volver y sentarse.</p>
+                                        
+                                        <div class="bg-white border rounded p-2 mb-3 d-inline-block shadow-sm">
+                                            <i class="fas fa-walking fs-1 text-muted opacity-50 m-2"></i>
+                                            <span class="d-block small text-muted" style="font-size: 0.7em;">Esquema TUG</span>
+                                        </div>
+
+                                        <div class="bg-soft-gray p-3 rounded-3 mb-3">
+                                            <label class="label-title text-muted mb-1">TIEMPO TOTAL (Segundos)</label>
+                                            <input type="number" step="0.01" min="0" id="tug_segundos" name="tug_segundos" 
+                                                   class="form-control text-center fw-bold fs-1 border-0 bg-transparent text-dark p-0" 
+                                                   placeholder="0.00" value="{{ $vgi->tug_segundos ?? '' }}" 
+                                                   oninput="calcularTUG()">
+                                        </div>
+
+                                        <div id="tug_badge" class="badge bg-secondary fs-6 px-3 py-2 w-100">Sin evaluar</div>
+
+                                        <div class="alert alert-light border mt-3 text-start small">
+                                            <strong>Interpretación:</strong><br>
+                                            <span class="text-success">●</span> < 10s: Normal (Independiente)<br>
+                                            <span class="text-warning">●</span> 10-20s: Riesgo Leve<br>
+                                            <span class="text-danger">●</span> > 20s: Riesgo Alto de Caídas
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA: PLAN FINAL -->
+            <div id="tab-plan" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-brand-gradient text-white"><i class="fas fa-file-prescription"></i></div>
+                    <h4 class="header-title text-brand">XVI. Plan de Trabajo y Recomendaciones</h4>
                 </div>
                 
-                <div class="form-group mt-5">
-                    <label class="text-brand fw-bold mb-3 fs-5"><i class="fas fa-user-md me-2"></i>Plan de Trabajo / Recomendaciones</label>
-                    <textarea name="plan_cuidados" class="form-control modern-input p-4 shadow-sm" rows="6" placeholder="Escriba aquí las indicaciones médicas, tratamiento y observaciones...">{{ $vgi->plan_cuidados ?? '' }}</textarea>
+                <div class="section-container p-5">
+                    <div class="form-group">
+                        <label class="text-brand fw-bold mb-3 fs-5"><i class="fas fa-user-md me-2"></i>Indicaciones Finales del Profesional</label>
+                        <textarea name="plan_cuidados" class="form-control modern-input p-4 shadow-sm fs-5" rows="10" placeholder="Escriba aquí el resumen diagnóstico, tratamiento, derivaciones y recomendaciones para el paciente...">{{ $vgi->plan_cuidados ?? '' }}</textarea>
+                    </div>
+                    
+                    <div class="mt-4 text-end">
+                        <small class="text-muted">Este plan se guardará en la historia clínica digital del paciente.</small>
+                    </div>
                 </div>
             </div>
 
@@ -1939,7 +2032,7 @@
                 <div class="d-flex gap-3 ms-auto">
                     <a href="{{ route('adultos') }}" class="btn btn-light px-4 fw-bold text-muted border rounded-pill hover-scale">Cancelar</a>
                     <button type="submit" class="btn btn-brand px-5 py-2 shadow-lg fw-bold rounded-pill text-white hover-scale">
-                        <i class="fas fa-save me-2"></i> Guardar Historia
+                        <i class="fas fa-save me-2"></i> Guardar Historia Clínica Completa
                     </button>
                 </div>
             </div>
@@ -2775,6 +2868,74 @@
         scoreDisplay.className = `display-4 fw-bold ${colorClass}`;
     }
 
+    // NUEVO: DESBLOQUEO MARCHA
+    function unlockMarcha() {
+        const pin = document.getElementById('marcha_pin').value;
+        const correctPin = "2026"; 
+        
+        if(pin === correctPin) {
+            document.getElementById('marcha_lock_screen').style.opacity = '0';
+            setTimeout(() => { document.getElementById('marcha_lock_screen').style.display = 'none'; }, 500);
+            document.getElementById('marcha_content').classList.add('unlocked');
+        } else {
+            document.getElementById('marcha_pin_error').style.display = 'block';
+            document.getElementById('marcha_pin').value = '';
+        }
+    }
+    document.getElementById('marcha_pin').addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); unlockMarcha(); } });
+
+    // NUEVO: CÁLCULO VELOCIDAD MARCHA (8 metros)
+    function calcularMarcha() {
+        const segundos = parseFloat(document.getElementById('marcha_segundos').value);
+        const distancia = 8.0; // Metros fijos según formato
+        const displayVel = document.getElementById('marcha_velocidad_display');
+        const inputVel = document.getElementById('input_marcha_velocidad');
+        const badge = document.getElementById('marcha_badge');
+
+        if (segundos > 0) {
+            const velocidad = distancia / segundos;
+            const velFixed = velocidad.toFixed(2);
+            
+            displayVel.innerText = velFixed;
+            inputVel.value = velFixed;
+
+            if (velocidad >= 0.8) {
+                badge.innerText = "NORMAL";
+                badge.className = "badge bg-success fs-6";
+            } else {
+                badge.innerText = "RIESGO / FRAGILIDAD";
+                badge.className = "badge bg-danger fs-6";
+            }
+        } else {
+            displayVel.innerText = "0.00";
+            inputVel.value = 0;
+            badge.innerText = "Sin evaluar";
+            badge.className = "badge bg-secondary";
+        }
+    }
+
+    // NUEVO: CÁLCULO TUG
+    function calcularTUG() {
+        const segundos = parseFloat(document.getElementById('tug_segundos').value);
+        const badge = document.getElementById('tug_badge');
+
+        if (segundos > 0) {
+            if (segundos < 10) {
+                badge.innerText = "NORMAL (Independiente)";
+                badge.className = "badge bg-success fs-6 px-3 py-2 w-100";
+            } else if (segundos <= 20) {
+                badge.innerText = "RIESGO LEVE (Movilidad Variable)";
+                badge.className = "badge bg-warning text-dark fs-6 px-3 py-2 w-100";
+            } else {
+                badge.innerText = "RIESGO ALTO DE CAÍDAS";
+                badge.className = "badge bg-danger fs-6 px-3 py-2 w-100";
+            }
+        } else {
+            badge.innerText = "Sin evaluar";
+            badge.className = "badge bg-secondary fs-6 px-3 py-2 w-100";
+        }
+    }
+
     // Auto-select IMC if available
     function autoSelectMNA_BMI() {
         // Obtenemos el IMC del input de la pestaña II
@@ -2810,6 +2971,8 @@
         calculateYesavage(); // Calcular Yesavage si existe
         calcularMNA(); // Calcular MNA al cargar
         calcularSarcF(); // Calcular SCAR-F al cargar
+        calcularMarcha(); // Calcular Marcha/TUG al cargar
+        calcularTUG(); // Calcular TUG al cargar
         
         // Intentar autoseleccionar IMC al cargar (si ya estaba guardado o calculado)
         setTimeout(autoSelectMNA_BMI, 500); 
@@ -2855,6 +3018,13 @@
         }
         if(e.target.id === 'peso' || e.target.id === 'talla') {
             setTimeout(autoSelectMNA_BMI, 100);
+        }
+        // Nuevos listeners para Marcha/TUG
+        if(e.target.id === 'marcha_segundos') {
+            calcularMarcha();
+        }
+        if(e.target.id === 'tug_segundos') {
+            calcularTUG();
         }
     });
     
