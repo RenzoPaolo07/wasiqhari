@@ -51,10 +51,11 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mna')"><i class="fas fa-utensils"></i> <span>XIII. Nutrición</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-sarcf')"><i class="fas fa-dumbbell"></i> <span>XIV. SCAR-F</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-marcha')"><i class="fas fa-walking"></i> <span>XV. Marcha/TUG</span></button>
-                <!-- NUEVA PESTAÑA FRAIL -->
                 <button class="vgi-tab" onclick="openTab(event, 'tab-frail')"><i class="fas fa-battery-half"></i> <span>XVI. FRAIL</span></button>
+                <!-- NUEVA PESTAÑA CFS -->
+                <button class="vgi-tab" onclick="openTab(event, 'tab-cfs')"><i class="fas fa-child"></i> <span>XVII. CFS</span></button>
                 <!-- FIN NUEVA PESTAÑA -->
-                <button class="vgi-tab" onclick="openTab(event, 'tab-plan')"><i class="fas fa-file-prescription"></i> <span>XVII. Plan</span></button>
+                <button class="vgi-tab" onclick="openTab(event, 'tab-plan')"><i class="fas fa-file-prescription"></i> <span>XVIII. Plan</span></button>
             </div>
         </div>
 
@@ -2151,11 +2152,65 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA: PLAN FINAL (Actualizada a XVII) -->
+            <!-- NUEVA PESTAÑA: CFS (Clinical Frailty Scale) -->
+            <div id="tab-cfs" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-info text-white"><i class="fas fa-child"></i></div>
+                    <h4 class="header-title text-info">XVII. Clinical Frailty Scale (CFS)</h4>
+                </div>
+
+                <div class="card shadow-sm border-0 bg-info text-white sticky-top mb-4" style="top: 90px; z-index: 5;">
+                    <div class="card-body p-3 d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-bold"><i class="fas fa-check-circle me-2"></i>Nivel Seleccionado:</h5>
+                        <div class="text-end">
+                            <span class="badge bg-white text-info fs-5 px-3 rounded-pill" id="cfs_result_badge">Sin seleccionar</span>
+                            <input type="hidden" name="cfs_puntaje" id="input_cfs_puntaje" value="{{ $vgi->cfs_puntaje ?? 0 }}">
+                            <input type="hidden" name="cfs_valoracion" id="input_cfs_valoracion" value="{{ $vgi->cfs_valoracion ?? '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    @php
+                        $cfs_levels = [
+                            1 => ['title' => 'Muy en forma', 'desc' => 'Robustas, activas, enérgicas y motivadas. Hacen ejercicio regular.', 'icon' => 'fa-running'],
+                            2 => ['title' => 'En forma', 'desc' => 'Síntomas de enfermedad activa pero menos en forma que cat. 1. Ejercicio estacional.', 'icon' => 'fa-walking'],
+                            3 => ['title' => 'Se las arregla bien', 'desc' => 'Problemas médicos controlados. No activas regularmente más allá de caminar.', 'icon' => 'fa-male'],
+                            4 => ['title' => 'Fragilidad muy leve', 'desc' => 'Vulnerable. Transición desde independencia. "Lento" o "cansado".', 'icon' => 'fa-blind'],
+                            5 => ['title' => 'Fragilidad leve', 'desc' => 'Enlentecimiento evidente. Ayuda en AIVD (finanzas, transporte, pesado).', 'icon' => 'fa-user-nurse'],
+                            6 => ['title' => 'Fragilidad moderada', 'desc' => 'Necesita ayuda en todas las AIVD y comienza en las básicas (baño, vestirse).', 'icon' => 'fa-crutch'],
+                            7 => ['title' => 'Fragilidad severa', 'desc' => 'Totalmente dependiente para cuidado personal. Estables, riesgo muerte < 6 meses.', 'icon' => 'fa-wheelchair'],
+                            8 => ['title' => 'Fragilidad muy severa', 'desc' => 'Totalmente dependiente, próximo al final de vida. No se recuperan de enfermedades menores.', 'icon' => 'fa-bed'],
+                            9 => ['title' => 'Enfermedad terminal', 'desc' => 'Esperanza de vida < 6 meses, pero no necesariamente fragilidad severa.', 'icon' => 'fa-procedures'],
+                        ];
+                    @endphp
+
+                    @foreach($cfs_levels as $level => $data)
+                    <div class="col-md-6 col-lg-4">
+                        <label class="cfs-card h-100">
+                            <input type="radio" name="cfs_radio" value="{{ $level }}" data-text="{{ $data['title'] }}" 
+                                   {{ ($vgi->cfs_puntaje ?? 0) == $level ? 'checked' : '' }} onchange="selectCFS(this)">
+                            <div class="card-inner p-4 h-100 d-flex flex-column align-items-center text-center">
+                                <div class="cfs-image-placeholder mb-3">
+                                    <i class="fas {{ $data['icon'] }} fa-2x text-muted opacity-50"></i>
+                                    <span class="small d-block text-muted mt-1">Imagen Nivel {{ $level }}</span>
+                                    </div>
+                                
+                                <div class="cfs-number mb-2">{{ $level }}</div>
+                                <h5 class="fw-bold text-dark mb-2">{{ $data['title'] }}</h5>
+                                <p class="text-muted small mb-0">{{ $data['desc'] }}</p>
+                            </div>
+                        </label>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- PESTAÑA: PLAN FINAL (Actualizada a XVIII) -->
             <div id="tab-plan" class="vgi-tab-content">
                 <div class="section-header mb-4">
                     <div class="header-icon bg-brand-gradient text-white"><i class="fas fa-file-prescription"></i></div>
-                    <h4 class="header-title text-brand">XVII. Plan de Trabajo y Recomendaciones</h4>
+                    <h4 class="header-title text-brand">XVIII. Plan de Trabajo y Recomendaciones</h4>
                 </div>
                 
                 <div class="section-container p-5">
@@ -2402,6 +2457,31 @@
     /* Nuevos estilos para SCAR-F */
     .sarcf-label { cursor: pointer; display: block; padding: 2px 0; font-size: 0.95rem; }
     .sarcf-radio { margin-right: 8px; transform: scale(1.2); }
+
+    /* === ESTILOS CFS === */
+    .cfs-card { cursor: pointer; display: block; position: relative; transition: all 0.3s; }
+    .cfs-card input { position: absolute; opacity: 0; }
+    .cfs-card .card-inner { 
+        border: 2px solid #f0f0f0; border-radius: 20px; background: white; 
+        transition: all 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+    }
+    .cfs-card:hover .card-inner { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: #bee5eb; }
+    
+    .cfs-card input:checked + .card-inner { 
+        border-color: #17a2b8; background-color: #f0fcff; 
+        box-shadow: 0 0 0 4px rgba(23, 162, 184, 0.2); transform: scale(1.02); 
+    }
+    
+    .cfs-number { 
+        width: 40px; height: 40px; border-radius: 50%; background: #17a2b8; color: white; 
+        display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;
+    }
+    
+    .cfs-image-placeholder {
+        width: 100%; height: 120px; background-color: #f8f9fa; border-radius: 10px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border: 2px dashed #dee2e6;
+    }
 </style>
 @endpush
 
@@ -3134,6 +3214,20 @@
         inputVal.value = result;
     }
 
+    // === NUEVO: SELECCIÓN CFS ===
+    function selectCFS(radio) {
+        const score = radio.value;
+        const text = radio.getAttribute('data-text');
+        
+        // Actualizar Badge Sticky
+        const badge = document.getElementById('cfs_result_badge');
+        badge.innerText = `${score} - ${text}`;
+        
+        // Actualizar inputs ocultos
+        document.getElementById('input_cfs_puntaje').value = score;
+        document.getElementById('input_cfs_valoracion').value = text;
+    }
+
     // Auto-select IMC if available
     function autoSelectMNA_BMI() {
         // Obtenemos el IMC del input de la pestaña II
@@ -3175,9 +3269,13 @@
         
         // Intentar autoseleccionar IMC al cargar (si ya estaba guardado o calculado)
         setTimeout(autoSelectMNA_BMI, 500); 
+
+        // Cargar selección previa de CFS
+        const checkedCFS = document.querySelector('input[name="cfs_radio"]:checked');
+        if(checkedCFS) selectCFS(checkedCFS);
     });
 
-    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS, Yesavage, MNA, SCAR-F y FRAIL
+    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS, Yesavage, MNA, SCAR-F, FRAIL y CFS
     document.addEventListener("change", function(e) {
         if(e.target.classList.contains('barthel-radio')) {
             calcularBarthel();
@@ -3211,6 +3309,11 @@
         }
         if(e.target.classList.contains('frail-radio')) {
             calcularFrail();
+        }
+        // Nuevo listener para CFS
+        if(e.target.classList.contains('cfs-card')) {
+            const radio = e.target.querySelector('input[type="radio"]');
+            if(radio) selectCFS(radio);
         }
     });
     
