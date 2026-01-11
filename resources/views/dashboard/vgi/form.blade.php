@@ -51,7 +51,10 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mna')"><i class="fas fa-utensils"></i> <span>XIII. Nutrición</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-sarcf')"><i class="fas fa-dumbbell"></i> <span>XIV. SCAR-F</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-marcha')"><i class="fas fa-walking"></i> <span>XV. Marcha/TUG</span></button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-plan')"><i class="fas fa-file-prescription"></i> <span>XVI. Plan</span></button>
+                <!-- NUEVA PESTAÑA FRAIL -->
+                <button class="vgi-tab" onclick="openTab(event, 'tab-frail')"><i class="fas fa-battery-half"></i> <span>XVI. FRAIL</span></button>
+                <!-- FIN NUEVA PESTAÑA -->
+                <button class="vgi-tab" onclick="openTab(event, 'tab-plan')"><i class="fas fa-file-prescription"></i> <span>XVII. Plan</span></button>
             </div>
         </div>
 
@@ -2008,21 +2011,161 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA: PLAN FINAL -->
+            <!-- NUEVA PESTAÑA: ESCALA FRAIL -->
+            <div id="tab-frail" class="vgi-tab-content">
+                <div class="section-header mb-4">
+                    <div class="header-icon bg-warning text-white"><i class="fas fa-battery-half"></i></div>
+                    <h4 class="header-title text-warning">XVI. Grado de Fragilidad: Escala FRAIL</h4>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="section-container">
+                            <div class="section-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0 align-middle">
+                                        <thead class="bg-light text-uppercase small text-muted">
+                                            <tr>
+                                                <th class="ps-4 py-3" style="width: 50px;"></th>
+                                                <th>Pregunta</th>
+                                                <th class="text-center" style="width: 100px;">SÍ (1 pt)</th>
+                                                <th class="text-center" style="width: 100px;">NO (0 pts)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-warning fs-5">F</td>
+                                                <td>
+                                                    <strong>Fatiga (Fatigue):</strong><br>
+                                                    <span class="text-muted small">¿Se siente cansado la mayor parte del tiempo?</span>
+                                                </td>
+                                                <td class="text-center bg-soft-danger-hover">
+                                                    <input class="form-check-input frail-radio scale-13" type="radio" name="frail_fatiga" value="1" {{ ($vgi->frail_fatiga ?? 0) == 1 ? 'checked' : '' }}>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input class="form-check-input frail-radio scale-13" type="radio" name="frail_fatiga" value="0" {{ ($vgi->frail_fatiga ?? 0) == 0 ? 'checked' : '' }}>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-warning fs-5">R</td>
+                                                <td>
+                                                    <strong>Resistencia (Resistance):</strong><br>
+                                                    <span class="text-muted small">¿Puede usted subir un tramo de escaleras sin ayuda?</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <label class="small d-block text-success fw-bold">SÍ PUEDE</label>
+                                                    <input class="form-check-input frail-radio scale-13 border-success" type="radio" name="frail_resistencia" value="0" {{ ($vgi->frail_resistencia ?? 0) == 0 ? 'checked' : '' }}>
+                                                </td>
+                                                <td class="text-center bg-soft-danger-hover">
+                                                    <label class="small d-block text-danger fw-bold">NO PUEDE</label>
+                                                    <input class="form-check-input frail-radio scale-13 border-danger" type="radio" name="frail_resistencia" value="1" {{ ($vgi->frail_resistencia ?? 0) == 1 ? 'checked' : '' }}>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-warning fs-5">A</td>
+                                                <td>
+                                                    <strong>Ambulación (Ambulation):</strong><br>
+                                                    <span class="text-muted small">¿Puede usted caminar una cuadra (100m) sin ayuda?</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <label class="small d-block text-success fw-bold">SÍ PUEDE</label>
+                                                    <input class="form-check-input frail-radio scale-13 border-success" type="radio" name="frail_ambulacion" value="0" {{ ($vgi->frail_ambulacion ?? 0) == 0 ? 'checked' : '' }}>
+                                                </td>
+                                                <td class="text-center bg-soft-danger-hover">
+                                                    <label class="small d-block text-danger fw-bold">NO PUEDE</label>
+                                                    <input class="form-check-input frail-radio scale-13 border-danger" type="radio" name="frail_ambulacion" value="1" {{ ($vgi->frail_ambulacion ?? 0) == 1 ? 'checked' : '' }}>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-warning fs-5">I</td>
+                                                <td>
+                                                    <strong>Enfermedades (Illnesses):</strong><br>
+                                                    <span class="text-muted small">¿Tiene usted más de 5 enfermedades diagnosticadas?</span>
+                                                </td>
+                                                <td class="text-center bg-soft-danger-hover">
+                                                    <input class="form-check-input frail-radio scale-13" type="radio" name="frail_enfermedades" value="1" {{ ($vgi->frail_enfermedades ?? 0) == 1 ? 'checked' : '' }}>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input class="form-check-input frail-radio scale-13" type="radio" name="frail_enfermedades" value="0" {{ ($vgi->frail_enfermedades ?? 0) == 0 ? 'checked' : '' }}>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-warning fs-5">L</td>
+                                                <td>
+                                                    <strong>Pérdida de Peso (Loss of weight):</strong><br>
+                                                    <span class="text-muted small">¿Ha perdido más del 5% de su peso en los últimos 6 meses?</span>
+                                                    <div class="mt-2 p-2 bg-soft-gray rounded d-inline-block border" style="font-size: 0.85em;">
+                                                        <i class="fas fa-calculator me-1"></i> Calculadora rápida:
+                                                        <div class="d-flex gap-2 mt-1">
+                                                            <input type="number" id="peso_ant" placeholder="Peso hace 1 año" class="form-control form-control-sm" style="width: 80px;">
+                                                            <input type="number" id="peso_act" placeholder="Peso actual" class="form-control form-control-sm" style="width: 80px;">
+                                                            <button type="button" class="btn btn-sm btn-dark" onclick="calcPesoPerdido()">%</button>
+                                                        </div>
+                                                        <span id="res_peso_perdido" class="fw-bold text-danger mt-1 d-block"></span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center bg-soft-danger-hover">
+                                                    <input class="form-check-input frail-radio scale-13" type="radio" name="frail_peso" value="1" {{ ($vgi->frail_peso ?? 0) == 1 ? 'checked' : '' }}>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input class="form-check-input frail-radio scale-13" type="radio" name="frail_peso" value="0" {{ ($vgi->frail_peso ?? 0) == 0 ? 'checked' : '' }}>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shadow-lg border-0 bg-warning text-dark sticky-top" style="top: 100px;">
+                            <div class="card-body text-center p-4">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-battery-half me-2"></i>PUNTAJE FRAIL</h5>
+                                
+                                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 100px; height: 100px;">
+                                    <div class="display-4 fw-bold text-warning" id="frail_score_display">0</div>
+                                </div>
+                                <p class="mb-2 fw-bold text-uppercase">Puntos</p>
+                                
+                                <div class="badge bg-secondary px-3 py-2 fs-6 rounded-pill w-100 mb-3" id="frail_result_display">Sin evaluar</div>
+                                
+                                <input type="hidden" name="frail_puntaje" id="input_frail_total" value="{{ $vgi->frail_puntaje ?? 0 }}">
+                                <input type="hidden" name="frail_valoracion_texto" id="input_frail_valoracion" value="{{ $vgi->frail_valoracion_texto ?? '' }}">
+                                
+                                <hr class="border-dark opacity-25 my-4">
+                                <div class="text-start small opacity-75">
+                                    <ul class="list-unstyled mb-0 d-grid gap-2">
+                                        <li><span class="badge bg-success me-2">0</span> <strong>Robusto</strong></li>
+                                        <li><span class="badge bg-warning text-dark me-2">1 - 2</span> <strong>Pre-Frágil</strong></li>
+                                        <li><span class="badge bg-danger me-2">3 - 5</span> <strong>Frágil</strong></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA: PLAN FINAL (Actualizada a XVII) -->
             <div id="tab-plan" class="vgi-tab-content">
                 <div class="section-header mb-4">
                     <div class="header-icon bg-brand-gradient text-white"><i class="fas fa-file-prescription"></i></div>
-                    <h4 class="header-title text-brand">XVI. Plan de Trabajo y Recomendaciones</h4>
+                    <h4 class="header-title text-brand">XVII. Plan de Trabajo y Recomendaciones</h4>
                 </div>
                 
                 <div class="section-container p-5">
+                    <div class="alert alert-info border-0 shadow-sm mb-4">
+                        <i class="fas fa-info-circle me-2"></i> Aquí finaliza la evaluación. Revise todas las pestañas antes de guardar.
+                    </div>
+                    
                     <div class="form-group">
                         <label class="text-brand fw-bold mb-3 fs-5"><i class="fas fa-user-md me-2"></i>Indicaciones Finales del Profesional</label>
                         <textarea name="plan_cuidados" class="form-control modern-input p-4 shadow-sm fs-5" rows="10" placeholder="Escriba aquí el resumen diagnóstico, tratamiento, derivaciones y recomendaciones para el paciente...">{{ $vgi->plan_cuidados ?? '' }}</textarea>
-                    </div>
-                    
-                    <div class="mt-4 text-end">
-                        <small class="text-muted">Este plan se guardará en la historia clínica digital del paciente.</small>
                     </div>
                 </div>
             </div>
@@ -2936,6 +3079,61 @@
         }
     }
 
+    // === NUEVO: CÁLCULO DE PESO PERDIDO (Auxiliar) ===
+    function calcPesoPerdido() {
+        const pAnt = parseFloat(document.getElementById('peso_ant').value);
+        const pAct = parseFloat(document.getElementById('peso_act').value);
+        const resLabel = document.getElementById('res_peso_perdido');
+        
+        if(pAnt > 0 && pAct > 0) {
+            const diff = pAnt - pAct;
+            const percent = (diff / pAnt) * 100;
+            resLabel.innerText = percent.toFixed(1) + "% de pérdida";
+            if(percent > 5) {
+                resLabel.classList.add('text-danger');
+                resLabel.classList.remove('text-success');
+                // Opcional: Marcar radio SI automáticamente
+                // document.querySelector('input[name="frail_peso"][value="1"]').checked = true;
+                // calcularFrail();
+            } else {
+                resLabel.classList.add('text-success');
+                resLabel.classList.remove('text-danger');
+            }
+        }
+    }
+
+    // === NUEVO: CALCULAR FRAIL ===
+    function calcularFrail() {
+        let total = 0;
+        document.querySelectorAll('.frail-radio:checked').forEach(r => total += parseInt(r.value));
+
+        const scoreDisplay = document.getElementById('frail_score_display');
+        const resultDisplay = document.getElementById('frail_result_display');
+        const inputTotal = document.getElementById('input_frail_total');
+        const inputVal = document.getElementById('input_frail_valoracion');
+
+        scoreDisplay.innerText = total;
+        inputTotal.value = total;
+
+        let result = "";
+        let colorClass = "";
+
+        if (total === 0) {
+            result = "ROBUSTO";
+            colorClass = "bg-success text-white";
+        } else if (total <= 2) {
+            result = "PRE-FRÁGIL";
+            colorClass = "bg-warning text-dark";
+        } else {
+            result = "FRÁGIL";
+            colorClass = "bg-danger text-white";
+        }
+
+        resultDisplay.innerText = result;
+        resultDisplay.className = `badge px-3 py-2 fs-6 rounded-pill w-100 mb-3 ${colorClass}`;
+        inputVal.value = result;
+    }
+
     // Auto-select IMC if available
     function autoSelectMNA_BMI() {
         // Obtenemos el IMC del input de la pestaña II
@@ -2973,12 +3171,13 @@
         calcularSarcF(); // Calcular SCAR-F al cargar
         calcularMarcha(); // Calcular Marcha/TUG al cargar
         calcularTUG(); // Calcular TUG al cargar
+        calcularFrail(); // Calcular FRAIL al cargar
         
         // Intentar autoseleccionar IMC al cargar (si ya estaba guardado o calculado)
         setTimeout(autoSelectMNA_BMI, 500); 
     });
 
-    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS, Yesavage, MNA y SCAR-F
+    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS, Yesavage, MNA, SCAR-F y FRAIL
     document.addEventListener("change", function(e) {
         if(e.target.classList.contains('barthel-radio')) {
             calcularBarthel();
@@ -3009,6 +3208,9 @@
         }
         if(e.target.classList.contains('sarcf-radio')) {
             calcularSarcF();
+        }
+        if(e.target.classList.contains('frail-radio')) {
+            calcularFrail();
         }
     });
     

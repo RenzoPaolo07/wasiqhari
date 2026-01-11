@@ -81,6 +81,7 @@ class VgiController extends Controller
             'sarcf_fuerza', 'sarcf_asistencia', 'sarcf_levantarse', 
             'sarcf_escaleras', 'sarcf_caidas', 'sarcf_total',
             'marcha_segundos', 'marcha_velocidad', 'tug_segundos',
+            'frail_fatiga', 'frail_resistencia', 'frail_ambulacion', 'frail_enfermedades', 'frail_peso',
         ];
 
         foreach ($camposNumericos as $campo) {
