@@ -56,13 +56,14 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-cfs')"><i class="fas fa-child"></i> <span>XVII. CFS</span></button>
                 <!-- NUEVA PESTAÑA SPPB -->
                 <button class="vgi-tab" onclick="openTab(event, 'tab-sppb')"><i class="fas fa-running"></i> <span>XVIII. SPPB</span></button>
-                <!-- PESTAÑA PLAN ACTUALIZADA -->
-                <button class="vgi-tab" onclick="openTab(event, 'tab-plan')"><i class="fas fa-file-prescription"></i> <span>XIX. Plan</span></button>
+                <!-- NUEVA PESTAÑA: RESUMEN EJECUTIVO -->
+                <button class="vgi-tab bg-primary text-white rounded-pill px-3 ms-2" onclick="openTab(event, 'tab-resumen')"><i class="fas fa-clipboard-check text-white"></i> XIX. Resumen</button>
             </div>
         </div>
 
         <form action="{{ route('adultos.vgi.store', $adulto->id) }}" method="POST" class="p-4 p-lg-5 bg-soft-gray">
             @csrf
+            <input type="hidden" name="generate_pdf" id="generate_pdf_input" value="0">
             
             <div id="tab-social" class="vgi-tab-content active-content">
                 
@@ -2489,31 +2490,124 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA: PLAN FINAL (Actualizada a XIX) -->
-            <div id="tab-plan" class="vgi-tab-content">
-                <div class="section-header mb-4">
-                    <div class="header-icon bg-brand-gradient text-white"><i class="fas fa-file-prescription"></i></div>
-                    <h4 class="header-title text-brand">XIX. Plan de Trabajo y Recomendaciones</h4>
-                </div>
+            <!-- PESTAÑA: RESUMEN EJECUTIVO VGI (Actualizada a XIX) -->
+            <div id="tab-resumen" class="vgi-tab-content">
                 
-                <div class="section-container p-5">
-                    <div class="alert alert-info border-0 shadow-sm mb-4">
-                        <i class="fas fa-info-circle me-2"></i> Aquí finaliza la evaluación. Revise todas las pestañas antes de guardar.
-                    </div>
+                <div class="text-center mb-5">
+                    <h2 class="text-brand fw-bold mb-2">Resumen Ejecutivo VGI</h2>
+                    <p class="text-muted">Vista preliminar de los resultados obtenidos en las 18 escalas.</p>
+                </div>
+
+                <div class="row g-4">
                     
-                    <div class="form-group">
-                        <label class="text-brand fw-bold mb-3 fs-5"><i class="fas fa-user-md me-2"></i>Indicaciones Finales del Profesional</label>
-                        <textarea name="plan_cuidados" class="form-control modern-input p-4 shadow-sm fs-5" rows="10" placeholder="Escriba aquí el resumen diagnóstico, tratamiento, derivaciones y recomendaciones para el paciente...">{{ $vgi->plan_cuidados ?? '' }}</textarea>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card h-100 border-0 shadow-sm hover-scale">
+                            <div class="card-header bg-purple text-white fw-bold"><i class="fas fa-users me-2"></i>Social / Bio</div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush small">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>IMC:</span> <strong id="res_imc">-</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Soporte/Cuidador:</span> <strong id="res_cuidador">-</strong>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <span class="d-block text-muted mb-1">Escala Gijón:</span>
+                                        <span id="res_gijon_badge" class="badge bg-secondary w-100">Sin datos</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card h-100 border-0 shadow-sm hover-scale">
+                            <div class="card-header bg-primary text-white fw-bold"><i class="fas fa-wheelchair me-2"></i>Funcional</div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush small">
+                                    <li class="list-group-item">
+                                        <div class="d-flex justify-content-between mb-1"><span>Barthel:</span> <strong id="res_barthel_pt">-</strong></div>
+                                        <span id="res_barthel_badge" class="badge bg-light text-dark border w-100">-</span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <div class="d-flex justify-content-between mb-1"><span>Lawton:</span> <strong id="res_lawton_pt">-</strong></div>
+                                        <span id="res_lawton_badge" class="badge bg-light text-dark border w-100">-</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card h-100 border-0 shadow-sm hover-scale">
+                            <div class="card-header bg-warning text-dark fw-bold"><i class="fas fa-brain me-2"></i>Cognitivo / Afectivo</div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush small">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Pfeiffer:</span> <strong id="res_pfeiffer">-</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>MMSE:</span> <strong id="res_mmse">-</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Mini-Cog:</span> <strong id="res_minicog">-</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>RUDAS:</span> <strong id="res_rudas">-</strong>
+                                    </li>
+                                    <li class="list-group-item border-top mt-2 pt-2">
+                                        <div class="d-flex justify-content-between mb-1"><span>Depresión (Yesavage):</span></div>
+                                        <span id="res_gds_badge" class="badge bg-light text-dark border w-100">-</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card h-100 border-0 shadow-sm hover-scale">
+                            <div class="card-header bg-success text-white fw-bold"><i class="fas fa-running me-2"></i>Física / Nutricional</div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush small">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>MNA (Nutrición):</span> <strong id="res_mna">-</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>SARC-F:</span> <strong id="res_sarcf">-</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>FRAIL:</span> <strong id="res_frail">-</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>SPPB:</span> <strong id="res_sppb">-</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>CFS:</span> <strong id="res_cfs">-</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
+
+                <div class="section-container mt-4">
+                    <div class="section-header bg-soft-gray"><h5 class="m-0 fw-bold">Plan de Trabajo / Observaciones</h5></div>
+                    <div class="section-body p-4">
+                        <textarea name="plan_cuidados_final" id="plan_cuidados_resumen" class="form-control bg-white" rows="4" placeholder="Escriba aquí el plan final..." oninput="syncPlan(this.value)">{{ $vgi->plan_cuidados ?? '' }}</textarea>
                     </div>
                 </div>
+
             </div>
 
-            <div class="form-actions-footer d-flex justify-content-between align-items-center mt-5 pt-4 border-top">
-                <div class="text-muted small d-none d-md-block"><i class="fas fa-lock me-1"></i> Información protegida por WasiQhari</div>
+            <div class="form-actions-footer d-flex justify-content-between align-items-center mt-5 pt-4 border-top bg-white sticky-bottom pb-4" style="z-index: 100;">
+                <div class="text-muted small"><i class="fas fa-shield-alt me-1"></i> Datos protegidos.</div>
                 <div class="d-flex gap-3 ms-auto">
-                    <a href="{{ route('adultos') }}" class="btn btn-light px-4 fw-bold text-muted border rounded-pill hover-scale">Cancelar</a>
-                    <button type="submit" class="btn btn-brand px-5 py-2 shadow-lg fw-bold rounded-pill text-white hover-scale">
-                        <i class="fas fa-save me-2"></i> Guardar Historia Clínica Completa
+                    <button type="submit" class="btn btn-outline-primary px-4 fw-bold rounded-pill hover-scale">
+                        <i class="fas fa-save me-2"></i> Solo Guardar
+                    </button>
+                    <button type="submit" class="btn btn-danger px-5 fw-bold rounded-pill hover-scale shadow-lg" onclick="setPdfFlag()">
+                        <i class="fas fa-file-pdf me-2"></i> GUARDAR Y EXPORTAR PDF
                     </button>
                 </div>
             </div>
@@ -3644,6 +3738,65 @@
         badge.innerText = interpretation;
         badge.className = `badge w-100 fs-5 ${colorClass}`;
         document.getElementById('input_sppb_valoracion').value = interpretation;
+    }
+
+    // NUEVO: SINCRONIZAR PLAN DE CUIDADOS
+// Para que lo que escribas en la pestaña XVII se vea en la XIX y viceversa
+    function syncPlan(val) {
+        // Busca el textarea de la pestaña plan (si existe un ID o name)
+        const inputs = document.getElementsByName('plan_cuidados');
+        inputs.forEach(i => i.value = val);
+        document.getElementById('plan_cuidados_resumen').value = val;
+    }
+
+    // NUEVO: BANDERA PARA PDF
+    function setPdfFlag() {
+        document.getElementById('generate_pdf_input').value = '1';
+    }
+
+    // NUEVO: ACTUALIZAR RESUMEN (Se ejecuta al abrir la pestaña XIX)
+    function updateSummaryView() {
+        // 1. Social
+        document.getElementById('res_imc').innerText = document.getElementById('imc').value || '-';
+        const cuidador = document.getElementById('cuidadorSwitch').checked ? 'SÍ' : 'NO';
+        document.getElementById('res_cuidador').innerText = cuidador;
+        document.getElementById('res_gijon_badge').innerText = document.getElementById('input_gijon_valoracion').value || 'Sin evaluar';
+        
+        // 2. Funcional
+        document.getElementById('res_barthel_pt').innerText = document.getElementById('input_barthel_total').value;
+        document.getElementById('res_barthel_badge').innerText = document.getElementById('input_barthel_valoracion').value || '-';
+        document.getElementById('res_lawton_pt').innerText = document.getElementById('input_lawton_total').value + '/8';
+        document.getElementById('res_lawton_badge').innerText = document.getElementById('input_lawton_valoracion').value || '-';
+
+        // 3. Mental
+        document.getElementById('res_pfeiffer').innerText = document.getElementById('input_pfeiffer_valoracion').value || '-';
+        document.getElementById('res_mmse').innerText = document.getElementById('input_mmse_total').value + ' (' + (document.getElementById('input_mmse_valoracion').value || '-') + ')';
+        document.getElementById('res_minicog').innerText = document.getElementById('input_minicog_valoracion').value || '-';
+        document.getElementById('res_rudas').innerText = document.getElementById('input_rudas_total').value + '/30';
+        document.getElementById('res_gds_badge').innerText = (document.getElementById('input_gds_total').value > 1) ? 'Ver Yesavage' : 'Normal (GDS-4)';
+        // Si hay yesavage
+        const yesavageVal = document.getElementById('input_yesavage_total').value;
+        if(yesavageVal > 0) document.getElementById('res_gds_badge').innerText = "Yesavage: " + yesavageVal + " pts";
+
+        // 4. Física
+        document.getElementById('res_mna').innerText = document.getElementById('input_mna_valoracion').value || '-';
+        document.getElementById('res_sarcf').innerText = document.getElementById('input_sarcf_valoracion').value || '-';
+        document.getElementById('res_frail').innerText = document.getElementById('input_frail_valoracion').value || '-';
+        document.getElementById('res_sppb').innerText = document.getElementById('input_sppb_total').value + '/12';
+        document.getElementById('res_cfs').innerText = document.getElementById('input_cfs_puntaje').value || '-';
+        
+        // Sincronizar textarea del plan
+        const planOriginal = document.querySelector('textarea[name="plan_cuidados"]').value;
+        document.getElementById('plan_cuidados_resumen').value = planOriginal;
+    }
+
+    // Modificar la función openTab existente para que llame a updateSummaryView
+    const originalOpenTab = openTab; // Guardamos referencia
+    openTab = function(evt, tabName) {
+        originalOpenTab(evt, tabName); // Ejecutamos la original
+        if(tabName === 'tab-resumen') {
+            updateSummaryView(); // Ejecutamos la actualización
+        }
     }
 
     // Auto-select IMC if available
