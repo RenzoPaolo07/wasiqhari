@@ -54,8 +54,10 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-frail')"><i class="fas fa-battery-half"></i> <span>XVI. FRAIL</span></button>
                 <!-- NUEVA PESTAÑA CFS -->
                 <button class="vgi-tab" onclick="openTab(event, 'tab-cfs')"><i class="fas fa-child"></i> <span>XVII. CFS</span></button>
-                <!-- FIN NUEVA PESTAÑA -->
-                <button class="vgi-tab" onclick="openTab(event, 'tab-plan')"><i class="fas fa-file-prescription"></i> <span>XVIII. Plan</span></button>
+                <!-- NUEVA PESTAÑA SPPB -->
+                <button class="vgi-tab" onclick="openTab(event, 'tab-sppb')"><i class="fas fa-running"></i> <span>XVIII. SPPB</span></button>
+                <!-- PESTAÑA PLAN ACTUALIZADA -->
+                <button class="vgi-tab" onclick="openTab(event, 'tab-plan')"><i class="fas fa-file-prescription"></i> <span>XIX. Plan</span></button>
             </div>
         </div>
 
@@ -2206,11 +2208,292 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA: PLAN FINAL (Actualizada a XVIII) -->
+            <!-- NUEVA PESTAÑA: SPPB (Short Physical Performance Battery) - ACTUALIZADA -->
+            <div id="tab-sppb" class="vgi-tab-content">
+                
+                <div class="locked-wrapper">
+                    <div class="lock-overlay" id="sppb_lock_screen">
+                        <div class="lock-card border-dark">
+                            <div class="mb-3 text-dark">
+                                <i class="fas fa-stopwatch fa-4x"></i>
+                                <i class="fas fa-lock fa-2x" style="margin-left: -15px; vertical-align: bottom; color: #dc3545; background: white; border-radius: 50%;"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark">Batería Física Protegida</h4>
+                            <p class="text-muted small">Evaluación SPPB exclusiva para personal capacitado.</p>
+                            <input type="password" id="sppb_pin" class="pin-input" placeholder="****" maxlength="4">
+                            <button type="button" class="btn btn-dark w-100 fw-bold py-2 rounded-pill shadow-sm" onclick="unlockSPPB()">
+                                <i class="fas fa-unlock me-2"></i> DESBLOQUEAR
+                            </button>
+                            <p id="sppb_pin_error" class="text-danger small mt-2 fw-bold" style="display:none;"><i class="fas fa-times-circle"></i> PIN Incorrecto</p>
+                        </div>
+                    </div>
+
+                    <div class="locked-content" id="sppb_content">
+                        
+                        <div class="section-header mb-4">
+                            <div class="header-icon bg-dark text-white"><i class="fas fa-running"></i></div>
+                            <h4 class="header-title text-dark">XVIII. Batería Corta de Desempeño Físico (SPPB)</h4>
+                        </div>
+
+                        <div class="row g-4">
+                            
+                            <div class="col-lg-6">
+                                <div class="section-container h-100">
+                                    <div class="section-header bg-light d-flex justify-content-between">
+                                        <h6 class="m-0 fw-bold">1. Prueba de Balance</h6>
+                                        <span class="badge bg-secondary" id="badge_sppb_1">0 / 4</span>
+                                    </div>
+                                    <div class="section-body p-4">
+                                        
+                                        <div class="mb-4 pb-3 border-bottom">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="me-3 text-center" style="width: 60px;">
+                                                    <i class="fas fa-shoe-prints fs-3 text-muted"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <p class="mb-1 fw-bold small">A. Pararse con los pies uno al lado del otro (10 seg)</p>
+                                                    <div class="btn-group btn-group-sm w-100">
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_lado" id="bal_lado_1" value="1" {{ ($vgi->sppb_bal_lado ?? 0) == 1 ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-success" for="bal_lado_1">Sí (1 punto)</label>
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_lado" id="bal_lado_0" value="0" {{ ($vgi->sppb_bal_lado ?? 0) == 0 ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-danger" for="bal_lado_0">No (0 punto)</label>
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_lado" id="bal_lado_rehusa" value="rehúsa" {{ ($vgi->sppb_bal_lado ?? 0) == 'rehúsa' ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-secondary" for="bal_lado_rehusa">Se rehúsa</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4 pb-3 border-bottom">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="me-3 text-center" style="width: 60px;">
+                                                    <i class="fas fa-shoe-prints fs-3 text-muted" style="transform: skewX(-20deg);"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <p class="mb-1 fw-bold small">B. Pararse en posición semi-tándem (10 seg)</p>
+                                                    <div class="btn-group btn-group-sm w-100">
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_semi" id="bal_semi_1" value="1" {{ ($vgi->sppb_bal_semi ?? 0) == 1 ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-success" for="bal_semi_1">Sí (1 punto)</label>
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_semi" id="bal_semi_0" value="0" {{ ($vgi->sppb_bal_semi ?? 0) == 0 ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-danger" for="bal_semi_0">No (0 puntos)</label>
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_semi" id="bal_semi_rehusa" value="rehúsa" {{ ($vgi->sppb_bal_semi ?? 0) == 'rehúsa' ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-secondary" for="bal_semi_rehusa">Se rehúsa</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="me-3 text-center" style="width: 60px;">
+                                                    <i class="fas fa-shoe-prints fs-3 text-muted" style="display:block; transform: rotate(90deg);"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <p class="mb-1 fw-bold small">C. Pararse en posición tándem (Max 15 seg)</p>
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text">Tiempo en seg:</span>
+                                                        <input type="number" step="0.01" name="sppb_bal_tandem_tiempo" id="sppb_bal_tandem_tiempo" class="form-control sppb-input" placeholder="0.00" value="{{ $vgi->sppb_bal_tandem_tiempo ?? '' }}">
+                                                    </div>
+                                                    <div class="btn-group btn-group-sm w-100 mt-2">
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_tandem_puntos" id="bal_tandem_2" value="2" {{ ($vgi->sppb_bal_tandem_puntos ?? 0) == 2 ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-success" for="bal_tandem_2">2 puntos (10-15 seg)</label>
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_tandem_puntos" id="bal_tandem_1" value="1" {{ ($vgi->sppb_bal_tandem_puntos ?? 0) == 1 ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-warning" for="bal_tandem_1">1 punto (3-9.99 seg)</label>
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_tandem_puntos" id="bal_tandem_0" value="0" {{ ($vgi->sppb_bal_tandem_puntos ?? 0) == 0 ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-danger" for="bal_tandem_0">0 puntos (<3 seg)</label>
+                                                        <input type="radio" class="btn-check sppb-check" name="sppb_bal_tandem_puntos" id="bal_tandem_rehusa" value="rehúsa" {{ ($vgi->sppb_bal_tandem_puntos ?? 0) == 'rehúsa' ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-secondary" for="bal_tandem_rehusa">Se rehúsa</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-4">
+                                            <div class="alert alert-light border small p-2 mb-0">
+                                                <strong>Subtotal Balance:</strong> 
+                                                <span id="display_sppb_score_balance" class="fw-bold">0</span> / 4 puntos
+                                                <input type="hidden" name="sppb_score_balance" id="input_sppb_score_balance" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="section-container h-100">
+                                    <div class="section-header bg-light d-flex justify-content-between">
+                                        <h6 class="m-0 fw-bold">2. Velocidad de marcha (recorrido de 4 metros)</h6>
+                                        <span class="badge bg-secondary" id="badge_sppb_2">0 / 4</span>
+                                    </div>
+                                    <div class="section-body p-4">
+                                        <p class="small text-muted mb-3">Recorrido de 4 metros. Realice dos intentos y registre el tiempo. Se usa el menor tiempo.</p>
+                                        
+                                        <div class="mb-3">
+                                            <label class="label-input">A. Primera medición</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Seg:</span>
+                                                <input type="number" step="0.01" name="sppb_marcha_t1" id="sppb_marcha_t1" class="form-control sppb-input" placeholder="0.00" value="{{ $vgi->sppb_marcha_t1 ?? '' }}">
+                                            </div>
+                                            <div class="form-check mt-1">
+                                                <input class="form-check-input sppb-check" type="radio" name="sppb_marcha_rehusa" id="marcha_rehusa_1" value="1" {{ ($vgi->sppb_marcha_rehusa ?? 0) == 1 ? 'checked' : '' }}>
+                                                <label class="form-check-label text-danger" for="marcha_rehusa_1">Se rehúsa</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="label-input">B. Segunda medición</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Seg:</span>
+                                                <input type="number" step="0.01" name="sppb_marcha_t2" id="sppb_marcha_t2" class="form-control sppb-input" placeholder="0.00" value="{{ $vgi->sppb_marcha_t2 ?? '' }}">
+                                            </div>
+                                            <div class="form-check mt-1">
+                                                <input class="form-check-input sppb-check" type="radio" name="sppb_marcha_rehusa" id="marcha_rehusa_2" value="2" {{ ($vgi->sppb_marcha_rehusa ?? 0) == 2 ? 'checked' : '' }}>
+                                                <label class="form-check-label text-danger" for="marcha_rehusa_2">Se rehúsa</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="label-input">Calificación de la medición menor:</label>
+                                            <div class="btn-group-vertical w-100">
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_marcha_puntos" id="marcha_4" value="4" {{ ($vgi->sppb_marcha_puntos ?? 0) == 4 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-success text-start" for="marcha_4">4 = <4.82 seg</label>
+                                                
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_marcha_puntos" id="marcha_3" value="3" {{ ($vgi->sppb_marcha_puntos ?? 0) == 3 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-info text-start" for="marcha_3">3 = 4.82 a 6.20 seg</label>
+                                                
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_marcha_puntos" id="marcha_2" value="2" {{ ($vgi->sppb_marcha_puntos ?? 0) == 2 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-warning text-start" for="marcha_2">2 = 6.21 a 8.70 seg</label>
+                                                
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_marcha_puntos" id="marcha_1" value="1" {{ ($vgi->sppb_marcha_puntos ?? 0) == 1 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-danger text-start" for="marcha_1">1 = >8.70 seg</label>
+                                                
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_marcha_puntos" id="marcha_0" value="0" {{ ($vgi->sppb_marcha_puntos ?? 0) == 0 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-secondary text-start" for="marcha_0">0 = Incapaz / Se rehúsa</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="alert alert-light border small p-2 mb-0">
+                                            <strong>Subtotal Marcha:</strong> 
+                                            <span id="display_sppb_score_marcha" class="fw-bold">0</span> / 4 puntos
+                                            <input type="hidden" name="sppb_score_marcha" id="input_sppb_score_marcha" value="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="section-container">
+                                    <div class="section-header bg-light d-flex justify-content-between">
+                                        <h6 class="m-0 fw-bold">3. Prueba de levantarse cinco veces de una silla</h6>
+                                        <span class="badge bg-secondary" id="badge_sppb_3">0 / 4</span>
+                                    </div>
+                                    <div class="section-body p-4">
+                                        <div class="row">
+                                            <div class="col-md-6 border-end">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div class="me-3">
+                                                        <i class="fas fa-chair fs-2 text-muted"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="mb-1 fw-bold small">A. Prueba previa (no se califica)</p>
+                                                        <label class="small text-muted">¿El paciente se levanta sin apoyarse en los brazos?</label>
+                                                        <div class="btn-group btn-group-sm w-100 mt-1">
+                                                            <input type="radio" class="btn-check sppb-check" name="sppb_silla_pre" id="silla_pre_1" value="1" {{ ($vgi->sppb_silla_pre ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('bloque_silla_b').style.display='block'">
+                                                            <label class="btn btn-outline-success" for="silla_pre_1">Sí</label>
+                                                            <input type="radio" class="btn-check sppb-check" name="sppb_silla_pre" id="silla_pre_0" value="0" {{ ($vgi->sppb_silla_pre ?? 0) == 0 ? 'checked' : '' }} onclick="document.getElementById('bloque_silla_b').style.display='none'">
+                                                            <label class="btn btn-outline-danger" for="silla_pre_0">No</label>
+                                                            <input type="radio" class="btn-check sppb-check" name="sppb_silla_pre" id="silla_pre_rehusa" value="rehúsa" {{ ($vgi->sppb_silla_pre ?? 0) == 'rehúsa' ? 'checked' : '' }} onclick="document.getElementById('bloque_silla_b').style.display='none'">
+                                                            <label class="btn btn-outline-secondary" for="silla_pre_rehusa">Se rehúsa</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6 ps-md-4" id="bloque_silla_b" style="display: {{ ($vgi->sppb_silla_pre ?? 0) == 1 ? 'block' : 'none' }};">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        <i class="fas fa-people-arrows fs-2 text-muted"></i>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <p class="mb-1 fw-bold small">B. Prueba repetida de levantarse de una silla</p>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Tiempo en seg:</span>
+                                                            <input type="number" step="0.01" name="sppb_silla_tiempo" id="sppb_silla_tiempo" class="form-control sppb-input" placeholder="0.00" value="{{ $vgi->sppb_silla_tiempo ?? '' }}">
+                                                        </div>
+                                                        <div class="form-check mt-1">
+                                                            <input class="form-check-input sppb-check" type="radio" name="sppb_silla_rehusa" id="silla_rehusa" value="1" {{ ($vgi->sppb_silla_rehusa ?? 0) == 1 ? 'checked' : '' }}>
+                                                            <label class="form-check-label text-danger" for="silla_rehusa">Se rehúsa</label>
+                                                        </div>
+                                                        <small class="text-muted d-block mt-1" style="font-size: 0.75em;">
+                                                            ≤11.19s(4) | 11.2-13.69s(3)<br>
+                                                            13.7-16.69s(2) | >16.7s(1) | >60s(0)
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <label class="label-input">Calificación de la actividad:</label>
+                                            <div class="btn-group-vertical w-100">
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_silla_puntos" id="silla_4" value="4" {{ ($vgi->sppb_silla_puntos ?? 0) == 4 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-success text-start" for="silla_4">4 = ≤11.19 seg</label>
+                                                
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_silla_puntos" id="silla_3" value="3" {{ ($vgi->sppb_silla_puntos ?? 0) == 3 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-info text-start" for="silla_3">3 = 11.2 a 13.69 seg</label>
+                                                
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_silla_puntos" id="silla_2" value="2" {{ ($vgi->sppb_silla_puntos ?? 0) == 2 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-warning text-start" for="silla_2">2 = 13.7 a 16.69 seg</label>
+                                                
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_silla_puntos" id="silla_1" value="1" {{ ($vgi->sppb_silla_puntos ?? 0) == 1 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-danger text-start" for="silla_1">1 = 16.7 a 60 seg</label>
+                                                
+                                                <input type="radio" class="btn-check sppb-check" name="sppb_silla_puntos" id="silla_0" value="0" {{ ($vgi->sppb_silla_puntos ?? 0) == 0 ? 'checked' : '' }}>
+                                                <label class="btn btn-outline-secondary text-start" for="silla_0">0 = Incapaz de realizar (>60 seg) / Se rehúsa</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <div class="alert alert-light border small p-2 mb-0">
+                                                <strong>Subtotal Silla:</strong> 
+                                                <span id="display_sppb_score_silla" class="fw-bold">0</span> / 4 puntos
+                                                <input type="hidden" name="sppb_score_silla" id="input_sppb_score_silla" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="card bg-dark text-white border-0 shadow-sm">
+                                    <div class="card-body d-flex justify-content-between align-items-center px-5 py-4">
+                                        <div>
+                                            <h3 class="m-0 fw-bold">TOTAL BATERÍA CORTA DE DESEMPEÑO FÍSICO</h3>
+                                            <p class="mb-0 text-white-50">(1 + 2 + 3) / 12 puntos</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="display-3 fw-bold" id="sppb_total_display">0</span>
+                                            <span class="fs-4 text-white-50">/ 12</span>
+                                            <input type="hidden" name="sppb_total" id="input_sppb_total" value="{{ $vgi->sppb_total ?? 0 }}">
+                                            <input type="hidden" name="sppb_valoracion" id="input_sppb_valoracion" value="{{ $vgi->sppb_valoracion ?? '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-secondary bg-opacity-25 border-top-0 px-5 pb-3">
+                                        <div class="badge bg-white text-dark w-100 fs-5" id="sppb_interpretation">Sin evaluar</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA: PLAN FINAL (Actualizada a XIX) -->
             <div id="tab-plan" class="vgi-tab-content">
                 <div class="section-header mb-4">
                     <div class="header-icon bg-brand-gradient text-white"><i class="fas fa-file-prescription"></i></div>
-                    <h4 class="header-title text-brand">XVIII. Plan de Trabajo y Recomendaciones</h4>
+                    <h4 class="header-title text-brand">XIX. Plan de Trabajo y Recomendaciones</h4>
                 </div>
                 
                 <div class="section-container p-5">
@@ -3228,6 +3511,141 @@
         document.getElementById('input_cfs_valoracion').value = text;
     }
 
+    // === NUEVO: DESBLOQUEO SPPB ===
+    function unlockSPPB() {
+        const pin = document.getElementById('sppb_pin').value;
+        const correctPin = "2026"; 
+        if(pin === correctPin) {
+            document.getElementById('sppb_lock_screen').style.opacity = '0';
+            setTimeout(() => { document.getElementById('sppb_lock_screen').style.display = 'none'; }, 500);
+            document.getElementById('sppb_content').classList.add('unlocked');
+        } else {
+            document.getElementById('sppb_pin_error').style.display = 'block';
+            document.getElementById('sppb_pin').value = '';
+        }
+    }
+    document.getElementById('sppb_pin').addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); unlockSPPB(); } });
+
+    // === NUEVO: CÁLCULO SPPB (ACTUALIZADO) ===
+    function calculateSPPB() {
+        // --- 1. BALANCE (Max 4) ---
+        let balScore = 0;
+        
+        // A. Pies lado a lado (0 o 1 punto)
+        const balLado = document.querySelector('input[name="sppb_bal_lado"]:checked');
+        if(balLado && (balLado.value === "1" || balLado.value === "rehúsa")) {
+            if(balLado.value === "1") balScore += 1;
+            
+            // B. Semi-Tándem (0 o 1 punto)
+            const balSemi = document.querySelector('input[name="sppb_bal_semi"]:checked');
+            if(balSemi && (balSemi.value === "1" || balSemi.value === "rehúsa")) {
+                if(balSemi.value === "1") balScore += 1;
+                
+                // C. Tándem (0, 1 o 2 puntos)
+                const balTandem = document.querySelector('input[name="sppb_bal_tandem_puntos"]:checked');
+                if(balTandem && (balTandem.value === "2" || balTandem.value === "1" || balTandem.value === "0" || balTandem.value === "rehúsa")) {
+                    if(balTandem.value === "2") balScore += 2;
+                    else if(balTandem.value === "1") balScore += 1;
+                    else balScore += 0; // 0 o "rehúsa"
+                }
+            }
+        }
+
+        // Actualizar visualización
+        document.getElementById('badge_sppb_1').innerText = balScore + " / 4";
+        document.getElementById('display_sppb_score_balance').innerText = balScore;
+        document.getElementById('input_sppb_score_balance').value = balScore;
+
+        // --- 2. MARCHA (Max 4) ---
+        let gaitScore = 0;
+        const gaitPuntos = document.querySelector('input[name="sppb_marcha_puntos"]:checked');
+        
+        if(gaitPuntos) {
+            gaitScore = parseInt(gaitPuntos.value);
+        } else {
+            // Calcular automáticamente si no hay selección manual
+            const t1 = parseFloat(document.getElementById('sppb_marcha_t1').value) || 0;
+            const t2 = parseFloat(document.getElementById('sppb_marcha_t2').value) || 0;
+            const rehusa1 = document.querySelector('input[name="sppb_marcha_rehusa"][value="1"]:checked');
+            const rehusa2 = document.querySelector('input[name="sppb_marcha_rehusa"][value="2"]:checked');
+            
+            if(rehusa1 || rehusa2) {
+                gaitScore = 0; // Se rehúsa
+            } else if (t1 > 0 || t2 > 0) {
+                let bestTime = 0;
+                if (t1 > 0 && t2 > 0) bestTime = Math.min(t1, t2);
+                else if (t1 > 0) bestTime = t1;
+                else if (t2 > 0) bestTime = t2;
+
+                if (bestTime > 0) {
+                    if (bestTime < 4.82) gaitScore = 4;
+                    else if (bestTime <= 6.20) gaitScore = 3;
+                    else if (bestTime <= 8.70) gaitScore = 2;
+                    else gaitScore = 1;
+                }
+            }
+        }
+
+        document.getElementById('badge_sppb_2').innerText = gaitScore + " / 4";
+        document.getElementById('display_sppb_score_marcha').innerText = gaitScore;
+        document.getElementById('input_sppb_score_marcha').value = gaitScore;
+
+        // --- 3. SILLA (Max 4) ---
+        let chairScore = 0;
+        const chairPuntos = document.querySelector('input[name="sppb_silla_puntos"]:checked');
+        const chairPre = document.querySelector('input[name="sppb_silla_pre"]:checked');
+        const chairRehúsa = document.querySelector('input[name="sppb_silla_rehusa"]:checked');
+        
+        if(chairPuntos) {
+            chairScore = parseInt(chairPuntos.value);
+        } else {
+            // Calcular automáticamente
+            if(chairPre && (chairPre.value === "0" || chairPre.value === "rehúsa" || chairRehúsa)) {
+                chairScore = 0; // No pasa prueba previa o se rehúsa
+            } else {
+                const chairTime = parseFloat(document.getElementById('sppb_silla_tiempo').value) || 0;
+                if (chairTime > 0) {
+                    if (chairTime <= 11.19) chairScore = 4;
+                    else if (chairTime <= 13.69) chairScore = 3;
+                    else if (chairTime <= 16.69) chairScore = 2;
+                    else if (chairTime <= 60) chairScore = 1;
+                    else chairScore = 0;
+                }
+            }
+        }
+
+        document.getElementById('badge_sppb_3').innerText = chairScore + " / 4";
+        document.getElementById('display_sppb_score_silla').innerText = chairScore;
+        document.getElementById('input_sppb_score_silla').value = chairScore;
+
+        // --- TOTAL ---
+        const total = balScore + gaitScore + chairScore;
+        document.getElementById('sppb_total_display').innerText = total;
+        document.getElementById('input_sppb_total').value = total;
+
+        let interpretation = "";
+        let colorClass = "bg-secondary";
+
+        if (total >= 10) {
+            interpretation = "BUEN DESEMPEÑO / ROBUSTO";
+            colorClass = "bg-success text-white";
+        } else if (total >= 7) {
+            interpretation = "FRAGILIDAD LEVE";
+            colorClass = "bg-warning text-dark";
+        } else if (total >= 4) {
+            interpretation = "FRAGILIDAD MODERADA";
+            colorClass = "bg-orange text-white";
+        } else {
+            interpretation = "FRAGILIDAD SEVERA / DISCAPACIDAD";
+            colorClass = "bg-danger text-white";
+        }
+
+        const badge = document.getElementById('sppb_interpretation');
+        badge.innerText = interpretation;
+        badge.className = `badge w-100 fs-5 ${colorClass}`;
+        document.getElementById('input_sppb_valoracion').value = interpretation;
+    }
+
     // Auto-select IMC if available
     function autoSelectMNA_BMI() {
         // Obtenemos el IMC del input de la pestaña II
@@ -3266,6 +3684,7 @@
         calcularMarcha(); // Calcular Marcha/TUG al cargar
         calcularTUG(); // Calcular TUG al cargar
         calcularFrail(); // Calcular FRAIL al cargar
+        calculateSPPB(); // Calcular SPPB al cargar
         
         // Intentar autoseleccionar IMC al cargar (si ya estaba guardado o calculado)
         setTimeout(autoSelectMNA_BMI, 500); 
@@ -3275,7 +3694,7 @@
         if(checkedCFS) selectCFS(checkedCFS);
     });
 
-    // Listeners para Barthel, Lawton, Pfeiffer, RUDAS, MMSE, Mini-Cog, GDS, Yesavage, MNA, SCAR-F, FRAIL y CFS
+    // Listeners para todas las escalas
     document.addEventListener("change", function(e) {
         if(e.target.classList.contains('barthel-radio')) {
             calcularBarthel();
@@ -3310,10 +3729,12 @@
         if(e.target.classList.contains('frail-radio')) {
             calcularFrail();
         }
-        // Nuevo listener para CFS
         if(e.target.classList.contains('cfs-card')) {
             const radio = e.target.querySelector('input[type="radio"]');
             if(radio) selectCFS(radio);
+        }
+        if(e.target.classList.contains('sppb-check') || e.target.classList.contains('sppb-input')) {
+            calculateSPPB();
         }
     });
     
@@ -3324,12 +3745,14 @@
         if(e.target.id === 'peso' || e.target.id === 'talla') {
             setTimeout(autoSelectMNA_BMI, 100);
         }
-        // Nuevos listeners para Marcha/TUG
         if(e.target.id === 'marcha_segundos') {
             calcularMarcha();
         }
         if(e.target.id === 'tug_segundos') {
             calcularTUG();
+        }
+        if(e.target.classList.contains('sppb-input')) {
+            calculateSPPB();
         }
     });
     

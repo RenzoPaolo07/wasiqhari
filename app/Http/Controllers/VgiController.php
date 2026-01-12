@@ -83,6 +83,9 @@ class VgiController extends Controller
             'marcha_segundos', 'marcha_velocidad', 'tug_segundos',
             'frail_fatiga', 'frail_resistencia', 'frail_ambulacion', 'frail_enfermedades', 'frail_peso',
             'cfs_puntaje', 'cfs_valoracion',
+            'sppb_bal_lado', 'sppb_bal_semi', 'sppb_bal_tandem_tiempo', 'sppb_score_balance',
+            'sppb_marcha_t1', 'sppb_marcha_t2', 'sppb_score_marcha',
+            'sppb_silla_pre', 'sppb_silla_tiempo', 'sppb_score_silla', 'sppb_total', 'sppb_valoracion',
         ];
 
         foreach ($camposNumericos as $campo) {
