@@ -6,6 +6,7 @@ use App\Models\AdultoMayor;
 use App\Models\VgiEvaluacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf; // <--- 1. ¡IMPORTANTE! AGREGA ESTO ARRIBA
 
 class VgiController extends Controller
 {
@@ -27,8 +28,8 @@ class VgiController extends Controller
     // Guarda una NUEVA evaluación (Cada vez que guardan, es una foto médica nueva en el tiempo)
     public function store(Request $request, $adultoId)
     {
-        // 1. Obtener todos los datos
-        $data = $request->except(['_token']);
+        // 1. Limpiar y preparar datos (lo que ya tenías)
+        $data = $request->except(['_token', 'generate_pdf']); // Quitamos el flag del array de datos
         
         // 2. Definir campos que deben ser 0 si vienen vacíos (Scores y Checkboxes)
         $camposNumericos = [
@@ -103,10 +104,27 @@ class VgiController extends Controller
             $data['fecha_evaluacion'] = now();
         }
 
-        // 4. Guardar
-        VgiEvaluacion::create($data);
+        // 4. GUARDAR EN BASE DE DATOS (Primero guardamos)
+        // Usamos updateOrCreate para que si ya existe una evaluación hoy, la actualice
+        $vgi = VgiEvaluacion::updateOrCreate(
+            ['adulto_mayor_id' => $adultoId, 'fecha_evaluacion' => $data['fecha_evaluacion']],
+            $data
+        );
 
+        // 5. GENERAR PDF (Si se presionó el botón rojo)
+        if ($request->input('generate_pdf') == '1') {
+            
+            $adulto = AdultoMayor::find($adultoId);
+            
+            // Cargar la vista del PDF (la crearemos en el Paso 2)
+            $pdf = Pdf::loadView('dashboard.vgi.pdf_export', compact('adulto', 'vgi'));
+            
+            // Descargar el archivo
+            return $pdf->download('VGI_' . $adulto->dni . '_' . date('Ymd') . '.pdf');
+        }
+
+        // Si fue solo guardar normal
         return redirect()->route('adultos.vgi', $adultoId)
-                         ->with('success', 'Historia Clínica VGI guardada correctamente.');
+                         ->with('success', 'Historia Clínica guardada correctamente.');
     }
 }
