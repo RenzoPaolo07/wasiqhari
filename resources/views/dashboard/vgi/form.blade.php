@@ -1290,6 +1290,9 @@
                                                     <input class="form-check-input mmse-check" type="checkbox" name="mmse_copiar" value="1" {{ ($vgi->mmse_copiar ?? 0) == 1 ? 'checked' : '' }}>
                                                     <div class="ms-2">
                                                         <label class="form-check-label d-block">Copiar el dibujo (Pentágonos)</label>
+                                                        <div class="col-md-7">
+                                                            <img src="https://www.fertilace.com/wp-content/uploads/2025/06/Screenshot-2025-06-05-at-3.53.43%E2%80%AFPM.png" alt="Imagen: Cubo / Pentágonos">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1316,13 +1319,13 @@
                                         
                                         <hr class="border-white opacity-25 my-4">
                                         <div class="text-start small opacity-75">
-                                            <p class="mb-1 fw-bold">Referencia (Folstein):</p>
+                                            <p class="mb-1 fw-bold">Referencia:</p>
                                             <ul class="list-unstyled mb-0">
-                                                <li><span class="text-success">●</span> 27-30: Normal</li>
-                                                <li><span class="text-warning">●</span> 24-26: Sospecha Patológica</li>
-                                                <li><span class="text-warning">●</span> 12-24: Deterioro</li>
-                                                <li><span class="text-danger">●</span> 9-12: Demencia</li>
-                                                <li><span class="text-danger">●</span> <9: Demencia Severa</li>
+                                                <li><span class="text-success">●</span> 27-30: Sin Deterioro</li>
+                                                <li><span class="text-warning">●</span> 25-26: Dudoso o Posible Deterioro</li>
+                                                <li><span class="text-warning">●</span> 10-24: Demencia Leve a Moderada</li>
+                                                <li><span class="text-danger">●</span> 6-9: Demencia Moderada a Severa</li>
+                                                <li><span class="text-danger">●</span> <6: Demencia Severa</li>
                                             </ul>
                                             <p class="mt-2 fst-italic" style="font-size: 0.8em;">*Ajustar según nivel educativo.</p>
                                         </div>
@@ -3193,16 +3196,16 @@
         let colorClass = "bg-secondary"; 
 
         if (total >= 27) {
-            result = "NORMAL";
+            result = "SIN DETERIORO ";
             colorClass = "bg-success";
-        } else if (total >= 24) {
-            result = "SOSPECHA PATOLÓGICA";
+        } else if (total >= 25) {
+            result = "DUDOSO O POSIBLE DETERIORO";
             colorClass = "bg-warning text-dark";
-        } else if (total >= 12) {
-            result = "DETERIORO";
+        } else if (total >= 10) {
+            result = "DEMENCIA LEVE A MODERADA";
             colorClass = "bg-orange text-white";
-        } else if (total >= 9) {
-            result = "DEMENCIA";
+        } else if (total >= 6) {
+            result = "DEMENCIA MODERADA A SEVERA";
             colorClass = "bg-danger";
         } else {
             result = "DEMENCIA SEVERA";
