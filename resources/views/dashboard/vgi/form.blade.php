@@ -2179,15 +2179,60 @@
                 <div class="row g-4">
                     @php
                         $cfs_levels = [
-                            1 => ['title' => 'Muy en forma', 'desc' => 'Robustas, activas, enérgicas y motivadas. Hacen ejercicio regular.', 'icon' => 'fa-running'],
-                            2 => ['title' => 'En forma', 'desc' => 'Síntomas de enfermedad activa pero menos en forma que cat. 1. Ejercicio estacional.', 'icon' => 'fa-walking'],
-                            3 => ['title' => 'Se las arregla bien', 'desc' => 'Problemas médicos controlados. No activas regularmente más allá de caminar.', 'icon' => 'fa-male'],
-                            4 => ['title' => 'Fragilidad muy leve', 'desc' => 'Vulnerable. Transición desde independencia. "Lento" o "cansado".', 'icon' => 'fa-blind'],
-                            5 => ['title' => 'Fragilidad leve', 'desc' => 'Enlentecimiento evidente. Ayuda en AIVD (finanzas, transporte, pesado).', 'icon' => 'fa-user-nurse'],
-                            6 => ['title' => 'Fragilidad moderada', 'desc' => 'Necesita ayuda en todas las AIVD y comienza en las básicas (baño, vestirse).', 'icon' => 'fa-crutch'],
-                            7 => ['title' => 'Fragilidad severa', 'desc' => 'Totalmente dependiente para cuidado personal. Estables, riesgo muerte < 6 meses.', 'icon' => 'fa-wheelchair'],
-                            8 => ['title' => 'Fragilidad muy severa', 'desc' => 'Totalmente dependiente, próximo al final de vida. No se recuperan de enfermedades menores.', 'icon' => 'fa-bed'],
-                            9 => ['title' => 'Enfermedad terminal', 'desc' => 'Esperanza de vida < 6 meses, pero no necesariamente fragilidad severa.', 'icon' => 'fa-procedures'],
+                            1 => [
+                                'title' => 'Muy en forma', 
+                                'desc' => 'Robustas, activas, enérgicas y motivadas. Hacen ejercicio regular.', 
+                                'icon' => 'fa-running',
+                                'image' => 'https://i.postimg.cc/D0T5MJ2s/Captura-de-pantalla-2026-01-16-231754.png' // URL de la imagen
+                            ],
+                            2 => [
+                                'title' => 'En forma', 
+                                'desc' => 'Síntomas de enfermedad activa pero menos en forma que cat. 1. Ejercicio estacional.', 
+                                'icon' => 'fa-walking',
+                                'image' => 'https://i.postimg.cc/jdvvMSBw/Captura-de-pantalla-2026-01-16-231919.png'
+                            ],
+                            3 => [
+                                'title' => 'Se las arregla bien', 
+                                'desc' => 'Problemas médicos controlados. No activas regularmente más allá de caminar.', 
+                                'icon' => 'fa-male',
+                                'image' => 'https://i.postimg.cc/PxGMCp85/Captura-de-pantalla-2026-01-16-232010.png'
+                            ],
+                            4 => [
+                                'title' => 'Fragilidad muy leve', 
+                                'desc' => 'Vulnerable. Transición desde independencia. "Lento" o "cansado".', 
+                                'icon' => 'fa-blind',
+                                'image' => 'https://i.postimg.cc/vTbLvJhM/Captura-de-pantalla-2026-01-16-232113.png'
+                            ],
+                            5 => [
+                                'title' => 'Fragilidad leve', 
+                                'desc' => 'Enlentecimiento evidente. Ayuda en AIVD (finanzas, transporte, pesado).', 
+                                'icon' => 'fa-user-nurse',
+                                'image' => 'https://i.postimg.cc/XYpKxcwP/Captura-de-pantalla-2026-01-16-232144.png'
+                            ],
+                            6 => [
+                                'title' => 'Fragilidad moderada', 
+                                'desc' => 'Necesita ayuda en todas las AIVD y comienza en las básicas (baño, vestirse).', 
+                                'icon' => 'fa-crutch',
+                                'image' => 'https://i.postimg.cc/ZqN8zbsP/Captura-de-pantalla-2026-01-16-232221.png'
+                            ],
+                            7 => [
+                                'title' => 'Fragilidad severa', 
+                                'desc' => 'Totalmente dependiente para cuidado personal. Estables, riesgo muerte < 6 meses.', 
+                                'icon' => 'fa-wheelchair',
+                                'image' => 'https://i.postimg.cc/Twqnhk6p/Captura-de-pantalla-2026-01-16-232256.png'
+                            ],
+                            8 => [
+                                'title' => 'Fragilidad muy severa', 
+                                'desc' => 'Totalmente dependiente, próximo al final de vida. No se recuperan de enfermedades menores.', 
+                                'icon' => 'fa-bed',
+                                'image' => 'https://i.postimg.cc/Kj0LDR48/Captura-de-pantalla-2026-01-16-232322.png'
+                            ],
+                            9 => [
+                                'title' => 'Enfermedad terminal', 
+                                'desc' => 'Esperanza de vida < 6 meses, pero no necesariamente fragilidad severa.', 
+                                'icon' => 'fa-procedures',
+                                'image' => 'https://i.postimg.cc/rFp5FCYV/Captura-de-pantalla-2026-01-16-232347.png'
+                            ],
                         ];
                     @endphp
 
@@ -2195,12 +2240,14 @@
                     <div class="col-md-6 col-lg-4">
                         <label class="cfs-card h-100">
                             <input type="radio" name="cfs_radio" value="{{ $level }}" data-text="{{ $data['title'] }}" 
-                                   {{ ($vgi->cfs_puntaje ?? 0) == $level ? 'checked' : '' }} onchange="selectCFS(this)">
+                                {{ ($vgi->cfs_puntaje ?? 0) == $level ? 'checked' : '' }} onchange="selectCFS(this)">
                             <div class="card-inner p-4 h-100 d-flex flex-column align-items-center text-center">
+                                <!-- Cambiar esta parte: icono por imagen -->
                                 <div class="cfs-image-placeholder mb-3">
-                                    <i class="fas {{ $data['icon'] }} fa-2x text-muted opacity-50"></i>
-                                    <span class="small d-block text-muted mt-1">Imagen Nivel {{ $level }}</span>
-                                    </div>
+                                    <img src="{{ $data['image'] }}" 
+                                        alt="CFS Nivel {{ $level }}" 
+                                        style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px;">
+                                </div>
                                 
                                 <div class="cfs-number mb-2">{{ $level }}</div>
                                 <h5 class="fw-bold text-dark mb-2">{{ $data['title'] }}</h5>
@@ -2861,6 +2908,28 @@
         width: 100%; height: 120px; background-color: #f8f9fa; border-radius: 10px;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         border: 2px dashed #dee2e6;
+    }
+
+    /* En la sección de estilos, modifica o agrega: */
+    .cfs-image-placeholder {
+        width: 100%; 
+        height: 120px; 
+        background-color: #f8f9fa; 
+        border-radius: 10px;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        border: 2px solid #dee2e6;
+        overflow: hidden; /* Para que las imágenes no se salgan */
+    }
+    .cfs-image-placeholder img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .cfs-card:hover .cfs-image-placeholder img {
+        transform: scale(1.05); /* Efecto zoom al pasar el mouse */
     }
 </style>
 @endpush
