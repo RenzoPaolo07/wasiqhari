@@ -2243,10 +2243,14 @@
                                 {{ ($vgi->cfs_puntaje ?? 0) == $level ? 'checked' : '' }} onchange="selectCFS(this)">
                             <div class="card-inner p-4 h-100 d-flex flex-column align-items-center text-center">
                                 <!-- Cambiar esta parte: icono por imagen -->
-                                <div class="cfs-image-placeholder mb-3">
-                                    <img src="{{ $data['image'] }}" 
-                                        alt="CFS Nivel {{ $level }}" 
-                                        style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px;">
+                                <div class="cfs-image-container mb-3">
+                                    <div class="cfs-image-wrapper">
+                                        <img src="{{ $data['image'] }}" 
+                                            alt="CFS Nivel {{ $level }}" 
+                                            class="cfs-responsive-img"
+                                            onload="this.parentElement.classList.add('loaded')">
+                                        <div class="cfs-number-overlay">{{ $level }}</div>
+                                    </div>
                                 </div>
                                 
                                 <div class="cfs-number mb-2">{{ $level }}</div>
@@ -2930,6 +2934,60 @@
     }
     .cfs-card:hover .cfs-image-placeholder img {
         transform: scale(1.05); /* Efecto zoom al pasar el mouse */
+    }
+
+    /* Agrega esto en tu sección de estilos CSS existente */
+    .cfs-image-container {
+        width: 100%;
+        height: 120px;
+        position: relative;
+    }
+
+    .cfs-image-wrapper {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        border: 2px solid #dee2e6;
+        background: #f8f9fa;
+    }
+
+    .cfs-responsive-img {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90%;
+        max-height: 90%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+
+    .cfs-number-overlay {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background: rgba(23, 162, 184, 0.9);
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .cfs-card:hover .cfs-responsive-img {
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .cfs-image-wrapper.loaded {
+        background: white;
     }
 </style>
 @endpush
