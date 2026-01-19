@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\AdultoMayor;
 use App\Models\Voluntario;
 use App\Models\Visita;
+use App\Models\VgiEvaluacion; // Importación del modelo VGI
 use Carbon\Carbon;
 
 class AIController extends Controller
@@ -15,6 +16,7 @@ class AIController extends Controller
     public function chat(Request $request)
     {
         $mensaje = $request->input('message');
+        $adultoId = $request->input('adulto_id'); // Nuevo parámetro para contexto clínico
         $apiKey = env('GEMINI_API_KEY');
 
         if (empty($apiKey)) {
@@ -62,6 +64,15 @@ class AIController extends Controller
                 $historial = "No hay visitas registradas recientemente.";
             }
 
+            // OBTENER CONTEXTO CLÍNICO VGI (si tenemos adulto_id)
+            $contextoMedico = "";
+            if ($adultoId) {
+                $contextoMedico = $this->obtenerContextoClinico($adultoId);
+            } else {
+                // Si no hay adulto_id pero encontramos por nombre, usamos su ID
+                $contextoMedico = $this->obtenerContextoClinico($adultoEncontrado->id);
+            }
+
             $datosDelSistema = "
             EXPEDIENTE DEL PACIENTE: {$adultoEncontrado->nombres} {$adultoEncontrado->apellidos}
             Edad: {$adultoEncontrado->edad} años
@@ -69,13 +80,20 @@ class AIController extends Controller
             
             HISTORIAL CLÍNICO RECIENTE (Últimas visitas):
             {$historial}
+            
+            {$contextoMedico}
             ";
 
             $systemInstruction = "Eres el Consultor Clínico de WasiQhari. 
             El usuario está preguntando específicamente por el paciente {$adultoEncontrado->nombres}.
             Usa el historial clínico proporcionado para responder. 
             Si ves alertas del 'DR. IA' en el historial, menciónalas como puntos de atención.
-            Sé empático, profesional y basa tu respuesta SOLO en los datos mostrados.";
+            
+            INFORMACIÓN CLÍNICA VGI: Usa esta información para dar consejos personalizados. 
+            Si el paciente tiene riesgo de caídas (SPPB bajo o TUG alto), sugiere precauciones.
+            Si tiene desnutrición (MNA bajo), sugiere dietas blandas o ricas en proteínas.
+            
+            Sé empático, profesional y basa tu respuesta en los datos mostrados.";
 
         } else {
             // === MODO ASISTENTE GENERAL (Estadísticas) ===
@@ -123,5 +141,46 @@ class AIController extends Controller
             Log::error('Error Chat IA: ' . $e->getMessage());
             return response()->json(['response' => 'Error de conexión con el servidor.'], 500);
         }
+    }
+
+    // NUEVA FUNCIÓN: Obtener contexto clínico del paciente
+    private function obtenerContextoClinico($adultoId)
+    {
+        // 1. Buscar la última evaluación VGI del paciente
+        $vgi = VgiEvaluacion::where('adulto_mayor_id', $adultoId)
+                            ->latest('fecha_evaluacion')
+                            ->first();
+
+        // 2. Si no hay evaluación, devolvemos vacío
+        if (!$vgi) {
+            return "Nota: Este paciente aún no tiene una Valoración Geriátrica Integral (VGI) registrada.";
+        }
+
+        // 3. Si existe, construimos el "Resumen para el Doctor Gemini"
+        $resumen = "INFORMACIÓN CLÍNICA DEL PACIENTE (Basada en VGI del {$vgi->fecha_evaluacion}):\n";
+        
+        // Agregamos datos clave
+        $resumen .= "- Estado Nutricional (MNA): {$vgi->mna_puntaje} pts ({$vgi->mna_valoracion}). IMC: {$vgi->imc}.\n";
+        $resumen .= "- Funcionalidad (Barthel): {$vgi->barthel_total} pts ({$vgi->barthel_valoracion}).\n";
+        $resumen .= "- Estado Cognitivo (MMSE): {$vgi->mmse_total_final}/30. (Pfeiffer: {$vgi->pfeiffer_errores} errores).\n";
+        $resumen .= "- Estado Afectivo (Yesavage): {$vgi->yesavage_total} pts.\n";
+        $resumen .= "- Desempeño Físico (SPPB): {$vgi->sppb_total}/12 ({$vgi->sppb_valoracion}).\n";
+        $resumen .= "- Riesgo de Caídas (TUG): {$vgi->tug_segundos} segundos.\n";
+        $resumen .= "- Fragilidad (FRAIL): {$vgi->frail_valoracion_texto}.\n";
+        
+        // Agregamos comorbilidades importantes (solo si las tiene)
+        $patologias = [];
+        if ($vgi->tiene_hta) $patologias[] = "Hipertensión";
+        if ($vgi->tiene_diabetes) $patologias[] = "Diabetes";
+        if ($vgi->tiene_demencia) $patologias[] = "Demencia";
+        if ($vgi->sindrome_caidas) $patologias[] = "Síndrome de Caídas Recientes";
+        
+        if (!empty($patologias)) {
+            $resumen .= "- Patologías/Síndromes: " . implode(', ', $patologias) . ".\n";
+        }
+
+        $resumen .= "- Plan de Cuidados Actual: " . ($vgi->plan_cuidados ?? 'No especificado') . "\n";
+
+        return $resumen;
     }
 }
