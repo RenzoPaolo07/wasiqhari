@@ -54,7 +54,7 @@
                     <small>{{ $visita->fecha_visita->format('H:i') }}</small>
                 </td>
                 <td>{{ $visita->adultoMayor->nombres }} {{ $visita->adultoMayor->apellidos }}</td>
-                <td>{{ $visita->voluntario->user->name }}</td>
+                <td>{{ $visita->voluntario?->user?->name ?? $visita->user?->name ?? 'Usuario no identificado' }}</td>
                 <td>{{ $visita->tipo_visita }}</td>
                 <td>{{ $visita->estado_emocional }}</td>
                 <td style="text-align: center;">

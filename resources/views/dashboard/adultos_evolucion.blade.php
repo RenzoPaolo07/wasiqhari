@@ -55,7 +55,7 @@
                                     </div>
                                     
                                     <p class="timeline-desc">
-                                        <strong>Voluntario:</strong> {{ $visita->voluntario->user->name }}<br>
+                                        <strong>Voluntario:</strong> {{ $visita->voluntario?->user?->name ?? 'Voluntario no encontrado' }}<br>
                                         {{ $visita->observaciones }}
                                     </p>
                                     
