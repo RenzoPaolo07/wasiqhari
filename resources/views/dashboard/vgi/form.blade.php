@@ -3800,6 +3800,71 @@ body {
 .gap-2 { gap: 0.5rem !important; }
 .gap-3 { gap: 1rem !important; }
 .gap-4 { gap: 1.5rem !important; }
+
+/* === CORRECCIONES PARA CELULAR (MOBILE RESPONSIVE) === */
+@media (max-width: 768px) {
+    /* Ajuste general de contenedores */
+    .dashboard-container { padding: 10px; }
+    .section-body { padding: 15px; }
+    
+    /* 1. Scroll Horizontal para Píldoras (Estado Civil / Parentesco) */
+    .scroll-horizontal-container {
+        display: flex;
+        flex-wrap: nowrap !important; /* Fuerza una sola línea */
+        overflow-x: auto; /* Permite scroll lateral */
+        gap: 10px;
+        padding-bottom: 10px;
+        justify-content: flex-start !important; /* Alinea al inicio */
+        -webkit-overflow-scrolling: touch; /* Suaviza el scroll en iPhone */
+    }
+    /* Ocultar barra de scroll fea pero mantener funcionalidad */
+    .scroll-horizontal-container::-webkit-scrollbar { height: 4px; }
+    .scroll-horizontal-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+    /* 2. Antropometría */
+    .input-group-lg .form-control { font-size: 1.5rem; padding: 0.5rem; }
+    #imc { font-size: 2.5rem !important; } /* Reducir tamaño fuente IMC */
+    
+    /* 3. Botones SI/NO (Comorbilidades y SPPB) */
+    .btn-group {
+        display: flex;
+        width: 100%;
+    }
+    .btn-group .btn {
+        flex: 1; /* Que ocupen el 50% cada uno */
+        padding: 0.5rem 0.2rem; /* Menos padding lateral */
+        font-size: 0.85rem;
+        white-space: normal; /* Permitir que el texto baje si es largo */
+        line-height: 1.2;
+    }
+    
+    /* 4-9. Tablas con Scroll (Pfeiffer, GDS, etc) */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid #eee;
+    }
+    .table { min-width: 600px; } /* Fuerza ancho mínimo para obligar el scroll */
+    
+    /* 5. RUDAS Imágenes */
+    .section-body img {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 15px;
+    }
+    
+    /* 10. SPPB en vertical */
+    .sppb-mobile-stack .btn-group {
+        flex-direction: column; /* Botones uno debajo de otro en SPPB */
+    }
+    .sppb-mobile-stack .btn {
+        width: 100%;
+        margin-bottom: 5px;
+        border-radius: 50px !important;
+    }
+}
 </style>
 @endpush
 
