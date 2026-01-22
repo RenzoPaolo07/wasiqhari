@@ -2457,11 +2457,13 @@
                                                 </div>
                                                 <div class="flex-grow-1">
                                                     <p class="mb-1 fw-bold small">B. Pararse en posición semi-tándem (10 seg)</p>
-                                                    <div class="btn-group btn-group-sm w-100">
+                                                    <div class="btn-group btn-group-sm w-100 sppb-mobile-stack">
                                                         <input type="radio" class="btn-check sppb-check" name="sppb_bal_semi" id="bal_semi_1" value="1" {{ ($vgi->sppb_bal_semi ?? 0) == 1 ? 'checked' : '' }}>
                                                         <label class="btn btn-outline-success" for="bal_semi_1">Sí (1 punto)</label>
+                                                        
                                                         <input type="radio" class="btn-check sppb-check" name="sppb_bal_semi" id="bal_semi_0" value="0" {{ ($vgi->sppb_bal_semi ?? 0) == 0 ? 'checked' : '' }}>
                                                         <label class="btn btn-outline-danger" for="bal_semi_0">No (0 puntos)</label>
+                                                        
                                                         <input type="radio" class="btn-check sppb-check" name="sppb_bal_semi" id="bal_semi_rehusa" value="rehúsa" {{ ($vgi->sppb_bal_semi ?? 0) == 'rehúsa' ? 'checked' : '' }}>
                                                         <label class="btn btn-outline-secondary" for="bal_semi_rehusa">Se rehúsa</label>
                                                     </div>
