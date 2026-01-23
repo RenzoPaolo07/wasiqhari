@@ -855,7 +855,7 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card shadow-lg border-0 bg-primary text-white sticky-top" style="top: 100px;">
+                        <div class="card shadow-lg border-0 bg-white text-dark sticky-top" style="top: 100px;">
                             <div class="card-body text-center p-4">
                                 <h5 class="fw-bold mb-3"><i class="fas fa-calculator me-2"></i>PUNTUACIÓN BARTHEL</h5>
                                 <div class="display-1 fw-bold mb-2" id="barthel_score_display">0</div>
@@ -972,7 +972,7 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card shadow-lg border-0 bg-success text-white sticky-top" style="top: 100px;">
+                        <div class="card shadow-lg border-0 bg-white text-dark sticky-top" style="top: 100px;">
                             <div class="card-body text-center p-4">
                                 <h5 class="fw-bold mb-3"><i class="fas fa-calculator me-2"></i>PUNTUACIÓN LAWTON</h5>
                                 <div class="display-1 fw-bold mb-2" id="lawton_score_display">0</div>
@@ -1058,7 +1058,7 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card shadow-lg border-0 bg-warning text-dark sticky-top" style="top: 100px;">
+                        <div class="card shadow-lg border-0 bg-white text-dark sticky-top" style="top: 100px;">
                             <div class="card-body text-center p-4">
                                 <h5 class="fw-bold mb-3"><i class="fas fa-poll me-2"></i>RESULTADO PFEIFFER</h5>
                                 
@@ -1558,7 +1558,7 @@
                             </div>
 
                             <div class="col-lg-5">
-                                <div class="card shadow-lg border-0 bg-indigo text-white sticky-top" style="top: 100px;">
+                                <div class="card shadow-lg border-0 bg-white text-dark sticky-top" style="top: 100px;">
                                     <div class="card-body text-center p-4">
                                         <h5 class="fw-bold mb-3"><i class="fas fa-calculator me-2"></i>RESULTADO MINI-COG</h5>
                                         
@@ -1883,7 +1883,7 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card shadow-lg border-0 bg-success text-white sticky-top" style="top: 100px;">
+                        <div class="card shadow-lg border-0 bg-white text-dark sticky-top" style="top: 100px;">
                             <div class="card-body text-center p-4">
                                 <h5 class="fw-bold mb-3"><i class="fas fa-apple-alt me-2"></i>PUNTAJE MNA</h5>
                                 
@@ -2018,7 +2018,7 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card shadow-lg border-0 bg-secondary text-white sticky-top" style="top: 100px;">
+                        <div class="card shadow-lg border-0 bg-white text-dark sticky-top" style="top: 100px;">
                             <div class="card-body text-center p-4">
                                 <h5 class="fw-bold mb-3"><i class="fas fa-dumbbell me-2"></i>PUNTAJE SCAR-F</h5>
                                 
@@ -2262,7 +2262,7 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card shadow-lg border-0 bg-warning text-dark sticky-top" style="top: 100px;">
+                        <div class="card shadow-lg border-0 bg-white text-dark sticky-top" style="top: 100px;">
                             <div class="card-body text-center p-4">
                                 <h5 class="fw-bold mb-3"><i class="fas fa-battery-half me-2"></i>PUNTAJE FRAIL</h5>
                                 
@@ -4090,6 +4090,49 @@ body {
         margin-right: 8px;
         font-size: 1.2rem;
     }
+}
+
+/* ESTILO UNIFICADO PARA TODAS LAS TARJETAS DE PUNTAJE */
+.score-card {
+    background: white !important;
+    border: 2px solid #f0f0f0 !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+    color: #2c3e50 !important;
+}
+
+.score-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-weight: 700;
+    font-size: 2.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Colores SEMÁNTICOS (solo para el círculo) */
+.score-circle.success { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+.score-circle.warning { background: linear-gradient(135deg, #ffc107, #fd7e14); color: white; }
+.score-circle.danger { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
+.score-circle.info { background: linear-gradient(135deg, #17a2b8, #138496); color: white; }
+.score-circle.primary { background: linear-gradient(135deg, #6f42c1, #8e44ad); color: white; }
+.score-circle.secondary { background: linear-gradient(135deg, #6c757d, #495057); color: white; }
+
+/* Badge de resultado */
+.result-badge {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    color: #495057;
+    font-weight: 600;
+    border-radius: 50px;
+    padding: 8px 20px;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
 }
 </style>
 @endpush
