@@ -413,8 +413,8 @@
                         <div class="row g-3">
                             @php $enfermedades = [ 'tiene_hta' => 'HTA Presión Arterial', 'tiene_diabetes' => 'Diabetes Mellitus', 'tiene_epoc' => 'EPOC', 'tiene_epid' => 'Enf. Pulmonar Intersticial Difusa', 'tiene_fa' => 'Fibrilación Auricular', 'tiene_coronaria' => 'Enf. Coronaria Crónica', 'tiene_icc' => 'Insuficiencia Cardiaca', 'tiene_demencia' => 'Demencia', 'tiene_hipotiroidismo' => 'Hipotiroidismo', 'tiene_depresion' => 'Depresión en tratamiento', 'tiene_osteoporosis' => 'Osteoporosis', 'tiene_artrosis' => 'Osteoartrosis', 'tiene_parkinson' => 'Enfermedad de Parkinson' ]; @endphp
                             @foreach($enfermedades as $key => $label)
-                            <div class="col-md-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div class="col-md-12 border-bottom pb-3 mb-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">{{ $label }}</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="{{ $key }}" id="{{ $key }}_si" value="1" {{ ($vgi->$key ?? 0) == 1 ? 'checked' : '' }}>
@@ -426,7 +426,7 @@
                             </div>
                             @endforeach
                             <div class="col-12 border-bottom pb-2 pt-2 bg-light rounded">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Cáncer</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="tiene_cancer" id="cancer_si" value="1" {{ ($vgi->tiene_cancer ?? 0) == 1 ? 'checked' : '' }} onclick="document.getElementById('cancer_details').style.display='block'">
@@ -452,7 +452,7 @@
                     <div class="section-body p-4">
                         <div class="row g-3">
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Caídas > 2 último año</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="sindrome_caidas" id="caidas_si" value="1" {{ ($vgi->sindrome_caidas ?? 0) == 1 ? 'checked' : '' }}>
@@ -463,7 +463,7 @@
                                 </div>
                             </div>
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Incontinencia</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="sindrome_incontinencia" id="inc_si" value="1" {{ ($vgi->sindrome_incontinencia ?? 0) == 1 ? 'checked' : '' }}>
@@ -474,7 +474,7 @@
                                 </div>
                             </div>
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Delirio</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="sindrome_delirio" id="del_si" value="1" {{ ($vgi->sindrome_delirio ?? 0) == 1 ? 'checked' : '' }}>
@@ -485,7 +485,7 @@
                                 </div>
                             </div>
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Faltan piezas dentales</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="problema_dental" id="dent_si" value="1" {{ ($vgi->problema_dental ?? 0) == 1 ? 'checked' : '' }}>
@@ -496,7 +496,7 @@
                                 </div>
                             </div>
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Usa prótesis</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="usa_protesis" id="prot_si" value="1" {{ ($vgi->usa_protesis ?? 0) == 1 ? 'checked' : '' }}>
@@ -507,7 +507,7 @@
                                 </div>
                             </div>
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Ve bien</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="vision_conservada" id="vis_si" value="1" {{ ($vgi->vision_conservada ?? 1) == 1 ? 'checked' : '' }}>
@@ -518,7 +518,7 @@
                                 </div>
                             </div>
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Escucha bien</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="audicion_conservada" id="aud_si" value="1" {{ ($vgi->audicion_conservada ?? 1) == 1 ? 'checked' : '' }}>
@@ -529,7 +529,7 @@
                                 </div>
                             </div>
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Estreñimiento</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="problema_estrenimiento" id="estr_si" value="1" {{ ($vgi->problema_estrenimiento ?? 0) == 1 ? 'checked' : '' }}>
@@ -540,7 +540,7 @@
                                 </div>
                             </div>
                             <div class="col-12 border-bottom pb-2">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Insomnio</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="problema_insomnio" id="insom_si" value="1" {{ ($vgi->problema_insomnio ?? 0) == 1 ? 'checked' : '' }}>
@@ -551,7 +551,7 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
                                     <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Nocturia</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="problema_nocturia" id="noct_si" value="1" {{ ($vgi->problema_nocturia ?? 0) == 1 ? 'checked' : '' }}>
@@ -1203,7 +1203,8 @@
                                 <h5 class="m-0 fw-bold"><i class="fas fa-calculator me-2"></i>Registro Final RUDAS</h5>
                             </div>
                             <div class="card-body p-0">
-                                <table class="table table-striped mb-0">
+                                <div class="table-responsive">
+                                <table class="table table-striped mb-0" style="min-width: 300px;">
                                     <thead class="small text-uppercase text-muted">
                                         <tr>
                                             <th class="ps-4">Dominio</th>
@@ -1223,7 +1224,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                
+                                </div>
                                 <div class="p-3 text-center border-top">
                                     <span class="badge w-100 py-2 fs-6" id="rudas_interpretation_badge">Sin evaluar</span>
                                 </div>
@@ -2542,7 +2543,7 @@
 
                                         <div class="mb-3">
                                             <label class="label-input">Calificación de la medición menor:</label>
-                                            <div class="btn-group-vertical w-100">
+                                            <div class="btn-group-vertical w-100 sppb-mobile-buttons">
                                                 <input type="radio" class="btn-check sppb-check" name="sppb_marcha_puntos" id="marcha_4" value="4" {{ ($vgi->sppb_marcha_puntos ?? 0) == 4 ? 'checked' : '' }}>
                                                 <label class="btn btn-outline-success text-start" for="marcha_4">4 = <4.82 seg</label>
                                                 
@@ -2623,7 +2624,7 @@
 
                                         <div class="mt-4">
                                             <label class="label-input">Calificación de la actividad:</label>
-                                            <div class="btn-group-vertical w-100">
+                                            <div class="btn-group-vertical w-100 sppb-mobile-buttons">
                                                 <input type="radio" class="btn-check sppb-check" name="sppb_silla_puntos" id="silla_4" value="4" {{ ($vgi->sppb_silla_puntos ?? 0) == 4 ? 'checked' : '' }}>
                                                 <label class="btn btn-outline-success text-start" for="silla_4">4 = ≤11.19 seg</label>
                                                 
@@ -3996,6 +3997,98 @@ body {
         width: 100%;
         margin-bottom: 5px;
         border-radius: 50px !important;
+    }
+}
+
+/* === CORRECCIONES FINALÍSIMAS PARA CELULAR (MOBILE) === */
+@media (max-width: 768px) {
+    
+    /* 1. ANTROPOMETRÍA: Arreglar inputs gigantes */
+    .input-group-lg {
+        flex-wrap: nowrap; /* Evita que el "kg" baje */
+    }
+    .input-group-lg .form-control { 
+        font-size: 1.5rem !important; 
+        padding: 0.5rem !important; 
+        width: 60% !important; /* Dar más espacio al número */
+    }
+    .input-group-lg .input-group-text {
+        font-size: 1rem !important;
+        padding: 0.5rem !important;
+        width: 40% !important; /* Ajustar texto unidad */
+        justify-content: center;
+    }
+    #imc { font-size: 3rem !important; } /* IMC más pequeño */
+
+    /* 2. COMORBILIDADES: Estilo "Tarjeta" para Si/No */
+    .mobile-row-stack {
+        flex-direction: column !important; /* Poner etiqueta arriba, botones abajo */
+        align-items: flex-start !important;
+    }
+    .mobile-row-stack .fw-bold {
+        margin-bottom: 8px;
+        width: 100%;
+    }
+    .mobile-row-stack .btn-group {
+        width: 100% !important;
+        display: flex !important;
+    }
+    .mobile-row-stack .btn {
+        flex: 1; /* Botones ocupan 50% cada uno */
+        padding: 10px 0;
+    }
+
+    /* 3. TABLAS (RUDAS y otras): Forzar scroll lateral */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    /* Truco: Forzar ancho mínimo a la tabla interna para activar el scroll */
+    #tab-rudas table, #tab-pfeiffer table, #tab-gds table, #tab-mna table, #tab-sarcf table, #tab-frail table {
+        min-width: 600px !important; 
+    }
+
+    /* 4. SPPB: Botones Verticales Estilizados */
+    .sppb-btn-vertical .btn {
+        width: 100% !important;
+        text-align: left !important;
+        margin-bottom: 8px !important;
+        border-radius: 10px !important; /* Botones redondeados */
+        display: block;
+        white-space: normal !important; /* Permitir texto en varias líneas */
+    }
+    .sppb-btn-vertical {
+        display: block !important; /* Romper el grupo horizontal */
+    }
+    .sppb-btn-vertical input {
+        display: none; /* Ocultar radio real */
+    }
+}
+
+/* === BOTONES SPPB ESPECÍFICOS PARA MÓVIL === */
+@media (max-width: 768px) {
+    .sppb-mobile-buttons .btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        padding: 12px 15px !important;
+        margin-bottom: 8px !important;
+        border-radius: 10px !important;
+        font-size: 0.9rem !important;
+        line-height: 1.4 !important;
+        min-height: 60px !important;
+        word-wrap: break-word !important;
+        white-space: normal !important;
+    }
+    
+    .sppb-mobile-buttons .btn::before {
+        content: "• ";
+        font-weight: bold;
+        margin-right: 8px;
+        font-size: 1.2rem;
     }
 }
 </style>
