@@ -2901,15 +2901,10 @@
                 </div>
             </div>
 
-            <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content border-0 shadow-lg bg-transparent">
-                        <div class="modal-body p-0 position-relative text-center">
-                            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 p-2 bg-white rounded-circle shadow" data-bs-dismiss="modal" aria-label="Close" style="z-index: 10; opacity: 1;"></button>
-                            <img src="" id="modalImageSrc" class="img-fluid rounded-4 shadow-lg" style="max-height: 85vh;">
-                        </div>
-                    </div>
-                </div>
+            <div id="imageLightbox" class="lightbox-overlay" onclick="closeLightbox()">
+                <span class="close-btn" onclick="closeLightbox()">&times;</span>
+                <img class="lightbox-content shadow-lg rounded-3" id="lightbox-img">
+                <div id="caption" class="text-center mt-2 text-white">Dibujo del Reloj</div>
             </div>
 
         </form>
@@ -4284,6 +4279,68 @@ body {
 }
 .zoom-hover:hover .overlay-zoom { opacity: 1; }
 .cursor-pointer { cursor: pointer; }
+
+/* ESTILOS DEL LIGHTBOX (Visor de imagen) */
+.lightbox-overlay {
+    display: none; /* Oculto por defecto */
+    position: fixed; 
+    z-index: 99999; /* Muy alto para tapar todo */
+    padding-top: 50px; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.9); /* Fondo negro semitransparente */
+    backdrop-filter: blur(5px);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* La imagen dentro del lightbox */
+.lightbox-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    max-height: 80vh;
+    object-fit: contain;
+    animation: zoomIn 0.3s;
+}
+
+/* Botón de cerrar */
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+    z-index: 100000;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Animación de zoom */
+@keyframes zoomIn {
+    from {transform:scale(0)} 
+    to {transform:scale(1)}
+}
+
+/* Ajuste para móviles */
+@media only screen and (max-width: 700px){
+    .lightbox-content {
+        width: 95%;
+    }
+}
 </style>
 @endpush
 
@@ -5241,17 +5298,32 @@ body {
         }
     }
 
-    // === NUEVA LÓGICA DE IMAGEN ===
+    // === NUEVA LÓGICA DE IMAGEN (LIGHTBOX) ===
 
-    // 1. Mostrar Modal
+    // 1. Abrir Visor Lightbox
     function showImageModal(src) {
         if(!src || src === '#') return;
-        document.getElementById('modalImageSrc').src = src;
-        var myModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
-        myModal.show();
+        
+        var modal = document.getElementById("imageLightbox");
+        var modalImg = document.getElementById("lightbox-img");
+        
+        modal.style.display = "flex"; // Usamos flex para centrar
+        modalImg.src = src;
+        
+        // Evitar scroll en el fondo
+        document.body.style.overflow = "hidden";
     }
 
-    // 2. Previsualizar al subir (Actualizada)
+    // 2. Cerrar Visor Lightbox
+    function closeLightbox() {
+        var modal = document.getElementById("imageLightbox");
+        modal.style.display = "none";
+        
+        // Restaurar scroll
+        document.body.style.overflow = "auto";
+    }
+
+    // 3. Previsualizar al subir
     function previewRelojImage(input) {
         const placeholder = document.getElementById('reloj-upload-placeholder');
         const previewCont = document.getElementById('reloj-preview-container');
@@ -5261,14 +5333,18 @@ body {
             const file = input.files[0];
             
             // Validaciones (opcional)
-            if (file.size > 5 * 1024 * 1024) { alert('Máximo 5MB'); input.value=''; return; }
+            if (file.size > 5 * 1024 * 1024) { 
+                alert('Máximo 5MB'); 
+                input.value=''; 
+                return; 
+            }
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                // Generamos el HTML dinámico con la función del modal incrustada
+                // Generamos el HTML dinámico con la función del lightbox incrustada
                 previewCont.innerHTML = `
                     <div class="position-relative d-inline-block shadow-sm rounded overflow-hidden cursor-pointer zoom-hover" 
-                         onclick="showImageModal('${e.target.result}')">
+                        onclick="showImageModal('${e.target.result}')">
                         <img src="${e.target.result}" class="img-fluid" style="max-height: 180px; object-fit: contain;">
                         <div class="overlay-zoom"><i class="fas fa-search-plus text-white fs-3"></i></div>
                     </div>
@@ -5283,7 +5359,7 @@ body {
         }
     }
 
-    // 3. Eliminar Imagen (Actualizada para UI)
+    // 4. Eliminar Imagen
     function removeRelojImage() {
         document.getElementById('reloj-preview-container').innerHTML = '';
         document.getElementById('reloj-preview-container').style.display = 'none';
@@ -5296,6 +5372,7 @@ body {
         if(hiddenInput) hiddenInput.value = '';
     }
 
+    // 5. Tomar foto con cámara
     function takePhotoWithCamera() {
         // Usar input file con captura de cámara
         const input = document.getElementById('minicog_reloj_file');
@@ -5310,23 +5387,25 @@ body {
         }, 100);
     }
 
-    function removeRelojImage() {
-        // Limpiar vista previa
-        document.getElementById('reloj-preview-container').innerHTML = '';
-        document.getElementById('reloj-preview-container').style.display = 'none';
-        document.getElementById('reloj-upload-placeholder').style.display = 'block';
+    // 6. Cerrar lightbox al hacer clic fuera de la imagen
+    document.addEventListener('DOMContentLoaded', function() {
+        // Si existe el lightbox, añadir funcionalidad de cerrar al hacer clic en el fondo
+        const lightbox = document.getElementById('imageLightbox');
+        if(lightbox) {
+            lightbox.addEventListener('click', function(e) {
+                if(e.target === lightbox || e.target.classList.contains('lightbox-close')) {
+                    closeLightbox();
+                }
+            });
+        }
         
-        // Limpiar input file
-        document.getElementById('minicog_reloj_file').value = '';
-        
-        // Ocultar botón eliminar
-        document.getElementById('remove-reloj-btn').style.display = 'none';
-        
-        // Limpiar campo oculto (opcional, dependiendo de tu lógica backend)
-        // document.getElementById('minicog_reloj_imagen_hidden').value = '';
-    }
-
-    // Asegurar que el formulario maneje archivos (ya tienes enctype="multipart/form-data")
+        // También cerrar con tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if(e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+    });
 
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
