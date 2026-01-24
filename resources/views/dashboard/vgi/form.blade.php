@@ -1566,71 +1566,60 @@
                                     <div class="section-body p-4">
                                         <p class="small text-muted">Instrucción: "Dibuje un reloj circular con todos los números y las manecillas marcando las 11:10".</p>
                                         
-                                        <div class="upload-reloj-container mb-3">
-                                            <div class="border rounded bg-white p-4" style="border-style: dashed !important; height: 200px;">
-                                                <div id="reloj-preview-container" class="text-center" style="display: {{ $vgi->minicog_reloj_imagen ? 'block' : 'none' }};">
+                                        <div class="upload-reloj-container mb-4">
+                                            <div class="border rounded bg-white p-4 d-flex flex-column justify-content-center align-items-center position-relative" 
+                                                style="border: 2px dashed #dee2e6 !important; min-height: 250px; transition: all 0.3s;">
+                                                
+                                                <div id="reloj-preview-container" class="text-center w-100" style="display: {{ $vgi->minicog_reloj_imagen ? 'block' : 'none' }};">
                                                     @if($vgi->minicog_reloj_imagen)
-                                                        <img src="{{ asset('storage/' . $vgi->minicog_reloj_imagen) }}" 
-                                                            alt="Reloj dibujado" 
-                                                            class="img-fluid rounded mb-2" 
-                                                            style="max-height: 120px;">
-                                                        <p class="small text-success mb-1">
-                                                            <i class="fas fa-check-circle"></i> Imagen cargada
+                                                        <div class="position-relative d-inline-block shadow-sm rounded overflow-hidden cursor-pointer zoom-hover" 
+                                                            onclick="showImageModal('{{ asset('storage/' . $vgi->minicog_reloj_imagen) }}')">
+                                                            <img src="{{ asset('storage/' . $vgi->minicog_reloj_imagen) }}" 
+                                                                alt="Reloj dibujado" 
+                                                                class="img-fluid" 
+                                                                style="max-height: 180px; object-fit: contain;">
+                                                            <div class="overlay-zoom">
+                                                                <i class="fas fa-search-plus text-white fs-3"></i>
+                                                            </div>
+                                                        </div>
+                                                        <p class="small text-success mt-2 mb-3 fw-bold">
+                                                            <i class="fas fa-check-circle"></i> Imagen cargada (Click para ver)
                                                         </p>
                                                     @endif
                                                 </div>
                                                 
-                                                <div id="reloj-upload-placeholder" class="text-center" style="display: {{ $vgi->minicog_reloj_imagen ? 'none' : 'block' }};">
-                                                    <i class="far fa-clock fs-1 text-muted opacity-50 mb-2 d-block"></i>
-                                                    <p class="small text-muted mb-2">Suba una foto del dibujo del reloj</p>
+                                                <div id="reloj-upload-placeholder" class="text-center mb-3" style="display: {{ $vgi->minicog_reloj_imagen ? 'none' : 'block' }};">
+                                                    <div class="mb-3">
+                                                        <i class="far fa-clock text-muted opacity-25" style="font-size: 4rem;"></i>
+                                                    </div>
+                                                    <p class="text-muted fw-500 mb-1">Suba una foto del dibujo del reloj</p>
+                                                    <small class="text-muted opacity-75">Formatos: JPG, PNG (Máx 5MB)</small>
                                                 </div>
                                                 
-                                                <div class="d-flex flex-column align-items-center">
-                                                    <!-- Input de archivo oculto -->
-                                                    <input type="file" 
-                                                        id="minicog_reloj_file" 
-                                                        name="minicog_reloj_imagen" 
-                                                        accept="image/*" 
-                                                        class="d-none"
-                                                        onchange="previewRelojImage(this)">
+                                                <div class="d-flex flex-wrap gap-2 justify-content-center w-100 mt-2" style="z-index: 2;">
+                                                    <input type="file" id="minicog_reloj_file" name="minicog_reloj_imagen" accept="image/*" class="d-none" onchange="previewRelojImage(this)">
                                                     
-                                                    <!-- Botón para tomar foto -->
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-outline-primary mb-2"
-                                                            onclick="document.getElementById('minicog_reloj_file').click()">
-                                                        <i class="fas fa-camera me-1"></i> Subir Foto
+                                                    <button type="button" class="btn btn-outline-primary rounded-pill px-4" onclick="document.getElementById('minicog_reloj_file').click()">
+                                                        <i class="fas fa-upload me-2"></i> Subir
                                                     </button>
                                                     
-                                                    <!-- Botón para usar cámara (si el navegador lo soporta) -->
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-outline-success mb-2"
-                                                            onclick="takePhotoWithCamera()">
-                                                        <i class="fas fa-video me-1"></i> Tomar Foto con Cámara
+                                                    <button type="button" class="btn btn-outline-success rounded-pill px-4" onclick="takePhotoWithCamera()">
+                                                        <i class="fas fa-camera me-2"></i> Cámara
+                                                    </button>
+
+                                                    <button type="button" id="remove-reloj-btn" class="btn btn-outline-danger rounded-pill px-4" 
+                                                            onclick="removeRelojImage()" 
+                                                            style="display: {{ $vgi->minicog_reloj_imagen ? 'inline-block' : 'none' }};">
+                                                        <i class="fas fa-trash-alt me-2"></i> Eliminar
                                                     </button>
                                                     
-                                                    <!-- Botón para eliminar imagen -->
-                                                    <button type="button" 
-                                                            id="remove-reloj-btn" 
-                                                            class="btn btn-sm btn-outline-danger"
-                                                            onclick="removeRelojImage()"
-                                                            style="display: {{ $vgi->minicog_reloj_imagen ? 'block' : 'none' }};">
-                                                        <i class="fas fa-trash me-1"></i> Eliminar
-                                                    </button>
-                                                    
-                                                    <input type="hidden" 
-                                                        name="minicog_reloj_imagen" 
-                                                        id="minicog_reloj_imagen_hidden" 
-                                                        value="{{ $vgi->minicog_reloj_imagen ?? '' }}">
+                                                    <input type="hidden" name="minicog_reloj_imagen_hidden" id="minicog_reloj_imagen_hidden" value="{{ $vgi->minicog_reloj_imagen ?? '' }}">
                                                 </div>
-                                            </div>
-                                            
-                                            <div class="small text-muted mt-1">
-                                                <i class="fas fa-info-circle"></i> Formatos aceptados: JPG, PNG (Máx. 5MB)
                                             </div>
                                         </div>
 
-                                        <div class="d-flex justify-content-between align-items-center p-3 bg-soft-gray rounded">
-                                            <span class="fw-bold">Evaluación del Reloj:</span>
+                                        <div class="d-flex justify-content-between align-items-center p-3 bg-soft-gray rounded border">
+                                            <span class="fw-bold text-dark">Evaluación del Reloj:</span>
                                             <div class="btn-group" role="group">
                                                 <input type="radio" class="btn-check minicog-clock" name="minicog_reloj_puntaje" id="reloj_anormal" value="0" {{ ($vgi->minicog_reloj_puntaje ?? 0) == 0 ? 'checked' : '' }}>
                                                 <label class="btn btn-outline-danger btn-sm px-3" for="reloj_anormal">0 pts (Anormal)</label>
@@ -1639,7 +1628,7 @@
                                                 <label class="btn btn-outline-success btn-sm px-3" for="reloj_normal">2 pts (Normal)</label>
                                             </div>
                                         </div>
-                                        <small class="d-block mt-2 text-muted" style="font-size: 0.8em;">*Normal: Todos los números, orden correcto, manecillas en 11 y 2.</small>
+                                        <small class="d-block mt-2 text-muted fst-italic ms-1">*Normal: Todos los números en orden correcto y manecillas en 11 y 2.</small>
                                     </div>
                                 </div>
 
@@ -2909,6 +2898,17 @@
                     <button type="submit" class="btn btn-danger px-5 fw-bold rounded-pill hover-scale shadow-lg" onclick="setPdfFlag()">
                         <i class="fas fa-file-pdf me-2"></i> GUARDAR Y EXPORTAR PDF
                     </button>
+                </div>
+            </div>
+
+            <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content border-0 shadow-lg bg-transparent">
+                        <div class="modal-body p-0 position-relative text-center">
+                            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 p-2 bg-white rounded-circle shadow" data-bs-dismiss="modal" aria-label="Close" style="z-index: 10; opacity: 1;"></button>
+                            <img src="" id="modalImageSrc" class="img-fluid rounded-4 shadow-lg" style="max-height: 85vh;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -4272,6 +4272,18 @@ body {
 #reloj-preview-container img:hover {
     transform: scale(1.05);
 }
+
+/* Efecto Hover Zoom */
+.zoom-hover { position: relative; transition: transform 0.3s ease; }
+.zoom-hover:hover { transform: scale(1.02); }
+.overlay-zoom {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.3s;
+}
+.zoom-hover:hover .overlay-zoom { opacity: 1; }
+.cursor-pointer { cursor: pointer; }
 </style>
 @endpush
 
@@ -5229,53 +5241,59 @@ body {
         }
     }
 
-    // === FUNCIONES PARA SUBIR FOTO DEL RELOJ ===
+    // === NUEVA LÓGICA DE IMAGEN ===
+
+    // 1. Mostrar Modal
+    function showImageModal(src) {
+        if(!src || src === '#') return;
+        document.getElementById('modalImageSrc').src = src;
+        var myModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        myModal.show();
+    }
+
+    // 2. Previsualizar al subir (Actualizada)
     function previewRelojImage(input) {
+        const placeholder = document.getElementById('reloj-upload-placeholder');
+        const previewCont = document.getElementById('reloj-preview-container');
+        const removeBtn = document.getElementById('remove-reloj-btn');
+
         if (input.files && input.files[0]) {
             const file = input.files[0];
             
-            // Validar tamaño (5MB máximo)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('El archivo es demasiado grande. Máximo 5MB.');
-                input.value = '';
-                return;
-            }
-            
-            // Validar tipo de archivo
-            if (!file.type.match('image.*')) {
-                alert('Por favor, selecciona solo archivos de imagen.');
-                input.value = '';
-                return;
-            }
-            
+            // Validaciones (opcional)
+            if (file.size > 5 * 1024 * 1024) { alert('Máximo 5MB'); input.value=''; return; }
+
             const reader = new FileReader();
-            
             reader.onload = function(e) {
-                // Crear imagen de vista previa
-                let previewHtml = `
-                    <img src="${e.target.result}" 
-                        alt="Reloj dibujado" 
-                        class="img-fluid rounded mb-2" 
-                        style="max-height: 120px;">
-                    <p class="small text-success mb-1">
-                        <i class="fas fa-check-circle"></i> Imagen cargada
-                    </p>
+                // Generamos el HTML dinámico con la función del modal incrustada
+                previewCont.innerHTML = `
+                    <div class="position-relative d-inline-block shadow-sm rounded overflow-hidden cursor-pointer zoom-hover" 
+                         onclick="showImageModal('${e.target.result}')">
+                        <img src="${e.target.result}" class="img-fluid" style="max-height: 180px; object-fit: contain;">
+                        <div class="overlay-zoom"><i class="fas fa-search-plus text-white fs-3"></i></div>
+                    </div>
+                    <p class="small text-success mt-2 mb-3 fw-bold"><i class="fas fa-check-circle"></i> Lista para guardar</p>
                 `;
                 
-                // Mostrar vista previa
-                document.getElementById('reloj-preview-container').innerHTML = previewHtml;
-                document.getElementById('reloj-preview-container').style.display = 'block';
-                document.getElementById('reloj-upload-placeholder').style.display = 'none';
-                
-                // Mostrar botón eliminar
-                document.getElementById('remove-reloj-btn').style.display = 'block';
-                
-                // Actualizar campo oculto con el nombre del archivo (para mostrar en el preview)
-                // Nota: El archivo real se enviará con el formulario
-            };
-            
+                placeholder.style.display = 'none';
+                previewCont.style.display = 'block';
+                removeBtn.style.display = 'inline-block'; // Mostrar botón eliminar
+            }
             reader.readAsDataURL(file);
         }
+    }
+
+    // 3. Eliminar Imagen (Actualizada para UI)
+    function removeRelojImage() {
+        document.getElementById('reloj-preview-container').innerHTML = '';
+        document.getElementById('reloj-preview-container').style.display = 'none';
+        document.getElementById('reloj-upload-placeholder').style.display = 'block';
+        document.getElementById('minicog_reloj_file').value = ''; // Limpiar input file
+        document.getElementById('remove-reloj-btn').style.display = 'none'; // Ocultar botón eliminar
+        
+        // Limpiar input hidden si existe (para backend)
+        const hiddenInput = document.getElementById('minicog_reloj_imagen_hidden');
+        if(hiddenInput) hiddenInput.value = '';
     }
 
     function takePhotoWithCamera() {
