@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <form action="{{ route('adultos.vgi.store', $adulto->id) }}" method="POST" class="p-4 p-lg-5 bg-soft-gray">
+        <form action="{{ route('adultos.vgi.store', $adulto->id) }}" method="POST" class="p-4 p-lg-5 bg-soft-gray" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="generate_pdf" id="generate_pdf_input" value="0">
             
@@ -464,7 +464,7 @@
                             </div>
                             <div class="col-12 border-bottom pb-2">
                                 <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
-                                    <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Incontinencia</span>
+                                    <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Incontinencia Urinaria</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="sindrome_incontinencia" id="inc_si" value="1" {{ ($vgi->sindrome_incontinencia ?? 0) == 1 ? 'checked' : '' }}>
                                         <label class="btn btn-outline-danger btn-sm" for="inc_si">SI</label>
@@ -552,7 +552,7 @@
                             </div>
                             <div class="col-12">
                                 <div class="d-flex align-items-center justify-content-between gap-2 mobile-row-stack">
-                                    <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Nocturia</span>
+                                    <span class="fw-bold text-dark text-start" style="flex: 1; min-width: 150px;">Nicturia</span>
                                     <div class="btn-group" style="flex: 0 0 auto; min-width: 120px;">
                                         <input type="radio" class="btn-check" name="problema_nocturia" id="noct_si" value="1" {{ ($vgi->problema_nocturia ?? 0) == 1 ? 'checked' : '' }}>
                                         <label class="btn btn-outline-danger btn-sm" for="noct_si">SI</label>
@@ -1329,30 +1329,84 @@
                                 </div>
 
                                 <div class="section-container mb-4">
-                                    <div class="section-header bg-light"><h6 class="m-0 fw-bold">3. Atención y Cálculo (Máx 5 puntos)</h6></div>
+                                    <div class="section-header bg-light">
+                                        <h6 class="m-0 fw-bold">3. Atención y Cálculo (Máx 5 puntos)</h6>
+                                    </div>
                                     <div class="section-body p-3">
-                                        <p class="small text-muted mb-2">Restar 7 de 100 consecutivamente <strong>O</strong> deletrear MUNDO al revés. (Marque 1 por cada acierto).</p>
-                                        <div class="d-flex justify-content-between text-center px-3">
-                                            <div>
-                                                <label class="d-block small fw-bold">93 / O</label>
-                                                <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_1" value="1" {{ ($vgi->mmse_atencion_1 ?? 0) == 1 ? 'checked' : '' }}>
+                                        <p class="small text-muted mb-3">
+                                            <strong>OPCIÓN A:</strong> Restar 7 de 100 consecutivamente<br>
+                                            <strong>O</strong><br>
+                                            <strong>OPCIÓN B:</strong> Deletrear MUNDO al revés<br>
+                                            <em class="text-danger">(Marque 1 punto por cada acierto correcto)</em>
+                                        </p>
+                                        
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <div class="card border-0 bg-light-subtle h-100">
+                                                    <div class="card-body">
+                                                        <h6 class="fw-bold text-center mb-3 text-primary">OPCIÓN A: Restar 7 de 100</h6>
+                                                        <div class="row g-2">
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">93</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_resta_93" value="1" {{ ($vgi->mmse_resta_93 ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">86</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_resta_86" value="1" {{ ($vgi->mmse_resta_86 ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">79</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_resta_79" value="1" {{ ($vgi->mmse_resta_79 ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">72</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_resta_72" value="1" {{ ($vgi->mmse_resta_72 ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">65</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_resta_65" value="1" {{ ($vgi->mmse_resta_65 ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                        </div>
+                                                        <p class="small text-muted text-center mt-2 mb-0">100 → 93 → 86 → 79 → 72 → 65</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label class="d-block small fw-bold">86 / D</label>
-                                                <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_2" value="1" {{ ($vgi->mmse_atencion_2 ?? 0) == 1 ? 'checked' : '' }}>
+                                            
+                                            <div class="col-md-6 mt-3 mt-md-0">
+                                                <div class="card border-0 bg-light-subtle h-100">
+                                                    <div class="card-body">
+                                                        <h6 class="fw-bold text-center mb-3 text-success">OPCIÓN B: MUNDO al revés</h6>
+                                                        <div class="row g-2">
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">O</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_mundo_o" value="1" {{ ($vgi->mmse_mundo_o ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">D</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_mundo_d" value="1" {{ ($vgi->mmse_mundo_d ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">N</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_mundo_n" value="1" {{ ($vgi->mmse_mundo_n ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">U</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_mundo_u" value="1" {{ ($vgi->mmse_mundo_u ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                            <div class="col">
+                                                                <label class="d-block small fw-bold text-center">M</label>
+                                                                <input class="form-check-input mmse-check scale-15 d-block mx-auto" type="checkbox" name="mmse_mundo_m" value="1" {{ ($vgi->mmse_mundo_m ?? 0) == 1 ? 'checked' : '' }}>
+                                                            </div>
+                                                        </div>
+                                                        <p class="small text-muted text-center mt-2 mb-0">MUNDO → O-D-N-U-M</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label class="d-block small fw-bold">79 / N</label>
-                                                <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_3" value="1" {{ ($vgi->mmse_atencion_3 ?? 0) == 1 ? 'checked' : '' }}>
-                                            </div>
-                                            <div>
-                                                <label class="d-block small fw-bold">72 / U</label>
-                                                <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_4" value="1" {{ ($vgi->mmse_atencion_4 ?? 0) == 1 ? 'checked' : '' }}>
-                                            </div>
-                                            <div>
-                                                <label class="d-block small fw-bold">65 / M</label>
-                                                <input class="form-check-input mmse-check scale-15" type="checkbox" name="mmse_atencion_5" value="1" {{ ($vgi->mmse_atencion_5 ?? 0) == 1 ? 'checked' : '' }}>
-                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-info small border-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Instrucción:</strong> Elija solo UNA de las dos opciones para calificar. Use la que el paciente haya realizado mejor.
                                         </div>
                                     </div>
                                 </div>
@@ -1423,7 +1477,7 @@
                                                     <div class="ms-2">
                                                         <label class="form-check-label d-block">Copiar el dibujo (Pentágonos)</label>
                                                         <div class="col-md-7">
-                                                            <img src="https://www.fertilace.com/wp-content/uploads/2025/06/Screenshot-2025-06-05-at-3.53.43%E2%80%AFPM.png" alt="Imagen: Cubo / Pentágonos">
+                                                            <img src="https://stimuluspro.com/www/book/imagenes/891/test-MEC.png" alt="Imagen: Cubo / Pentágonos">
                                                         </div>
                                                     </div>
                                                 </div>
