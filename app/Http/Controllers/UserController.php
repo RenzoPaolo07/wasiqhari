@@ -86,7 +86,7 @@ class UserController extends Controller
 
         // --- ENVÍO DE CORREO DE BIENVENIDA ---
         try {
-            Mail::to($user->email)->send(new BienvenidaVoluntario($user));
+            //Mail::to($user->email)->send(new BienvenidaVoluntario($user));
         } catch (\Exception $e) {
             // Si falla el correo, no detenemos el registro, solo lo logueamos
             \Log::error('Error enviando correo bienvenida: ' . $e->getMessage());
