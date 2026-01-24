@@ -6,7 +6,8 @@ use App\Models\AdultoMayor;
 use App\Models\VgiEvaluacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf; // <--- 1. ¡IMPORTANTE! AGREGA ESTO ARRIBA
+use Illuminate\Support\Facades\Storage; // <--- 1. IMPORTANTE PARA SUBIR FOTOS
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class VgiController extends Controller
 {
@@ -20,16 +21,15 @@ class VgiController extends Controller
                             ->latest('fecha_evaluacion')
                             ->first();
 
-        // Retornamos la vista (que crearemos en el Paso 3)
-        // Enviamos los datos del adulto y su evaluación (si tiene)
         return view('dashboard.vgi.form', compact('adulto', 'vgi'));
     }
 
-    // Guarda una NUEVA evaluación (Cada vez que guardan, es una foto médica nueva en el tiempo)
+    // Guarda una NUEVA evaluación
     public function store(Request $request, $adultoId)
     {
-        // 1. Limpiar y preparar datos (lo que ya tenías)
-        $data = $request->except(['_token', 'generate_pdf']); // Quitamos el flag del array de datos
+        // 1. Limpiar y preparar datos
+        // Excluimos el token, el flag de PDF y el archivo de imagen crudo (lo procesamos abajo)
+        $data = $request->except(['_token', 'generate_pdf', 'minicog_reloj_imagen']); 
         
         // 2. Definir campos que deben ser 0 si vienen vacíos (Scores y Checkboxes)
         $camposNumericos = [
@@ -43,11 +43,11 @@ class VgiController extends Controller
             'lawton_ropa', 'lawton_transporte', 'lawton_medicacion', 'lawton_finanzas', 'lawton_total',
             'pfeiffer_errores', 'yesavage_total', 'mna_puntaje', 'frail_puntaje', 'sarcf_puntaje',
             'sppb_balance', 'sppb_velocidad', 'sppb_silla', 'sppb_total',
-            // Comorbilidades (Booleanos)
+            // Comorbilidades
             'tiene_hta', 'tiene_diabetes', 'tiene_epoc', 'tiene_epid', 'tiene_fa', 'tiene_icc',
             'tiene_coronaria', 'tiene_demencia', 'tiene_hipotiroidismo', 'tiene_depresion',
             'tiene_osteoporosis', 'tiene_artrosis', 'tiene_parkinson', 'tiene_cancer',
-            // AGREGA ESTOS NUEVOS AL FINAL DE LA LISTA:
+            // Síndromes
             'sindrome_caidas', 'sindrome_incontinencia', 'sindrome_delirio',
             'problema_dental', 'usa_protesis', 'vision_conservada', 'audicion_conservada',
             'problema_estrenimiento', 'problema_insomnio', 'problema_nocturia',
@@ -55,15 +55,17 @@ class VgiController extends Controller
             'gijon_familiar', 'gijon_economica', 'gijon_vivienda', 
             'gijon_relaciones', 'gijon_apoyo', 'gijon_total',
             'toma_medicacion', 'num_medicamentos',
-            // Agrega estos a tu lista en el método store:
+            // Barthel Desglosado
             'barthel_comer', 'barthel_aseo', 'barthel_vestirse', 'barthel_banarse',
             'barthel_heces', 'barthel_orina', 'barthel_retrete', 'barthel_escaleras',
             'barthel_traslado', 'barthel_deambulacion', 'barthel_total',
+            // Pfeiffer Desglosado
             'pf_fecha', 'pf_dia', 'pf_lugar', 'pf_telefono', 'pf_direccion', 
             'pf_edad', 'pf_nacer', 'pf_pres_act', 'pf_pres_ant', 'pf_madre', 'pf_resta',
+            // Rudas
             'rudas_orientacion', 'rudas_praxis', 'rudas_visoconstructiva',
             'rudas_juicio', 'rudas_lenguaje', 'rudas_memoria', 'rudas_total',
-            // Agrega a la lista:
+            // MMSE
             'mmse_tiempo_anio', 'mmse_tiempo_estacion', 'mmse_tiempo_fecha', 'mmse_tiempo_dia', 'mmse_tiempo_mes',
             'mmse_lugar_pais', 'mmse_lugar_dep', 'mmse_lugar_dist', 'mmse_lugar_hosp', 'mmse_lugar_piso',
             'mmse_mem_arbol', 'mmse_mem_puente', 'mmse_mem_farol',
@@ -72,21 +74,28 @@ class VgiController extends Controller
             'mmse_nom_lapiz', 'mmse_nom_reloj', 'mmse_repeticion',
             'mmse_orden_mano', 'mmse_orden_doblar', 'mmse_orden_suelo',
             'mmse_leer', 'mmse_escribir', 'mmse_copiar', 'mmse_total_final',
+            // MiniCog
             'minicog_palabra_mesa', 'minicog_palabra_llave', 'minicog_palabra_libro',
             'minicog_reloj_puntaje', 'minicog_total',
+            // GDS / Yesavage
             'gds_insatisfecho', 'gds_impotente', 'gds_memoria', 'gds_desgano', 'gds_total',
             'ysg_1', 'ysg_2', 'ysg_3', 'ysg_4', 'ysg_5', 
             'ysg_6', 'ysg_7', 'ysg_8', 'ysg_9', 'ysg_10', 
             'ysg_11', 'ysg_12', 'ysg_13', 'ysg_14', 'ysg_15',
+            // MNA / SARC-F
             'mna_a', 'mna_b', 'mna_c', 'mna_d', 'mna_e', 'mna_f',
             'sarcf_fuerza', 'sarcf_asistencia', 'sarcf_levantarse', 
             'sarcf_escaleras', 'sarcf_caidas', 'sarcf_total',
+            // Marcha / TUG / Frail / CFS / SPPB
             'marcha_segundos', 'marcha_velocidad', 'tug_segundos',
             'frail_fatiga', 'frail_resistencia', 'frail_ambulacion', 'frail_enfermedades', 'frail_peso',
             'cfs_puntaje', 'cfs_valoracion',
             'sppb_bal_lado', 'sppb_bal_semi', 'sppb_bal_tandem_tiempo', 'sppb_score_balance',
             'sppb_marcha_t1', 'sppb_marcha_t2', 'sppb_score_marcha',
             'sppb_silla_pre', 'sppb_silla_tiempo', 'sppb_score_silla', 'sppb_total', 'sppb_valoracion',
+            // MMSE Cálculo (Las nuevas columnas que separaste)
+            'mmse_resta_93', 'mmse_resta_86', 'mmse_resta_79', 'mmse_resta_72', 'mmse_resta_65',
+            'mmse_mundo_o', 'mmse_mundo_d', 'mmse_mundo_n', 'mmse_mundo_u', 'mmse_mundo_m',
         ];
 
         foreach ($camposNumericos as $campo) {
@@ -95,31 +104,41 @@ class VgiController extends Controller
             }
         }
 
-        // 3. Asignar IDs y Fechas
+        // =========================================================
+        // 3. PROCESAMIENTO DE IMAGEN (MINI-COG RELOJ) - ¡NUEVO! 📸
+        // =========================================================
+        if ($request->hasFile('minicog_reloj_imagen')) {
+            // Validamos que sea una imagen válida (máx 5MB)
+            $request->validate([
+                'minicog_reloj_imagen' => 'image|mimes:jpeg,png,jpg|max:5120',
+            ]);
+
+            // Guardamos la imagen en la carpeta 'public/relojes'
+            // Esto devuelve la ruta relativa (ej: "relojes/imagen123.jpg")
+            $path = $request->file('minicog_reloj_imagen')->store('relojes', 'public');
+            
+            // Agregamos la ruta al array de datos para que se guarde en la BD
+            $data['minicog_reloj_imagen'] = $path;
+        }
+
+        // 4. Asignar IDs y Fechas
         $data['adulto_mayor_id'] = $adultoId;
         $data['user_id'] = Auth::id();
         
-        // Si no mandan fecha, ponemos la de hoy
         if (empty($data['fecha_evaluacion'])) {
             $data['fecha_evaluacion'] = now();
         }
 
-        // 4. GUARDAR EN BASE DE DATOS (Primero guardamos)
-        // Usamos updateOrCreate para que si ya existe una evaluación hoy, la actualice
+        // 5. GUARDAR EN BASE DE DATOS
         $vgi = VgiEvaluacion::updateOrCreate(
             ['adulto_mayor_id' => $adultoId, 'fecha_evaluacion' => $data['fecha_evaluacion']],
             $data
         );
 
-        // 5. GENERAR PDF (Si se presionó el botón rojo)
+        // 6. GENERAR PDF (Si se presionó el botón rojo)
         if ($request->input('generate_pdf') == '1') {
-            
             $adulto = AdultoMayor::find($adultoId);
-            
-            // Cargar la vista del PDF (la crearemos en el Paso 2)
             $pdf = Pdf::loadView('dashboard.vgi.pdf_export', compact('adulto', 'vgi'));
-            
-            // Descargar el archivo
             return $pdf->download('VGI_' . $adulto->dni . '_' . date('Ymd') . '.pdf');
         }
 
