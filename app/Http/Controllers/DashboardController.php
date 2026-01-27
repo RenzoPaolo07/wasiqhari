@@ -15,6 +15,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http; // <--- AGREGA ESTA LÍNEA
 use Illuminate\Support\Facades\Log;  // <--- Y ESTA TAMBIÉN
+use App\Models\VgiEvaluacion; // <--- AGREGA ESTO ARRIBA
 
 class DashboardController extends Controller
 {
@@ -520,50 +521,63 @@ class DashboardController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Ítem eliminado']);
     }
-    // --- EXPEDIENTE EVOLUTIVO ---
+    // --- EXPEDIENTE EVOLUTIVO (CONECTADO A VGI REAL) ---
     public function evolucionAdulto(AdultoMayor $adulto)
     {
-        // 1. Obtener visitas ordenadas cronológicamente (antiguas primero para el gráfico)
-        $visitasGrafico = $adulto->visitas()->orderBy('fecha_visita', 'asc')->get();
+        // 1. Obtener evaluaciones VGI ordenadas por fecha (para el gráfico)
+        // Usamos VgiEvaluacion en lugar de Visita para tener los datos médicos exactos
+        $evaluaciones = VgiEvaluacion::where('adulto_mayor_id', $adulto->id)
+                        ->orderBy('fecha_evaluacion', 'asc')
+                        ->get();
 
-        $labels = [];
-        $fisicoData = [];
-        $emocionalData = [];
+        $chartLabels = [];
+        $chartFisico = [];    // Usaremos el Índice de Barthel (0-100)
+        $chartEmocional = []; // Usaremos GDS/Yesavage normalizados a %
 
-        // Mapas de conversión (Texto -> Puntaje)
-        // Ajusta los textos EXACTAMENTE como están en tu base de datos/enum
-        $mapFisico = [
-            'Bueno' => 100, 
-            'Regular' => 75, 
-            'Malo' => 50, 
-            'Critico' => 25, 'Crítico' => 25 
-        ];
-        
-        $mapEmocional = [
-            'Eufórico' => 100, 
-            'Estable' => 80, 
-            'Triste' => 50, 
-            'Ansioso' => 40, 
-            'Deprimido' => 20 
-        ];
+        foreach ($evaluaciones as $eval) {
+            // Eje X: Fechas
+            $chartLabels[] = \Carbon\Carbon::parse($eval->fecha_evaluacion)->format('d/m/Y');
 
-        foreach ($visitasGrafico as $v) {
-            $labels[] = $v->fecha_visita->format('d/m/Y');
-            $fisicoData[] = $mapFisico[$v->estado_fisico] ?? 50; // 50 por defecto
-            $emocionalData[] = $mapEmocional[$v->estado_emocional] ?? 50;
+            // --- A. ESTADO FÍSICO (Barthel) ---
+            // Barthel ya viene en escala 0 a 100, así que lo usamos directo.
+            $chartFisico[] = $eval->barthel_total ?? 0;
+
+            // --- B. ESTADO EMOCIONAL (GDS / Yesavage) ---
+            // Meta: Convertir los puntajes "malos" a porcentaje de "Bienestar" (0-100)
+            
+            $puntajeEmo = 0;
+
+            // Si el GDS-4 fue 2 o más, se activó Yesavage (Escala de 15 puntos)
+            if (($eval->gds_total ?? 0) >= 2) {
+                // Escala Yesavage: 0 es mejor (100%), 15 es peor (0%)
+                // Fórmula: 100 - (Puntaje * 6.66)
+                $puntos = $eval->yesavage_total ?? 0;
+                $puntajeEmo = 100 - ($puntos * 6.66);
+            } else {
+                // Escala GDS-4: 0 es mejor (100%), 4 es peor (0%)
+                // Fórmula: 100 - (Puntaje * 25)
+                $puntos = $eval->gds_total ?? 0;
+                $puntajeEmo = 100 - ($puntos * 25);
+            }
+
+            // Aseguramos que esté entre 0 y 100 y redondeamos
+            $chartEmocional[] = round(max(0, min(100, $puntajeEmo)));
         }
 
-        // 2. Obtener visitas para el Timeline (nuevas primero)
-        $visitasTimeline = $adulto->visitas()->with('voluntario.user')->orderBy('fecha_visita', 'desc')->get();
+        // 2. Obtener visitas para el Timeline (historial de visitas domiciliarias)
+        $visitasTimeline = $adulto->visitas()
+            ->with('voluntario.user')
+            ->orderBy('fecha_visita', 'desc')
+            ->get();
 
         return view('dashboard.adultos_evolucion', [
             'title' => 'Expediente: ' . $adulto->nombres,
             'page' => 'adultos',
             'adulto' => $adulto,
-            'visitas' => $visitasTimeline,
-            'chartLabels' => $labels,
-            'chartFisico' => $fisicoData,
-            'chartEmocional' => $emocionalData
+            'visitas' => $visitasTimeline, // Lista de abajo (Timeline)
+            'chartLabels' => $chartLabels, // Gráfico (Eje X)
+            'chartFisico' => $chartFisico, // Gráfico (Línea Verde - Barthel)
+            'chartEmocional' => $chartEmocional // Gráfico (Línea Naranja - GDS/Yesavage)
         ]);
     }
 
