@@ -44,7 +44,7 @@
                 <button class="vgi-tab" onclick="openTab(event, 'tab-barthel')"><i class="fas fa-wheelchair"></i> <span>VI. Barthel</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-lawton')"><i class="fas fa-tasks"></i> <span>VII. Lawton</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-pfeiffer')"><i class="fas fa-brain"></i> <span>VIII. Pfeiffer</span></button>
-                <button class="vgi-tab" onclick="openTab(event, 'tab-rudas')"><i class="fas fa-puzzle-piece"></i> <span>IX. RUDAS</span></button>
+                <button id="btn-tab-rudas" class="vgi-tab" onclick="openTab(event, 'tab-rudas')"><i class="fas fa-puzzle-piece"></i> <span>IX. RUDAS</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-mmse')"><i class="fas fa-brain"></i> <span>X. MMSE</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-minicog')"><i class="fas fa-stopwatch"></i> <span>XI. Mini-Cog</span></button>
                 <button class="vgi-tab" onclick="openTab(event, 'tab-gds')"><i class="fas fa-sad-tear"></i> <span>XII. GDS-4</span></button>
@@ -5407,6 +5407,37 @@ body {
         });
     });
 
+    // === NUEVA FUNCIÓN: MOSTRAR/OCULTAR RUDAS ===
+    function toggleRudasVisibility() {
+        // 1. Obtener el input seleccionado de Grado de Instrucción
+        const instruccion = document.querySelector('input[name="grado_instruccion"]:checked');
+        const btnRudas = document.getElementById('btn-tab-rudas');
+        const tabRudas = document.getElementById('tab-rudas');
+
+        if (!btnRudas) return;
+
+        // 2. Verificar si el valor es "Sin instrucción"
+        // Nota: Asegúrate que el value en el HTML sea exactamente "Sin instrucción"
+        const mostrar = instruccion && instruccion.value === 'Sin instrucción';
+
+        if (mostrar) {
+            // SI MOSTRAR: Lo ponemos visible (display original es inline-flex o lo que use tu CSS)
+            btnRudas.style.display = 'inline-flex'; 
+        } else {
+            // NO MOSTRAR: Lo ocultamos
+            btnRudas.style.display = 'none';
+
+            // 3. Lógica de seguridad: 
+            // Si el usuario estaba justo dentro de la pestaña RUDAS y la ocultamos,
+            // debemos mandarlo a otra pestaña (por ejemplo, Social) para que no se quede en blanco.
+            if (tabRudas.style.display === 'block') {
+                // Simular click en la primera pestaña (Social)
+                const tabSocial = document.querySelector("button[onclick*='tab-social']");
+                if(tabSocial) tabSocial.click();
+            }
+        }
+    }
+
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
         const tieneCuidador = {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
@@ -5429,6 +5460,7 @@ body {
         calcularTUG(); // Calcular TUG al cargar
         calcularFrail(); // Calcular FRAIL al cargar
         calculateSPPB(); // Calcular SPPB al cargar
+        toggleRudasVisibility(); // Mostrar/Ocultar RUDAS según instrucción
         
         // Intentar autoseleccionar IMC al cargar (si ya estaba guardado o calculado)
         setTimeout(autoSelectMNA_BMI, 500); 
@@ -5479,6 +5511,9 @@ body {
         }
         if(e.target.classList.contains('sppb-check') || e.target.classList.contains('sppb-input')) {
             calculateSPPB();
+        }
+        if (e.target.name === 'grado_instruccion') {
+            toggleRudasVisibility();
         }
     });
     
