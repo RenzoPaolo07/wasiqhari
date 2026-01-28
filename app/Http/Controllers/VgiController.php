@@ -27,11 +27,51 @@ class VgiController extends Controller
     // Guarda una NUEVA evaluación
     public function store(Request $request, $adultoId)
     {
-        // 1. Limpiar y preparar datos
-        // Excluimos el token, el flag de PDF y el archivo de imagen crudo (lo procesamos abajo)
-        $data = $request->except(['_token', 'generate_pdf', 'minicog_reloj_imagen']); 
+        // 1. ACTUALIZAR DATOS DEL ADULTO MAYOR (Opcional, pero recomendado)
+        // Si cambiaste algo en "Datos Personales", actualizamos la ficha del abuelito
+        $adulto = AdultoMayor::findOrFail($adultoId);
+        $adulto->update($request->only([
+            'fecha_nacimiento', 
+            'lugar_nacimiento', 
+            'grupo_sanguineo', 
+            'religion', 
+            'ocupacion', 
+            'telefonos_referencia', 
+            'grado_instruccion', // Asegúrate que tu tabla adultos tenga estos campos
+            'estado_civil',
+            'anios_estudio',      // <--- Agregado
+            'vive_con',           // <--- Agregado (El del error actual)
+            'visitas_familiares', // <--- Agregado
+            'actividades_sociales'// <--- Agregado
+        ]));
+
+        // 2. PREPARAR DATOS PARA VGI (Limpieza)
+        // Quitamos todo lo que NO pertenece a la tabla 'vgi_evaluaciones'
+        $data = $request->except([
+            '_token', 
+            'generate_pdf', 
+            'minicog_reloj_imagen', 
+            // Datos que no existen en la tabla vgi_evaluaciones
+            'hora_evaluacion', 
+            'fecha_nacimiento',
+            'lugar_nacimiento',
+            'grupo_sanguineo',
+            'procedencia',       // Ojo con este
+            'religion',
+            'ocupacion',
+            'telefonos_referencia',
+            'grado_instruccion',
+            'anios_estudio',
+            'estado_civil',
+            'vive_con',           // <--- El culpable actual
+            'visitas_familiares',
+            'actividades_sociales',
+            'nombres', 
+            'apellidos', 
+            'dni'
+        ]);
         
-        // 2. Definir campos que deben ser 0 si vienen vacíos (Scores y Checkboxes)
+        // 3. Definir campos numéricos que deben ser 0 si vienen vacíos
         $camposNumericos = [
             'cuidador_aplica', 'peso', 'talla', 'imc', 'perimetro_abdominal', 'perimetro_pantorrilla',
             'dinam_derecha_1', 'dinam_derecha_2', 'dinam_derecha_3',
@@ -89,11 +129,11 @@ class VgiController extends Controller
             // Marcha / TUG / Frail / CFS / SPPB
             'marcha_segundos', 'marcha_velocidad', 'tug_segundos',
             'frail_fatiga', 'frail_resistencia', 'frail_ambulacion', 'frail_enfermedades', 'frail_peso',
-            'cfs_puntaje', 'cfs_valoracion',
+            'cfs_puntaje', 
             'sppb_bal_lado', 'sppb_bal_semi', 'sppb_bal_tandem_tiempo', 'sppb_score_balance',
             'sppb_marcha_t1', 'sppb_marcha_t2', 'sppb_score_marcha',
-            'sppb_silla_pre', 'sppb_silla_tiempo', 'sppb_score_silla', 'sppb_total', 'sppb_valoracion',
-            // MMSE Cálculo (Las nuevas columnas que separaste)
+            'sppb_silla_pre', 'sppb_silla_tiempo', 'sppb_score_silla', 'sppb_total', 
+            // MMSE Cálculo
             'mmse_resta_93', 'mmse_resta_86', 'mmse_resta_79', 'mmse_resta_72', 'mmse_resta_65',
             'mmse_mundo_o', 'mmse_mundo_d', 'mmse_mundo_n', 'mmse_mundo_u', 'mmse_mundo_m',
         ];
@@ -105,23 +145,20 @@ class VgiController extends Controller
         }
 
         // =========================================================
-        // 3. PROCESAMIENTO DE IMAGEN (MINI-COG RELOJ) - ¡NUEVO! 📸
+        // 4. PROCESAMIENTO DE IMAGEN (MINI-COG RELOJ)
         // =========================================================
         if ($request->hasFile('minicog_reloj_imagen')) {
-            // Validamos que sea una imagen válida (máx 5MB)
             $request->validate([
                 'minicog_reloj_imagen' => 'image|mimes:jpeg,png,jpg|max:5120',
             ]);
-
-            // Guardamos la imagen en la carpeta 'public/relojes'
-            // Esto devuelve la ruta relativa (ej: "relojes/imagen123.jpg")
             $path = $request->file('minicog_reloj_imagen')->store('relojes', 'public');
-            
-            // Agregamos la ruta al array de datos para que se guarde en la BD
             $data['minicog_reloj_imagen'] = $path;
+        } elseif ($request->minicog_reloj_imagen_hidden) {
+             // Si no subió foto nueva, pero ya existía una (caso editar), la mantenemos
+             // No hacemos nada, el valor no se sobrescribe
         }
 
-        // 4. Asignar IDs y Fechas
+        // 5. Asignar IDs y Fechas
         $data['adulto_mayor_id'] = $adultoId;
         $data['user_id'] = Auth::id();
         
@@ -129,13 +166,13 @@ class VgiController extends Controller
             $data['fecha_evaluacion'] = now();
         }
 
-        // 5. GUARDAR EN BASE DE DATOS
+        // 6. GUARDAR EN BASE DE DATOS
         $vgi = VgiEvaluacion::updateOrCreate(
             ['adulto_mayor_id' => $adultoId, 'fecha_evaluacion' => $data['fecha_evaluacion']],
             $data
         );
 
-        // 6. GENERAR PDF (Si se presionó el botón rojo)
+        // 7. GENERAR PDF (Si se presionó el botón rojo)
         if ($request->input('generate_pdf') == '1') {
             $adulto = AdultoMayor::find($adultoId);
             $pdf = Pdf::loadView('dashboard.vgi.pdf_export', compact('adulto', 'vgi'));

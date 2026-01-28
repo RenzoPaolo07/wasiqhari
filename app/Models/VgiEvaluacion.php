@@ -11,15 +11,20 @@ class VgiEvaluacion extends Model
 
     protected $table = 'vgi_evaluaciones';
 
-    // Permitimos asignación masiva para no escribir los 100 campos aquí
-    protected $guarded = ['id', 'created_at', 'updated_at'];
+    // 🔥 CAMBIO 1: Usar un array vacío libera TOTALMENTE el modelo.
+    // Esto evita cualquier error de "Mass Assignment" silencioso.
+    protected $guarded = []; 
 
     protected $casts = [
-        'fecha_evaluacion' => 'datetime',
+        // 🔥 CAMBIO 2: Usar 'date' en vez de 'datetime' evita problemas 
+        // de comparación con el input type="date" del HTML.
+        'fecha_evaluacion' => 'date', 
+        
+        // Los booleanos están perfectos
         'tiene_hta' => 'boolean',
         'tiene_diabetes' => 'boolean',
         'tiene_demencia' => 'boolean',
-        // ... Laravel convierte automáticamente los tinyint(1) a boolean, pero esto ayuda a ser explícito
+        // ... el resto de tus booleanos
     ];
 
     // Relación Inversa: Una evaluación pertenece a un Adulto Mayor
@@ -28,7 +33,7 @@ class VgiEvaluacion extends Model
         return $this->belongsTo(AdultoMayor::class, 'adulto_mayor_id');
     }
 
-    // Relación: Una evaluación fue hecha por un Usuario (Médico/Voluntario)
+    // Relación: Una evaluación fue hecha por un Usuario
     public function evaluador()
     {
         return $this->belongsTo(User::class, 'user_id');

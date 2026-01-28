@@ -73,7 +73,7 @@
                             <label class="label-mini text-muted">Fecha</label>
                             <div class="d-flex gap-2">
                                 <div class="icon-sq bg-purple-light text-purple"><i class="far fa-calendar-alt"></i></div>
-                                <input type="date" name="fecha_evaluacion" class="form-control border-0 bg-transparent fw-bold p-0 text-dark" value="{{ \Carbon\Carbon::now('America/Lima')->format('Y-m-d') }}">
+                                <input type="date" name="fecha_evaluacion" class="form-control border-0 bg-transparent fw-bold p-0 text-dark" value="{{ optional($vgi)->fecha_evaluacion ? \Carbon\Carbon::parse($vgi->fecha_evaluacion)->format('Y-m-d') : \Carbon\Carbon::now('America/Lima')->format('Y-m-d') }}">
                             </div>
                         </div>
                         <div class="col-md-2 border-start ps-4">
@@ -296,7 +296,7 @@
                                 <div class="input-group input-group-lg">
                                     <input type="number" step="0.1" min="0" id="peso" name="peso" 
                                            class="form-control text-center fw-bold fs-3 border-0 bg-light rounded-3 text-dark" 
-                                           placeholder="0.0" value="{{ $vgi->peso ?? '' }}" required oninput="calcularIMC()">
+                                           placeholder="0.0" value="{{ $vgi->peso ?? '' }}" oninput="calcularIMC()">
                                     <span class="input-group-text bg-transparent border-0 text-muted">kg</span>
                                 </div>
                             </div>
@@ -309,7 +309,7 @@
                                 <div class="input-group input-group-lg">
                                     <input type="number" step="0.01" min="0" id="talla" name="talla" 
                                            class="form-control text-center fw-bold fs-3 border-0 bg-light rounded-3 text-dark" 
-                                           placeholder="0.00" value="{{ $vgi->talla ?? '' }}" required oninput="calcularIMC()">
+                                           placeholder="0.00" value="{{ $vgi->talla ?? '' }}" oninput="calcularIMC()">
                                     <span class="input-group-text bg-transparent border-0 text-muted">mts</span>
                                 </div>
                             </div>
@@ -1570,8 +1570,9 @@
                                             <div class="border rounded bg-white p-4 d-flex flex-column justify-content-center align-items-center position-relative" 
                                                 style="border: 2px dashed #dee2e6 !important; min-height: 250px; transition: all 0.3s;">
                                                 
-                                                <div id="reloj-preview-container" class="text-center w-100" style="display: {{ $vgi->minicog_reloj_imagen ? 'block' : 'none' }};">
-                                                    @if($vgi->minicog_reloj_imagen)
+                                                <div id="reloj-preview-container" class="text-center w-100" 
+                                                    style="display: {{ optional($vgi)->minicog_reloj_imagen ? 'block' : 'none' }};">
+                                                    @if(optional($vgi)->minicog_reloj_imagen)
                                                         <div class="position-relative d-inline-block shadow-sm rounded overflow-hidden cursor-pointer zoom-hover" 
                                                             onclick="showImageModal('{{ asset('storage/' . $vgi->minicog_reloj_imagen) }}')">
                                                             <img src="{{ asset('storage/' . $vgi->minicog_reloj_imagen) }}" 
@@ -1588,7 +1589,8 @@
                                                     @endif
                                                 </div>
                                                 
-                                                <div id="reloj-upload-placeholder" class="text-center mb-3" style="display: {{ $vgi->minicog_reloj_imagen ? 'none' : 'block' }};">
+                                                <div id="reloj-upload-placeholder" class="text-center mb-3" 
+                                                    style="display: {{ optional($vgi)->minicog_reloj_imagen ? 'none' : 'block' }};">
                                                     <div class="mb-3">
                                                         <i class="far fa-clock text-muted opacity-25" style="font-size: 4rem;"></i>
                                                     </div>
@@ -1609,11 +1611,11 @@
 
                                                     <button type="button" id="remove-reloj-btn" class="btn btn-outline-danger rounded-pill px-4" 
                                                             onclick="removeRelojImage()" 
-                                                            style="display: {{ $vgi->minicog_reloj_imagen ? 'inline-block' : 'none' }};">
+                                                            style="display: {{ optional($vgi)->minicog_reloj_imagen ? 'inline-block' : 'none' }};">
                                                         <i class="fas fa-trash-alt me-2"></i> Eliminar
                                                     </button>
                                                     
-                                                    <input type="hidden" name="minicog_reloj_imagen_hidden" id="minicog_reloj_imagen_hidden" value="{{ $vgi->minicog_reloj_imagen ?? '' }}">
+                                                    <input type="hidden" name="minicog_reloj_imagen_hidden" id="minicog_reloj_imagen_hidden" value="{{ optional($vgi)->minicog_reloj_imagen ?? '' }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -1621,10 +1623,10 @@
                                         <div class="d-flex justify-content-between align-items-center p-3 bg-soft-gray rounded border">
                                             <span class="fw-bold text-dark">Evaluación del Reloj:</span>
                                             <div class="btn-group" role="group">
-                                                <input type="radio" class="btn-check minicog-clock" name="minicog_reloj_puntaje" id="reloj_anormal" value="0" {{ ($vgi->minicog_reloj_puntaje ?? 0) == 0 ? 'checked' : '' }}>
+                                                <input type="radio" class="btn-check minicog-clock" name="minicog_reloj_puntaje" id="reloj_anormal" value="0" {{ (optional($vgi)->minicog_reloj_puntaje ?? 0) == 0 ? 'checked' : '' }}>
                                                 <label class="btn btn-outline-danger btn-sm px-3" for="reloj_anormal">0 pts (Anormal)</label>
 
-                                                <input type="radio" class="btn-check minicog-clock" name="minicog_reloj_puntaje" id="reloj_normal" value="2" {{ ($vgi->minicog_reloj_puntaje ?? 0) == 2 ? 'checked' : '' }}>
+                                                <input type="radio" class="btn-check minicog-clock" name="minicog_reloj_puntaje" id="reloj_normal" value="2" {{ (optional($vgi)->minicog_reloj_puntaje ?? 0) == 2 ? 'checked' : '' }}>
                                                 <label class="btn btn-outline-success btn-sm px-3" for="reloj_normal">2 pts (Normal)</label>
                                             </div>
                                         </div>
@@ -5440,7 +5442,7 @@ body {
 
     // Inicializar al cargar
     document.addEventListener("DOMContentLoaded", function() {
-        const tieneCuidador = {{ ($vgi->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
+        const tieneCuidador = {{ (optional($vgi)->cuidador_aplica ?? 0) == 1 ? 'true' : 'false' }};
         if(tieneCuidador) {
             document.getElementById('bloque_cuidador').style.display = 'block';
             document.getElementById('caregiverContainer').classList.add('active');
@@ -5466,8 +5468,11 @@ body {
         setTimeout(autoSelectMNA_BMI, 500); 
 
         // Cargar selección previa de CFS
-        const checkedCFS = document.querySelector('input[name="cfs_radio"]:checked');
-        if(checkedCFS) selectCFS(checkedCFS);
+        const checkedCFS = document.querySelector('input[name="cfs_radio"][value="{{ optional($vgi)->cfs_puntaje }}"]');
+        if(checkedCFS) {
+            checkedCFS.checked = true;
+            selectCFS(checkedCFS);
+        }
     });
 
     // Listeners para todas las escalas

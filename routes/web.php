@@ -3,147 +3,167 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ReporteController; // ¡Asegúrate de importar esto!
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\VgiController;
+use App\Http\Controllers\AIController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Artisan; // Importante para los comandos
 
-// Rutas públicas
+// --- RUTAS PÚBLICAS ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/services', [HomeController::class, 'services'])->name('services');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
 
-// Rutas de autenticación
+// --- RUTAS DE AUTENTICACIÓN ---
 Route::get('/login', [UserController::class, 'login'])->name('login');
 Route::get('/register', [UserController::class, 'register'])->name('register');
 Route::post('/login', [UserController::class, 'authenticate']);
 Route::post('/register', [UserController::class, 'store']);
 Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
-// Rutas protegidas (dashboard)
+// --- RUTAS PROTEGIDAS (DASHBOARD) ---
 Route::middleware(['auth'])->group(function () {
-    // Dashboard
+    
+    // Dashboard & AI
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/ai/chat', [App\Http\Controllers\AIController::class, 'chat'])->name('ai.chat.process');
+    Route::post('/ai/chat', [AIController::class, 'chat'])->name('ai.chat.process');
+    Route::get('/dashboard/ai', [DashboardController::class, 'ai'])->name('ai');
+
     // Notificaciones
     Route::get('/notifications/mark-read', [DashboardController::class, 'markNotificationsRead'])->name('notifications.read');
     
-    Route::post('/ai/chat', [App\Http\Controllers\AIController::class, 'chat'])->name('ai.chat.process');
+    // Perfil y Configuración
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+    Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/dashboard/settings', [DashboardController::class, 'settings'])->name('settings');
 
-    // Gestión de Adultos
+    // Auditoría
+    Route::get('/dashboard/auditoria', [DashboardController::class, 'auditoria'])->name('auditoria');
+
+    // ==================================================
+    // GESTIÓN DE ADULTOS MAYORES
+    // ==================================================
     Route::get('/dashboard/adultos', [DashboardController::class, 'adultos'])->name('adultos');
     Route::post('/dashboard/adultos', [DashboardController::class, 'storeAdulto'])->name('adultos.store');
     Route::get('/dashboard/adultos/{adulto}', [DashboardController::class, 'show'])->name('adultos.show'); 
     Route::put('/dashboard/adultos/{adulto}', [DashboardController::class, 'update'])->name('adultos.update');
     Route::delete('/dashboard/adultos/{adulto}', [DashboardController::class, 'destroy'])->name('adultos.destroy');
-    // ============ HISTORIA CLÍNICA VGI (NUEVO) ============
-    Route::get('/dashboard/adultos/{id}/vgi', [App\Http\Controllers\VgiController::class, 'show'])->name('adultos.vgi');
-    Route::post('/dashboard/adultos/{id}/vgi', [App\Http\Controllers\VgiController::class, 'store'])->name('adultos.vgi.store');
-    // ======================================================
-    // RUTA NUEVA: Expediente Evolutivo
+
+    // --- HISTORIA CLÍNICA VGI ---
+    // Ver formulario
+    Route::get('/dashboard/adultos/{id}/vgi', [VgiController::class, 'show'])->name('adultos.vgi');
+    // Guardar formulario (Apunta a VgiController@store)
+    Route::post('/dashboard/adultos/{id}/vgi/store', [VgiController::class, 'store'])->name('adultos.vgi.store');
+    
+    // --- EXPEDIENTE EVOLUTIVO ---
     Route::get('/dashboard/adultos/{adulto}/evolucion', [DashboardController::class, 'evolucionAdulto'])->name('adultos.evolucion');
-    //
-    
-    Route::get('/dashboard/auditoria', [DashboardController::class, 'auditoria'])->name('auditoria');
-    
-    // ============ CREDENCIALES ============
+
+    // --- CREDENCIALES ---
     Route::get('/dashboard/adultos/{adulto}/credencial', [ReporteController::class, 'credencialAdulto'])->name('adultos.credencial');
-    Route::get('/dashboard/voluntarios/{voluntario}/credencial', [ReporteController::class, 'credencialVoluntario'])->name('voluntarios.credencial');
-    // ===============================================
-    
-    // Ruta temporal para ver qué modelos tienes disponibles
-    Route::get('/debug-models', function() {
-        $apiKey = env('GEMINI_API_KEY');
-        $response = Illuminate\Support\Facades\Http::get("https://generativelanguage.googleapis.com/v1beta/models?key={$apiKey}");
-        return $response->json();
-    });
-    
-    // Gestión de Voluntarios
+
+
+    // ==================================================
+    // GESTIÓN DE VOLUNTARIOS
+    // ==================================================
     Route::get('/dashboard/voluntarios', [DashboardController::class, 'voluntarios'])->name('voluntarios');
     Route::get('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'showVoluntario'])->name('voluntarios.show');
     Route::put('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'updateVoluntario'])->name('voluntarios.update');
     Route::delete('/dashboard/voluntarios/{voluntario}', [DashboardController::class, 'destroyVoluntario'])->name('voluntarios.destroy');
-    
-    // Gestión de Visitas
+    Route::get('/dashboard/voluntarios/{voluntario}/credencial', [ReporteController::class, 'credencialVoluntario'])->name('voluntarios.credencial');
+
+    // ==================================================
+    // GESTIÓN DE VISITAS
+    // ==================================================
     Route::get('/dashboard/visitas', [DashboardController::class, 'visitas'])->name('visitas');
     Route::post('/dashboard/visitas', [DashboardController::class, 'storeVisita'])->name('visitas.store');
     Route::get('/dashboard/visitas/{visita}', [DashboardController::class, 'showVisita'])->name('visitas.show');
     Route::put('/dashboard/visitas/{visita}', [DashboardController::class, 'updateVisita'])->name('visitas.update');
     Route::delete('/dashboard/visitas/{visita}', [DashboardController::class, 'destroyVisita'])->name('visitas.destroy');
-    
-    // ============ GESTIÓN DE INVENTARIO (¡NUEVO!) ============
+    // Comentarios en Visitas
+    Route::post('/dashboard/visitas/{visita}/comentarios', [DashboardController::class, 'storeComentario'])->name('visitas.comentarios.store');
+
+    // ==================================================
+    // GESTIÓN DE INVENTARIO
+    // ==================================================
     Route::get('/dashboard/inventario', [DashboardController::class, 'inventario'])->name('inventario');
     Route::post('/dashboard/inventario', [DashboardController::class, 'storeInventario'])->name('inventario.store');
     Route::get('/dashboard/inventario/{item}', [DashboardController::class, 'showInventario'])->name('inventario.show');
     Route::put('/dashboard/inventario/{item}', [DashboardController::class, 'updateInventario'])->name('inventario.update');
     Route::delete('/dashboard/inventario/{item}', [DashboardController::class, 'destroyInventario'])->name('inventario.destroy');
-    // =========================================================
-    
-    // Ruta para COMENTARIOS (Chat)
-    Route::post('/dashboard/visitas/{visita}/comentarios', [DashboardController::class, 'storeComentario'])->name('visitas.comentarios.store');
 
-    // Calendario
+    // ==================================================
+    // CALENDARIO Y REPORTES
+    // ==================================================
     Route::get('/dashboard/calendario', [DashboardController::class, 'calendario'])->name('calendario');
     Route::get('/api/eventos-calendario', [DashboardController::class, 'getEventosCalendario'])->name('api.calendario');
     
-    // Reportes
     Route::get('/dashboard/reportes', [DashboardController::class, 'reporters'])->name('reportes');
     Route::get('/reportes/exportar/general', [ReporteController::class, 'exportarGeneralExcel'])->name('reportes.excel.general');
     Route::get('/reportes/exportar/visitas', [ReporteController::class, 'exportarVisitasExcel'])->name('reportes.excel.visitas');
     Route::get('/reportes/exportar/voluntarios', [ReporteController::class, 'exportarVoluntariosExcel'])->name('reportes.excel.voluntarios');
     Route::get('/reportes/imprimir/{tipo}', [ReporteController::class, 'imprimirReporte'])->name('reportes.imprimir');
-    
-    // Ruta temporal para arreglar coordenadas
-    Route::get('/fix-mapa', function() {
-    $adultos = \App\Models\AdultoMayor::all();
-    foreach($adultos as $a) {
-        $a->update([
-            'lat' => -13.5319 + (mt_rand(-100, 100) / 10000),
-            'lon' => -71.9675 + (mt_rand(-100, 100) / 10000)
-        ]);
-    }
-    return "Coordenadas generadas. Ve al dashboard.";
 });
 
-    // Otros
-    Route::get('/dashboard/ai', [DashboardController::class, 'ai'])->name('ai');
-    Route::get('/dashboard/settings', [DashboardController::class, 'settings'])->name('settings');
-    Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
-    Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
-});
+// ==========================================================
+// 🛠️ RUTAS DE MANTENIMIENTO DEL SISTEMA 🛠️
+// ==========================================================
 
-// RUTA TEMPORAL PARA ACTUALIZAR LA BASE DE DATOS
-/*Route::get('/instalar-doctor-ia', function() {
+// 1. RUTA PARA EJECUTAR MIGRACIONES (SOLUCIONA TU ERROR DE BASE DE DATOS)
+Route::get('/update-system', function () {
     try {
-        Illuminate\Support\Facades\Schema::table('visitas', function (Illuminate\Database\Schema\Blueprint $table) {
-            $table->text('recomendacion_ia')->nullable()->after('observaciones');
-        });
-        return "¡Éxito! Columna 'recomendacion_ia' creada correctamente. Ya puedes borrar esta ruta.";
-    } catch (\Exception $e) {
-        return "Error (quizás ya existe la columna): " . $e->getMessage();
-    }
-});*/
+        // Ejecutar Migraciones (Crea las columnas faltantes: sindrome_caidas, vive_con, etc)
+        Artisan::call('migrate', ['--force' => true]);
+        $migracion = Artisan::output();
 
-// RUTA DE EMERGENCIA PARA ARREGLAR IMÁGENES
+        // Limpiar Caché
+        Artisan::call('optimize:clear');
+        $cache = Artisan::output();
+
+        // Enlazar Storage (Para las fotos)
+        try {
+            Artisan::call('storage:link');
+            $storage = Artisan::output();
+        } catch (\Exception $e) {
+            $storage = "El storage ya estaba linkeado.";
+        }
+
+        return "
+            <div style='font-family: sans-serif; padding: 20px;'>
+                <h1 style='color: green;'>¡Sistema Actualizado con Éxito! 🚀</h1>
+                <p>Las columnas faltantes se han creado en la base de datos.</p>
+                <hr>
+                <h3>Detalle de Migraciones:</h3>
+                <pre style='background: #f4f4f4; padding: 10px;'>$migracion</pre>
+                <hr>
+                <h3>Caché:</h3>
+                <pre style='background: #f4f4f4; padding: 10px;'>$cache</pre>
+                <br>
+                <a href='/dashboard/adultos' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Volver al Panel</a>
+            </div>
+        ";
+
+    } catch (\Exception $e) {
+        return "<h1 style='color: red;'>❌ Error Crítico</h1><pre>" . $e->getMessage() . "</pre>";
+    }
+});
+
+// 2. RUTA PARA ARREGLAR IMÁGENES (SI NO CARGAN)
 Route::get('/fix-storage', function () {
     $targetFolder = storage_path('app/public');
     $linkFolder = public_path('storage');
-
-    // 1. Si existe un enlace viejo y roto, lo borramos
-    if (file_exists($linkFolder)) {
-        // En Windows es rmdir, en Linux unlink suele funcionar mejor para symlinks
-        @unlink($linkFolder); 
-    }
-
-    // 2. Creamos el nuevo enlace
+    if (file_exists($linkFolder)) { @unlink($linkFolder); }
     try {
         symlink($targetFolder, $linkFolder);
-        return '¡ÉXITO! 📸 El puente de imágenes ha sido reparado. <br> Ruta Origen: '.$targetFolder.'<br> Ruta Destino: '.$linkFolder;
+        return '¡ÉXITO! 📸 El puente de imágenes ha sido reparado.';
     } catch (\Exception $e) {
-        return 'ERROR: No se pudo crear el enlace. <br> Detalle: ' . $e->getMessage();
+        return 'ERROR: ' . $e->getMessage();
     }
 });
 
+// Ruta de Fallback (Error 404)
 Route::fallback([ErrorController::class, 'notFound']);
