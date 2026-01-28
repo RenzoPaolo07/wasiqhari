@@ -52,6 +52,7 @@ class VgiController extends Controller
             'generate_pdf', 
             'minicog_reloj_imagen', 
             // Datos que no existen en la tabla vgi_evaluaciones
+            'url', // <--- ¡AGREGA ESTO AQUÍ! (Esto es lo que falla)
             'hora_evaluacion', 
             'fecha_nacimiento',
             'lugar_nacimiento',
