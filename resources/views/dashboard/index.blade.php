@@ -58,6 +58,18 @@
         </div>
     </div>
 
+    <!-- Sección de Alertas IoT -->
+    <div class="card mt-4">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-bell"></i> 🚨 Alertas IoT en Tiempo Real
+        </div>
+        <div class="card-body">
+            <div id="alertas-iot">
+                <div class="text-center">Cargando alertas...</div>
+            </div>
+        </div>
+    </div>
+
     <div class="dashboard-content">
         <div class="content-grid">
             <div class="content-card">
@@ -984,5 +996,42 @@ document.querySelectorAll('.visitas-list').forEach(list => {
         }
     });
 });
+
+// --- FUNCIONES PARA ALERTAS IoT ---
+function cargarAlertas() {
+    fetch('/api/ultimas-alertas')
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('alertas-iot');
+            if (data.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No hay alertas recientes</div>';
+                return;
+            }
+            
+            let html = '<div class="list-group">';
+            data.forEach(alerta => {
+                html += `
+                    <div class="list-group-item list-group-item-danger">
+                        <div class="d-flex justify-content-between">
+                            <strong>🚨 ${alerta.tipo_alerta.toUpperCase()}</strong>
+                            <small>${new Date(alerta.timestamp).toLocaleString()}</small>
+                        </div>
+                        <div>👤 Paciente: ${alerta.paciente}</div>
+                        <div>📊 Fuerza G: ${alerta.fuerza_g} G</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            document.getElementById('alertas-iot').innerHTML = '<div class="alert alert-warning">Error cargando alertas</div>';
+        });
+}
+
+// Cargar alertas cada 5 segundos
+cargarAlertas();
+setInterval(cargarAlertas, 5000);
 </script>
 @endpush

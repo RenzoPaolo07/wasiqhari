@@ -19,6 +19,8 @@ Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/services', [HomeController::class, 'services'])->name('services');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
+// NUEVO ESP32
+Route::get('/iot/paciente/{dni}', [IoTController::class, 'mostrarPaciente']);
 
 // --- RUTAS DE AUTENTICACIÓN ---
 Route::get('/login', [UserController::class, 'login'])->name('login');

@@ -81,4 +81,26 @@ class IoTController extends Controller
             'tipo_alerta' => $request->tipo_alerta
         ], 200);
     }
+
+    public function ultimasAlertas()
+    {
+        $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(function($log) {
+                $detalles = json_decode($log->descripcion, true);
+                $paciente = AdultoMayor::find($detalles['paciente_id'] ?? null);
+                
+                return [
+                    'id' => $log->id,
+                    'tipo_alerta' => $detalles['tipo_alerta'] ?? 'Desconocido',
+                    'fuerza_g' => $detalles['fuerza_g'] ?? 0,
+                    'paciente' => $paciente ? $paciente->nombres . ' ' . $paciente->apellidos : 'Desconocido',
+                    'timestamp' => $log->created_at
+                ];
+            });
+        
+        return response()->json($alertas);
+    }
 };
