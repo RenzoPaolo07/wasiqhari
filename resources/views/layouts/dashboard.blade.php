@@ -70,6 +70,10 @@
                     <i class="fas fa-file-alt"></i>
                     <span>Reportes</span>
                 </a>
+                <a class="nav-link" href="{{ route('iot.dashboard') }}">
+                    <i class="fas fa-microchip"></i> Monitoreo IoT
+                    <span class="badge bg-danger" id="iot-alert-badge" style="display: none;">!</span>
+                </a>
                 <a href="{{ route('inventario') }}" class="nav-link {{ ($page ?? '') == 'inventario' ? 'active' : '' }}">
                     <i class="fas fa-box-open"></i>
                     <span>Inventario</span>

@@ -21,6 +21,7 @@ Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
 // NUEVO ESP32
 Route::get('/iot/paciente/{dni}', [IoTController::class, 'mostrarPaciente']);
+Route::get('/iot/paciente/{id}', [IoTController::class, 'mostrarPaciente']);
 
 // --- RUTAS DE AUTENTICACIÓN ---
 Route::get('/login', [UserController::class, 'login'])->name('login');
@@ -167,6 +168,10 @@ Route::get('/fix-storage', function () {
         return 'ERROR: ' . $e->getMessage();
     }
 });
+
+Route::get('/iot-dashboard', function () {
+    return view('dashboard.iot-dashboard');
+})->middleware('auth')->name('iot.dashboard');
 
 Route::get('/test-iot', function() {
     return response()->json(['status' => 'ok', 'message' => 'Web route works!']);

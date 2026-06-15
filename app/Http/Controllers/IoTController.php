@@ -131,7 +131,7 @@ class IoTController extends Controller
     }
 
     // En IoTController.php
-public function mostrarPaciente($dni)
+    public function mostrarPaciente($dni)
     {
         $paciente = AdultoMayor::where('dni', $dni)->first();
         $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
@@ -141,5 +141,94 @@ public function mostrarPaciente($dni)
             ->get();
         
         return view('iot.paciente', compact('paciente', 'alertas'));
+    }
+
+    public function resumenIoT()
+    {
+        $hoy = now()->startOfDay();
+        
+        return response()->json([
+            'dispositivos_activos' => AdultoMayor::where('alertas_activas', true)->count(),
+            'alertas_hoy' => ActivityLog::where('accion', 'EMERGENCIA_IOT')
+                ->where('created_at', '>=', $hoy)->count(),
+            'pacientes_riesgo' => AdultoMayor::where('nivel_riesgo', 'Alto')->count(),
+            'total_pacientes' => AdultoMayor::count()
+        ]);
+    }
+
+    public function alertasRecientes()
+    {
+        $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
+            ->with('adultoMayor')
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(function($log) {
+                $detalles = json_decode($log->descripcion, true);
+                return [
+                    'id' => $log->id,
+                    'tipo_alerta' => $detalles['tipo_alerta'] ?? 'Desconocido',
+                    'fuerza_g' => $detalles['fuerza_g'] ?? 0,
+                    'paciente' => $log->adultoMayor ? $log->adultoMayor->nombres . ' ' . $log->adultoMayor->apellidos : 'Desconocido',
+                    'dispositivo_id' => $log->adultoMayor ? $log->adultoMayor->dispositivo_id : 'N/A',
+                    'timestamp' => $log->created_at,
+                    'es_nueva' => $log->created_at > now()->subMinutes(1)
+                ];
+            });
+        
+        return response()->json($alertas);
+    }
+
+    public function pacientesConDispositivos()
+    {
+        $pacientes = AdultoMayor::whereNotNull('dispositivo_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return response()->json($pacientes);
+    }
+
+    public function estadisticasAlertas()
+    {
+        $alertasPorDia = ActivityLog::where('accion', 'EMERGENCIA_IOT')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->selectRaw('DATE(created_at) as fecha, COUNT(*) as total')
+            ->groupBy('fecha')
+            ->orderBy('fecha')
+            ->get();
+        
+        $labels = [];
+        $valores = [];
+        
+        for ($i = 6; $i >= 0; $i--) {
+            $fecha = now()->subDays($i)->format('Y-m-d');
+            $labels[] = now()->subDays($i)->format('d/m');
+            $valores[] = $alertasPorDia->firstWhere('fecha', $fecha)->total ?? 0;
+        }
+        
+        return response()->json([
+            'labels' => $labels,
+            'valores' => $valores
+        ]);
+    }
+    
+    public function ubicacionesPacientes()
+    {
+        $pacientes = AdultoMayor::whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->get(['id', 'nombres', 'apellidos', 'dni', 'lat', 'lon', 'nivel_riesgo']);
+        
+        return response()->json($pacientes);
+    }
+    
+    public function dashboard()
+    {
+        // Obtener estadísticas para mostrar en el dashboard IoT
+        $totalDispositivos = AdultoMayor::whereNotNull('dispositivo_id')->count();
+        $alertasHoy = ActivityLog::where('accion', 'EMERGENCIA_IOT')
+            ->whereDate('created_at', today())->count();
+        $alertasTotales = ActivityLog::where('accion', 'EMERGENCIA_IOT')->count();
+        
+        return view('dashboard.iot-dashboard', compact('totalDispositivos', 'alertasHoy', 'alertasTotales'));
     }
 }
