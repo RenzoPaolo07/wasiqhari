@@ -8,6 +8,7 @@ use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\VgiController;
 use App\Http\Controllers\AIController;
+use App\Http\Controllers\Api\IoTController; // Nuevo Iot
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan; // Importante para los comandos
@@ -164,6 +165,16 @@ Route::get('/fix-storage', function () {
         return 'ERROR: ' . $e->getMessage();
     }
 });
+
+Route::get('/test-iot', function() {
+    return response()->json(['status' => 'ok', 'message' => 'Web route works!']);
+});
+Route::post('/iot-alerta', [IoTController::class, 'recibirAlerta']);
+Route::get('/iot-estado/{pacienteId}', [IoTController::class, 'obtenerEstado']);
+Route::get('/iot-test', function() {
+    return response()->json(['status' => 'ok', 'message' => 'Test endpoint funciona']);
+});
+
 
 // Ruta de Fallback (Error 404)
 Route::fallback([ErrorController::class, 'notFound']);
