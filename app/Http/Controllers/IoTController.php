@@ -231,4 +231,18 @@ class IoTController extends Controller
         
         return view('dashboard.iot-dashboard', compact('totalDispositivos', 'alertasHoy', 'alertasTotales'));
     }
+    
+    public function exportarExcel()
+    {
+        $pacientes = AdultoMayor::whereNotNull('dispositivo_id')->get();
+        
+        $csv = "ID,Nombre Completo,DNI,Dispositivo,Estado,Riesgo,Último Contacto\n";
+        foreach ($pacientes as $p) {
+            $csv .= "{$p->id},{$p->nombres} {$p->apellidos},{$p->dni},{$p->dispositivo_id},{$p->alertas_activas},{$p->nivel_riesgo},{$p->ultimo_contacto_iot}\n";
+        }
+        
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="pacientes_iot.csv"');
+    }
 }
