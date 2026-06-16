@@ -82,6 +82,32 @@
             letter-spacing: 1px;
         }
 
+        /* Tarjetas de sensores */
+        .sensor-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            height: 100%;
+        }
+
+        .sensor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .sensor-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .sensor-unit {
+            font-size: 14px;
+            color: #666;
+        }
+
         /* Mapa Premium */
         .map-container {
             background: white;
@@ -91,32 +117,8 @@
         }
 
         #mapa {
-            height: 500px;
+            height: 450px;
             width: 100%;
-        }
-
-        /* Tabla de pacientes */
-        .table-container {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .table-custom {
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .table-custom thead {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .table-custom tbody tr:hover {
-            background: #f8f9fa;
-            transform: scale(1.01);
-            transition: all 0.3s ease;
         }
 
         /* Alertas en tiempo real */
@@ -155,7 +157,7 @@
             }
         }
 
-        /* Badges de estado */
+        /* Badges */
         .badge-iot {
             padding: 8px 15px;
             border-radius: 50px;
@@ -163,29 +165,24 @@
             font-weight: 600;
         }
 
-        .badge-activo {
-            background: #28a745;
-            color: white;
+        .badge-activo { background: #28a745; color: white; }
+        .badge-inactivo { background: #dc3545; color: white; }
+        .badge-peligro { background: #dc3545; color: white; animation: pulse 1s infinite; }
+        .badge-cuidado { background: #ffc107; color: #333; }
+        .badge-normal { background: #28a745; color: white; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
         }
 
-        .badge-inactivo {
-            background: #dc3545;
-            color: white;
-        }
-
-        .badge-riesgo-alto {
-            background: #dc3545;
-            color: white;
-        }
-
-        .badge-riesgo-medio {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .badge-riesgo-bajo {
-            background: #28a745;
-            color: white;
+        /* Gráficos */
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         /* Botones */
@@ -204,33 +201,40 @@
             color: white;
         }
 
-        /* Scrollbar personalizado */
-        ::-webkit-scrollbar {
-            width: 8px;
+        /* Tabla */
+        .table-custom {
+            border-radius: 15px;
+            overflow: hidden;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
+        .table-custom thead {
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 10px;
+            color: white;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .stat-card {
-                margin-bottom: 20px;
-            }
-            
-            #mapa {
-                height: 300px;
-            }
+        .table-custom tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+            transition: all 0.3s ease;
         }
 
-        /* Loading spinner */
+        /* Indicadores en tiempo real */
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 1s infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
         .loader {
             border: 3px solid #f3f3f3;
             border-radius: 50%;
@@ -245,19 +249,25 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        @media (max-width: 768px) {
+            .stat-card, .sensor-card { margin-bottom: 20px; }
+            #mapa { height: 300px; }
+        }
     </style>
 </head>
 <body>
-    <!-- Navbar Superior -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-premium">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-microchip" style="color: #667eea;"></i>
                 <strong>Wasiqhari IoT</strong>
+                <span class="live-indicator"></span> <small class="text-muted">Monitoreo en tiempo real</small>
             </a>
             <div class="ms-auto">
                 <span class="badge bg-primary">
-                    <i class="fas fa-circle" style="font-size: 8px;"></i> Sistema en Tiempo Real
+                    <i class="fas fa-clock"></i> <span id="reloj"></span>
                 </span>
             </div>
         </div>
@@ -268,13 +278,13 @@
         <div class="row mb-4">
             <div class="col-12 text-center">
                 <h1 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-                    <i class="fas fa-chart-line"></i> Monitoreo IoT Inteligente
+                    <i class="fas fa-chart-line"></i> Centro de Monitoreo IoT Inteligente
                 </h1>
-                <p style="color: rgba(255,255,255,0.9);">Sistema de alertas tempranas y localización en tiempo real</p>
+                <p style="color: rgba(255,255,255,0.9);">Sistema de alertas tempranas, localización y monitoreo ambiental</p>
             </div>
         </div>
 
-        <!-- Tarjetas de Estadísticas -->
+        <!-- Fila 1: Tarjetas de Métricas Principales -->
         <div class="row mb-4">
             <div class="col-md-3">
                 <div class="stat-card">
@@ -314,7 +324,125 @@
             </div>
         </div>
 
-        <!-- Mapa y Gráfico -->
+        <!-- Fila 2: Sensores en Tiempo Real -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="sensor-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6><i class="fas fa-tachometer-alt"></i> Acelerómetro (MPU6050)</h6>
+                        <span class="badge bg-success" id="acelerometro-status">En línea</span>
+                    </div>
+                    <div class="sensor-value">
+                        <span id="fuerza-g">0.00</span> <span class="sensor-unit">G</span>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" id="fuerza-bar" style="width: 0%; background: linear-gradient(90deg, #28a745, #dc3545);"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 text-center">
+                            <small class="text-muted">Eje X</small>
+                            <div><strong id="accel-x">0.00</strong> <small>G</small></div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <small class="text-muted">Eje Y</small>
+                            <div><strong id="accel-y">0.00</strong> <small>G</small></div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <small class="text-muted">Eje Z</small>
+                            <div><strong id="accel-z">0.00</strong> <small>G</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sensor-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6><i class="fas fa-temperature-high"></i> Sensor Ambiental (DHT22)</h6>
+                        <span class="badge bg-success" id="dht-status">En línea</span>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="sensor-value">
+                                <span id="temperatura">--</span> <span class="sensor-unit">°C</span>
+                            </div>
+                            <div class="sensor-value" style="font-size: 14px;">
+                                <span id="sensacion-termica">--</span> <span class="sensor-unit">°C</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="sensor-value">
+                                <span id="humedad">--</span> <span class="sensor-unit">%</span>
+                            </div>
+                            <div class="sensor-value" style="font-size: 14px;">
+                                <span id="punto-rocio">--</span> <span class="sensor-unit">°C</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sensor-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6><i class="fas fa-arrows-alt"></i> Distancia (HC-SR04)</h6>
+                        <span class="badge bg-success" id="distancia-status">En línea</span>
+                    </div>
+                    <div class="sensor-value text-center">
+                        <span id="distancia">0</span> <span class="sensor-unit">cm</span>
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar" id="distancia-bar" style="width: 0%; background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);"></div>
+                    </div>
+                    <div class="text-center">
+                        <small class="text-muted" id="distancia-mensaje">Sin obstáculos cercanos</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila 3: Luz y Botón SOS -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="sensor-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6><i class="fas fa-sun"></i> Sensor de Luz (LDR)</h6>
+                        <span class="badge bg-success" id="ldr-status">En línea</span>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 text-center">
+                            <div class="sensor-value">
+                                <span id="luz">0</span> <span class="sensor-unit">lux</span>
+                            </div>
+                            <span class="badge" id="luz-badge">Oscuro</span>
+                        </div>
+                        <div class="col-6 text-center">
+                            <i class="fas fa-lightbulb" style="font-size: 48px; color: #ffc107;"></i>
+                            <div class="mt-2">
+                                <span id="luz-recomendacion">Encender luces</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="sensor-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6><i class="fas fa-hand-paper"></i> Botón de Pánico (SOS)</h6>
+                        <span class="badge bg-success" id="sos-status">En línea</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="sos-button" id="sos-button" style="cursor: pointer;">
+                            <i class="fas fa-bell" style="font-size: 48px; color: #dc3545;"></i>
+                            <div class="sensor-value" style="font-size: 16px;">Presiona para probar</div>
+                        </div>
+                        <div id="ultimo-sos" class="mt-2">
+                            <small class="text-muted">Última alerta: --</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila 4: Mapa y Alertas -->
         <div class="row mb-4">
             <div class="col-lg-8 mb-4">
                 <div class="map-container">
@@ -326,15 +454,18 @@
                     <h5 class="mb-3">
                         <i class="fas fa-chart-line"></i> Estadísticas de Alertas
                         <button class="btn btn-sm btn-gradient float-end" onclick="actualizarGrafico()">
-                            <i class="fas fa-sync-alt"></i> Actualizar
+                            <i class="fas fa-sync-alt"></i>
                         </button>
                     </h5>
-                    <canvas id="graficoAlertas" height="300"></canvas>
+                    <canvas id="graficoAlertas" height="250"></canvas>
+                    <hr>
+                    <h6 class="mb-3">Alertas por Tipo</h6>
+                    <canvas id="graficoPie" height="150"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Alertas en Tiempo Real -->
+        <!-- Fila 5: Alertas Recientes -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="alertas-container">
@@ -349,14 +480,14 @@
             </div>
         </div>
 
-        <!-- Tabla de Pacientes -->
+        <!-- Fila 6: Tabla de Pacientes -->
         <div class="row">
             <div class="col-12">
-                <div class="table-container">
+                <div class="chart-container">
                     <h5 class="mb-3">
                         <i class="fas fa-table"></i> Pacientes con Dispositivos IoT
-                        <button class="btn btn-sm btn-gradient float-end" onclick="exportarExcel()">
-                            <i class="fas fa-file-excel"></i> Exportar
+                        <button class="btn btn-sm btn-gradient float-end" onclick="exportarDatos()">
+                            <i class="fas fa-download"></i> Exportar Datos
                         </button>
                     </h5>
                     <div class="table-responsive">
@@ -364,7 +495,7 @@
                             <thead>
                                 <tr>
                                     <th><i class="fas fa-hashtag"></i> ID</th>
-                                    <th><i class="fas fa-user"></i> Nombre Completo</th>
+                                    <th><i class="fas fa-user"></i> Nombre</th>
                                     <th><i class="fas fa-id-card"></i> DNI</th>
                                     <th><i class="fas fa-microchip"></i> Dispositivo</th>
                                     <th><i class="fas fa-clock"></i> Último Contacto</th>
@@ -388,8 +519,17 @@
         let mapa;
         let marcadores = [];
         let graficoAlertas;
+        let graficoPie;
         let audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
         let ultimaAlerta = 0;
+
+        // Reloj en tiempo real
+        function actualizarReloj() {
+            const ahora = new Date();
+            document.getElementById('reloj').textContent = ahora.toLocaleTimeString('es-ES');
+        }
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
 
         // Inicializar mapa
         function initMapa() {
@@ -397,74 +537,126 @@
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB',
                 subdomains: 'abcd',
-                maxZoom: 19,
-                minZoom: 3
+                maxZoom: 19
             }).addTo(mapa);
         }
 
-        // Cargar ubicaciones en el mapa
-        async function cargarUbicaciones() {
-            try {
-                const response = await fetch('/api/iot/ubicaciones');
-                const ubicaciones = await response.json();
-                
-                // Limpiar marcadores existentes
-                marcadores.forEach(marker => mapa.removeLayer(marker));
-                marcadores = [];
-                
-                ubicaciones.forEach(ubic => {
-                    if (ubic.lat && ubic.lon) {
-                        const icono = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `<div style="background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-                                      <i class="fas fa-heart" style="color: white; font-size: 14px;"></i>
-                                  </div>`,
-                            iconSize: [30, 30],
-                            popupAnchor: [0, -15]
-                        });
-                        
-                        const marker = L.marker([parseFloat(ubic.lat), parseFloat(ubic.lon)], { icon: icono })
-                            .addTo(mapa)
-                            .bindPopup(`
-                                <div style="padding: 10px;">
-                                    <strong>${ubic.nombres} ${ubic.apellidos}</strong><br>
-                                    <i class="fas fa-id-card"></i> ${ubic.dni}<br>
-                                    <i class="fas fa-chart-line"></i> Riesgo: ${ubic.nivel_riesgo}<br>
-                                    <button class="btn btn-sm btn-primary mt-2" onclick="verDetalles(${ubic.id})">
-                                        Ver detalles
-                                    </button>
-                                </div>
-                            `);
-                        marcadores.push(marker);
-                    }
-                });
-                
-                // Ajustar vista para mostrar todos los marcadores
-                if (marcadores.length > 0) {
-                    const group = L.featureGroup(marcadores);
-                    mapa.fitBounds(group.getBounds().pad(0.1));
-                }
-            } catch (error) {
-                console.error('Error cargando ubicaciones:', error);
-            }
+        // Actualizar datos del acelerómetro (simulado)
+        function actualizarAcelerometro() {
+            // En producción, esto vendría del ESP32
+            const fuerzaG = (Math.random() * 2).toFixed(2);
+            const accelX = (Math.random() * 1 - 0.5).toFixed(2);
+            const accelY = (Math.random() * 1 - 0.5).toFixed(2);
+            const accelZ = (Math.random() * 1 + 0.8).toFixed(2);
+            
+            document.getElementById('fuerza-g').textContent = fuerzaG;
+            document.getElementById('accel-x').textContent = accelX;
+            document.getElementById('accel-y').textContent = accelY;
+            document.getElementById('accel-z').textContent = accelZ;
+            
+            const porcentaje = (fuerzaG / 4) * 100;
+            document.getElementById('fuerza-bar').style.width = Math.min(porcentaje, 100) + '%';
+            
+            let color = '#28a745';
+            if (fuerzaG > 1.5) color = '#ffc107';
+            if (fuerzaG > 2.5) color = '#dc3545';
+            document.getElementById('fuerza-bar').style.background = `linear-gradient(90deg, #28a745, ${color})`;
         }
 
-        // Cargar resumen de estadísticas
+        // Actualizar datos ambientales
+        function actualizarAmbiente() {
+            const temp = (Math.random() * 15 + 20).toFixed(1);
+            const hum = (Math.random() * 40 + 40).toFixed(0);
+            
+            document.getElementById('temperatura').textContent = temp;
+            document.getElementById('humedad').textContent = hum;
+            
+            // Calcular sensación térmica
+            let sensacion = temp;
+            if (hum > 70) sensacion = (temp - 2).toFixed(1);
+            if (hum < 40) sensacion = (temp + 1).toFixed(1);
+            document.getElementById('sensacion-termica').textContent = sensacion;
+            
+            // Calcular punto de rocío
+            const puntoRocio = (temp - ((100 - hum) / 5)).toFixed(1);
+            document.getElementById('punto-rocio').textContent = puntoRocio;
+        }
+
+        // Actualizar distancia
+        function actualizarDistancia() {
+            const distancia = Math.floor(Math.random() * 200);
+            document.getElementById('distancia').textContent = distancia;
+            
+            const porcentaje = (distancia / 200) * 100;
+            document.getElementById('distancia-bar').style.width = porcentaje + '%';
+            
+            let mensaje = 'Sin obstáculos cercanos';
+            let color = '#28a745';
+            if (distancia < 100) {
+                mensaje = '⚠️ Objeto cercano a ' + distancia + ' cm';
+                color = '#ffc107';
+            }
+            if (distancia < 50) {
+                mensaje = '🚨 ¡PELIGRO! Objeto muy cercano';
+                color = '#dc3545';
+            }
+            if (distancia < 20) {
+                mensaje = '🔴 ¡ALERTA MÁXIMA! Colisión inminente';
+                color = '#dc3545';
+            }
+            document.getElementById('distancia-mensaje').textContent = mensaje;
+            document.getElementById('distancia-bar').style.background = `linear-gradient(90deg, #28a745, ${color}, #dc3545)`;
+        }
+
+        // Actualizar sensor de luz
+        function actualizarLuz() {
+            const luz = Math.floor(Math.random() * 1000);
+            document.getElementById('luz').textContent = luz;
+            
+            let mensaje = 'Oscuro';
+            let badge = 'badge bg-secondary';
+            let recomendacion = '💡 Encender luces';
+            let icono = '🌙';
+            
+            if (luz > 200) {
+                mensaje = 'Poca luz';
+                badge = 'badge bg-warning';
+                recomendacion = '💡 Luces recomendadas';
+                icono = '🌓';
+            }
+            if (luz > 500) {
+                mensaje = 'Ambiente iluminado';
+                badge = 'badge bg-success';
+                recomendacion = '✅ Luz adecuada';
+                icono = '☀️';
+            }
+            if (luz > 800) {
+                mensaje = 'Muy brillante';
+                badge = 'badge bg-info';
+                recomendacion = '🕶️ Reducir exposición';
+                icono = '😎';
+            }
+            
+            document.getElementById('luz-badge').className = badge;
+            document.getElementById('luz-badge').textContent = mensaje;
+            document.getElementById('luz-recomendacion').innerHTML = recomendacion;
+        }
+
+        // Cargar resumen
         async function cargarResumen() {
             try {
                 const response = await fetch('/api/iot/resumen');
                 const data = await response.json();
-                
                 document.getElementById('dispositivos-activos').textContent = data.dispositivos_activos || 0;
                 document.getElementById('alertas-hoy').textContent = data.alertas_hoy || 0;
                 document.getElementById('pacientes-riesgo').textContent = data.pacientes_riesgo || 0;
                 document.getElementById('total-pacientes').textContent = data.total_pacientes || 0;
             } catch (error) {
-                console.error('Error cargando resumen:', error);
+                console.error('Error:', error);
             }
         }
 
-        // Cargar alertas recientes
+        // Cargar alertas
         async function cargarAlertas() {
             try {
                 const response = await fetch('/api/iot/alertas-recientes');
@@ -483,9 +675,6 @@
                 let html = '';
                 data.forEach(alerta => {
                     const fecha = new Date(alerta.timestamp);
-                    const hora = fecha.toLocaleTimeString('es-ES');
-                    const fechaStr = fecha.toLocaleDateString('es-ES');
-                    
                     html += `
                         <div class="alerta-item">
                             <div class="row align-items-center">
@@ -496,7 +685,7 @@
                                     <strong>${alerta.paciente}</strong><br>
                                     <small class="text-muted">
                                         <i class="fas fa-tachometer-alt"></i> ${alerta.fuerza_g} G | 
-                                        <i class="fas fa-clock"></i> ${fechaStr} ${hora}
+                                        <i class="fas fa-clock"></i> ${fecha.toLocaleString()}
                                     </small>
                                 </div>
                                 <div class="col-auto">
@@ -508,26 +697,8 @@
                 });
                 
                 container.innerHTML = html;
-                
-                // Reproducir sonido si hay nuevas alertas
-                if (data.length > 0 && new Date(data[0].timestamp).getTime() > ultimaAlerta) {
-                    audio.play().catch(e => console.log('Audio no soportado'));
-                    ultimaAlerta = new Date(data[0].timestamp).getTime();
-                    
-                    Swal.fire({
-                        title: '🚨 ¡Nueva Alerta IoT!',
-                        text: `${data[0].paciente} - ${data[0].tipo_alerta} (${data[0].fuerza_g} G)`,
-                        icon: 'error',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true
-                    });
-                }
             } catch (error) {
-                console.error('Error cargando alertas:', error);
-                document.getElementById('alertas-lista').innerHTML = '<div class="text-center text-danger">Error cargando alertas</div>';
+                console.error('Error:', error);
             }
         }
 
@@ -540,31 +711,23 @@
                 const tbody = document.getElementById('pacientes-tbody');
                 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay pacientes con dispositivos</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay pacientes</td></tr>';
                     return;
                 }
                 
                 tbody.innerHTML = '';
                 data.forEach(paciente => {
-                    const ultimoContacto = paciente.ultimo_contacto_iot ? new Date(paciente.ultimo_contacto_iot).toLocaleString() : 'Nunca';
-                    const estadoClass = paciente.alertas_activas ? 'badge-activo' : 'badge-inactivo';
-                    const estadoText = paciente.alertas_activas ? 'Activo' : 'Inactivo';
                     const riesgoClass = `badge-riesgo-${(paciente.nivel_riesgo || 'bajo').toLowerCase()}`;
-                    
                     tbody.innerHTML += `
                         <tr>
                             <td>${paciente.id}</td>
                             <td><strong>${paciente.nombres} ${paciente.apellidos}</strong></td>
                             <td>${paciente.dni}</td>
-                            <td><code>${paciente.dispositivo_id || 'No asignado'}</code></td>
-                            <td><small>${ultimoContacto}</small></td>
-                            <td><span class="badge-iot ${estadoClass}">${estadoText}</span></td>
-                            <td><span class="badge-iot ${riesgoClass}">${paciente.nivel_riesgo || 'No definido'}</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-info" onclick="verAlertasPaciente(${paciente.id})">
-                                    <i class="fas fa-chart-line"></i> Ver
-                                </button>
-                            </td>
+                            <td><code>${paciente.dispositivo_id || 'No'}</code></td>
+                            <td><small>${paciente.ultimo_contacto_iot ? new Date(paciente.ultimo_contacto_iot).toLocaleString() : 'Nunca'}</small></td>
+                            <td><span class="badge-iot ${paciente.alertas_activas ? 'badge-activo' : 'badge-inactivo'}">${paciente.alertas_activas ? 'Activo' : 'Inactivo'}</span></td>
+                            <td><span class="badge-iot ${riesgoClass}">${paciente.nivel_riesgo || 'No'}</span></td>
+                            <td><span id="alertas-${paciente.id}">--</span></td>
                             <td>
                                 <button class="btn btn-sm btn-gradient" onclick="verDetalles(${paciente.id})">
                                     <i class="fas fa-eye"></i>
@@ -574,133 +737,90 @@
                     `;
                 });
             } catch (error) {
-                console.error('Error cargando pacientes:', error);
+                console.error('Error:', error);
             }
         }
 
-        // Cargar gráfico
-        async function cargarGrafico() {
+        // Cargar gráficos
+        async function cargarGraficos() {
             try {
                 const response = await fetch('/api/iot/estadisticas-alertas');
                 const data = await response.json();
                 
                 const ctx = document.getElementById('graficoAlertas').getContext('2d');
-                
-                if (graficoAlertas) {
-                    graficoAlertas.destroy();
-                }
+                if (graficoAlertas) graficoAlertas.destroy();
                 
                 graficoAlertas = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: data.labels,
                         datasets: [{
-                            label: 'Alertas IoT',
+                            label: 'Alertas',
                             data: data.valores,
                             borderColor: '#667eea',
                             backgroundColor: 'rgba(102, 126, 234, 0.1)',
                             borderWidth: 3,
                             tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#764ba2',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            pointHoverRadius: 7
+                            fill: true
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    usePointStyle: true,
-                                    boxWidth: 10
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#ddd',
-                                borderColor: '#667eea',
-                                borderWidth: 1
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(0,0,0,0.05)'
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: true }
+                });
+                
+                // Gráfico de torta
+                const pieCtx = document.getElementById('graficoPie').getContext('2d');
+                if (graficoPie) graficoPie.destroy();
+                
+                graficoPie = new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Caídas', 'SOS Manual', 'Detección'],
+                        datasets: [{
+                            data: [data.caidas || 0, data.sos || 0, data.detecciones || 0],
+                            backgroundColor: ['#dc3545', '#ffc107', '#28a745']
+                        }]
+                    },
+                    options: { responsive: true }
                 });
             } catch (error) {
-                console.error('Error cargando gráfico:', error);
+                console.error('Error:', error);
             }
         }
 
-        // Función para actualizar gráfico
-        function actualizarGrafico() {
-            cargarGrafico();
-            Swal.fire({
-                icon: 'success',
-                title: 'Actualizado',
-                text: 'Los datos han sido actualizados',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 2000
-            });
-        }
-
-        // Ver detalles del paciente
         function verDetalles(id) {
             window.location.href = `/iot/paciente/${id}`;
         }
 
-        // Ver alertas del paciente
-        async function verAlertasPaciente(id) {
-            window.location.href = `/iot/paciente/${id}`;
-        }
-
-        // Exportar a Excel
-        function exportarExcel() {
+        function exportarDatos() {
             window.location.href = '/api/iot/exportar-excel';
         }
 
-        // Inicializar dashboard
+        function actualizarGrafico() {
+            cargarGraficos();
+            Swal.fire({ icon: 'success', title: 'Actualizado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+        }
+
+        // Inicializar todo
         document.addEventListener('DOMContentLoaded', () => {
             initMapa();
             cargarResumen();
             cargarAlertas();
             cargarPacientes();
-            cargarGrafico();
-            cargarUbicaciones();
+            cargarGraficos();
+            
+            // Sensores en tiempo real
+            setInterval(actualizarAcelerometro, 2000);
+            setInterval(actualizarAmbiente, 3000);
+            setInterval(actualizarDistancia, 2000);
+            setInterval(actualizarLuz, 3000);
             
             // Actualizar cada 5 segundos
-            setInterval(() => {
-                cargarAlertas();
-                cargarResumen();
-            }, 5000);
+            setInterval(() => { cargarAlertas(); cargarResumen(); }, 5000);
             
-            // Actualizar mapa cada 30 segundos
-            setInterval(() => {
-                cargarUbicaciones();
-            }, 30000);
-            
-            // Solicitar permisos de notificación
-            if (Notification.permission !== 'denied') {
-                Notification.requestPermission();
-            }
+            // Botón SOS demo
+            document.getElementById('sos-button')?.addEventListener('click', () => {
+                Swal.fire('🚨 SOS Enviado', 'Se ha enviado una alerta de emergencia', 'error');
+            });
         });
     </script>
 </body>

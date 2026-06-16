@@ -130,12 +130,16 @@ class IoTController extends Controller
         ]);
     }
 
-    // En IoTController.php
     public function mostrarPaciente($dni)
     {
         $paciente = AdultoMayor::where('dni', $dni)->first();
+        
+        if (!$paciente) {
+            abort(404, 'Paciente no encontrado');
+        }
+        
         $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
-            ->where('descripcion', 'LIKE', '%' . $paciente->id . '%')
+            ->where('adulto_mayor_id', $paciente->id) // ✅ Mejor usar el ID directamente
             ->latest()
             ->take(10)
             ->get();
@@ -164,13 +168,15 @@ class IoTController extends Controller
             ->limit(20)
             ->get()
             ->map(function($log) {
-                $detalles = json_decode($log->descripcion, true);
+                $detalles = json_decode($log->detalles, true); // ✅ Corregido
+                $datos = $detalles['datos'] ?? [];
+                
                 return [
                     'id' => $log->id,
-                    'tipo_alerta' => $detalles['tipo_alerta'] ?? 'Desconocido',
-                    'fuerza_g' => $detalles['fuerza_g'] ?? 0,
-                    'paciente' => $log->adultoMayor ? $log->adultoMayor->nombres . ' ' . $log->adultoMayor->apellidos : 'Desconocido',
-                    'dispositivo_id' => $log->adultoMayor ? $log->adultoMayor->dispositivo_id : 'N/A',
+                    'tipo_alerta' => $datos['sos'] ?? false ? 'SOS' : ($datos['caida'] ?? false ? 'CAÍDA' : 'SENSOR'),
+                    'fuerza_g' => $datos['fuerza_g'] ?? 0,
+                    'paciente' => $log->adultoMayor ? $log->adultoMayor->nombre : 'Desconocido',
+                    'dispositivo_id' => $log->adultoMayor ? $log->adultoMayor->codigo : 'N/A',
                     'timestamp' => $log->created_at,
                     'es_nueva' => $log->created_at > now()->subMinutes(1)
                 ];
@@ -181,13 +187,14 @@ class IoTController extends Controller
 
     public function pacientesConDispositivos()
     {
-        $pacientes = AdultoMayor::whereNotNull('dispositivo_id')
+        $pacientes = AdultoMayor::whereNotNull('codigo') // ✅ Cambiado a 'codigo'
             ->orderBy('created_at', 'desc')
             ->get();
         
         return response()->json($pacientes);
     }
 
+    // ✅ Método estadisticasAlertas unificado y corregido
     public function estadisticasAlertas()
     {
         $alertasPorDia = ActivityLog::where('accion', 'EMERGENCIA_IOT')
@@ -196,6 +203,23 @@ class IoTController extends Controller
             ->groupBy('fecha')
             ->orderBy('fecha')
             ->get();
+        
+        // Estadísticas adicionales
+        $alertasUltimaSemana = ActivityLog::where('accion', 'EMERGENCIA_IOT')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->get();
+        
+        $caidas = $alertasUltimaSemana->filter(function($alerta) {
+            $detalles = json_decode($alerta->detalles, true);
+            return isset($detalles['datos']['caida']) && $detalles['datos']['caida'] === true;
+        })->count();
+        
+        $sos = $alertasUltimaSemana->filter(function($alerta) {
+            $detalles = json_decode($alerta->detalles, true);
+            return isset($detalles['datos']['sos']) && $detalles['datos']['sos'] === true;
+        })->count();
+        
+        $detecciones = $alertasUltimaSemana->count() - $caidas - $sos;
         
         $labels = [];
         $valores = [];
@@ -208,41 +232,56 @@ class IoTController extends Controller
         
         return response()->json([
             'labels' => $labels,
-            'valores' => $valores
+            'valores' => $valores,
+            'caidas' => $caidas,
+            'sos' => $sos,
+            'detecciones' => $detecciones
         ]);
     }
     
     public function ubicacionesPacientes()
     {
+        // Si no tienes columnas 'lat' y 'lon', usa dirección
         $pacientes = AdultoMayor::whereNotNull('lat')
             ->whereNotNull('lon')
-            ->get(['id', 'nombres', 'apellidos', 'dni', 'lat', 'lon', 'nivel_riesgo']);
+            ->get(['id', 'nombre', 'dni', 'lat', 'lon', 'nivel_riesgo']);
         
         return response()->json($pacientes);
     }
     
     public function dashboard()
     {
-        // Obtener estadísticas para mostrar en el dashboard IoT
-        $totalDispositivos = AdultoMayor::whereNotNull('dispositivo_id')->count();
+        $totalDispositivos = AdultoMayor::whereNotNull('codigo')->count();
         $alertasHoy = ActivityLog::where('accion', 'EMERGENCIA_IOT')
             ->whereDate('created_at', today())->count();
         $alertasTotales = ActivityLog::where('accion', 'EMERGENCIA_IOT')->count();
         
         return view('dashboard.iot-dashboard', compact('totalDispositivos', 'alertasHoy', 'alertasTotales'));
     }
-    
+
     public function exportarExcel()
     {
-        $pacientes = AdultoMayor::whereNotNull('dispositivo_id')->get();
+        $pacientes = AdultoMayor::whereNotNull('codigo')->get();
         
-        $csv = "ID,Nombre Completo,DNI,Dispositivo,Estado,Riesgo,Último Contacto\n";
+        $csv = "ID,Nombre,DNI,Dispositivo,Estado,Riesgo,Último Contacto\n";
         foreach ($pacientes as $p) {
-            $csv .= "{$p->id},{$p->nombres} {$p->apellidos},{$p->dni},{$p->dispositivo_id},{$p->alertas_activas},{$p->nivel_riesgo},{$p->ultimo_contacto_iot}\n";
+            $csv .= "{$p->id},{$p->nombre},{$p->dni},{$p->codigo},{$p->alertas_activas},{$p->nivel_riesgo},{$p->updated_at}\n";
         }
         
         return response($csv)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="pacientes_iot.csv"');
+    }
+
+    public function datosSensores()
+    {
+        return response()->json([
+            'acelerometro' => ['x' => 0.1, 'y' => 0.2, 'z' => 0.95, 'fuerza' => 1.0],
+            'temperatura' => 24.5,
+            'humedad' => 55,
+            'distancia' => 120,
+            'luz' => 450,
+            'timestamp' => now()
+        ]);
     }
 }

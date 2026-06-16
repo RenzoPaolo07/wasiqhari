@@ -62,7 +62,7 @@ class IoTController extends Controller
 
         // Registrar en activity_logs usando las columnas correctas
         ActivityLog::create([
-            'user_id' => null,  // o 1 si tienes un usuario admin
+            'user_id' => null,
             'accion' => 'EMERGENCIA_IOT',
             'modulo' => 'IoT',
             'descripcion' => json_encode([
@@ -149,6 +149,7 @@ class IoTController extends Controller
         return response()->json($pacientes);
     }
 
+    // Método unificado de estadisticasAlertas
     public function estadisticasAlertas()
     {
         $alertasPorDia = ActivityLog::where('accion', 'EMERGENCIA_IOT')
@@ -157,6 +158,15 @@ class IoTController extends Controller
             ->groupBy('fecha')
             ->orderBy('fecha')
             ->get();
+        
+        // Obtener todas las alertas para estadísticas adicionales
+        $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->get();
+        
+        $caidas = $alertas->filter(fn($a) => str_contains($a->descripcion, 'caida'))->count();
+        $sos = $alertas->filter(fn($a) => str_contains($a->descripcion, 'panico'))->count();
+        $detecciones = $alertas->count() - $caidas - $sos;
         
         $labels = [];
         $valores = [];
@@ -169,7 +179,10 @@ class IoTController extends Controller
         
         return response()->json([
             'labels' => $labels,
-            'valores' => $valores
+            'valores' => $valores,
+            'caidas' => $caidas,
+            'sos' => $sos,
+            'detecciones' => $detecciones
         ]);
     }
 
@@ -203,7 +216,7 @@ class IoTController extends Controller
         
         return view('dashboard.iot-dashboard', compact('totalDispositivos', 'alertasHoy', 'alertasTotales'));
     }
-    
+
     public function exportarExcel()
     {
         $pacientes = AdultoMayor::whereNotNull('dispositivo_id')->get();
@@ -217,4 +230,17 @@ class IoTController extends Controller
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="pacientes_iot.csv"');
     }
-};
+
+    public function datosSensores()
+    {
+        // Aquí se recibirán los datos reales del ESP32
+        return response()->json([
+            'acelerometro' => ['x' => 0.1, 'y' => 0.2, 'z' => 0.95, 'fuerza' => 1.0],
+            'temperatura' => 24.5,
+            'humedad' => 55,
+            'distancia' => 120,
+            'luz' => 450,
+            'timestamp' => now()
+        ]);
+    }
+}
