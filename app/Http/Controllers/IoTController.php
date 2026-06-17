@@ -284,4 +284,29 @@ class IoTController extends Controller
             'timestamp' => now()
         ]);
     }
+
+    public function simularArduino()
+    {
+        // Datos simulados como si vinieran del Arduino
+        $datos = [
+            'estado' => 'conectado',
+            'ultima_lectura' => now(),
+            'sensores' => [
+                'temperatura' => rand(200, 300) / 10, // 20-30°C
+                'humedad' => rand(400, 800) / 10, // 40-80%
+                'distancia' => rand(10, 150), // cm
+                'luz' => rand(100, 900), // LDR
+                'acelerometro' => [
+                    'x' => rand(-100, 100) / 100,
+                    'y' => rand(-100, 100) / 100,
+                    'z' => rand(80, 120) / 100
+                ],
+                'sos' => false,
+                'impacto' => false
+            ],
+            'timestamp' => now()->toISOString()
+        ];
+        
+        return response()->json($datos);
+    }
 }

@@ -229,12 +229,6 @@
             margin-right: 8px;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
         .loader {
             border: 3px solid #f3f3f3;
             border-radius: 50%;
@@ -250,9 +244,90 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Estilos para el Arduino */
+        .arduino-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .arduino-card .card-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            padding: 15px 20px;
+        }
+
+        .arduino-card .sensor-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            height: auto;
+            transition: all 0.3s ease;
+        }
+
+        .arduino-card .sensor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .arduino-card .sensor-value {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        .progress {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            transition: width 0.5s ease;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        #sos-alert, #impacto-alert {
+            animation: flashAlert 0.5s ease-in-out;
+        }
+
+        @keyframes flashAlert {
+            0% { opacity: 0; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .badge-riesgo-bajo { background: #28a745; color: white; }
+        .badge-riesgo-medio { background: #ffc107; color: #333; }
+        .badge-riesgo-alto { background: #dc3545; color: white; }
+
+        /* Estado de conexión del Arduino */
+        .arduino-status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .arduino-status-indicator.online {
+            background: #28a745;
+        }
+
+        .arduino-status-indicator.offline {
+            background: #dc3545;
+            animation: none;
+        }
+
+        .arduino-status-indicator.error {
+            background: #ffc107;
+            animation: none;
+        }
+
         @media (max-width: 768px) {
             .stat-card, .sensor-card { margin-bottom: 20px; }
             #mapa { height: 300px; }
+            .arduino-card .sensor-card { margin-bottom: 10px; }
         }
     </style>
 </head>
@@ -323,6 +398,119 @@
                 </div>
             </div>
         </div>
+
+        <!-- ============================================ -->
+        <!-- SECCIÓN: Estado del Arduino con API -->
+        <!-- ============================================ -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="arduino-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-microchip"></i> 
+                            <strong>Arduino Uno - Monitoreo en Tiempo Real</strong>
+                        </div>
+                        <div>
+                            <span class="badge bg-light text-success" id="arduino-status">
+                                <span class="arduino-status-indicator online" id="arduino-status-indicator"></span>
+                                <span id="arduino-status-text">Conectado</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Temperatura -->
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="sensor-card">
+                                    <i class="fas fa-temperature-high" style="font-size: 30px; color: #ff6b6b;"></i>
+                                    <div class="sensor-value">
+                                        <span id="arduino-temp">--</span>°C
+                                    </div>
+                                    <div class="sensor-unit">Temperatura</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Humedad -->
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="sensor-card">
+                                    <i class="fas fa-water" style="font-size: 30px; color: #4dabf7;"></i>
+                                    <div class="sensor-value">
+                                        <span id="arduino-hum">--</span>%
+                                    </div>
+                                    <div class="sensor-unit">Humedad</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Distancia -->
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="sensor-card">
+                                    <i class="fas fa-arrows-alt-h" style="font-size: 30px; color: #fcc419;"></i>
+                                    <div class="sensor-value">
+                                        <span id="arduino-dist">--</span> cm
+                                    </div>
+                                    <div class="sensor-unit">Distancia</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Luz -->
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="sensor-card">
+                                    <i class="fas fa-sun" style="font-size: 30px; color: #ffd43b;"></i>
+                                    <div class="sensor-value">
+                                        <span id="arduino-luz">--</span>
+                                    </div>
+                                    <div class="sensor-unit">Lux (LDR)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Acelerómetro -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="text-center mb-3">Acelerómetro (MPU6050)</h6>
+                                <div class="row">
+                                    <div class="col-4 text-center">
+                                        <label class="text-muted small">Eje X</label>
+                                        <div class="progress" style="height: 25px;">
+                                            <div class="progress-bar" id="accel-x-bar" style="width: 50%; background: #ff6b6b;">50%</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <label class="text-muted small">Eje Y</label>
+                                        <div class="progress" style="height: 25px;">
+                                            <div class="progress-bar" id="accel-y-bar" style="width: 50%; background: #4dabf7;">50%</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 text-center">
+                                        <label class="text-muted small">Eje Z</label>
+                                        <div class="progress" style="height: 25px;">
+                                            <div class="progress-bar" id="accel-z-bar" style="width: 50%; background: #51cf66;">50%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Estado SOS -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="alert alert-danger" id="sos-alert" style="display: none;">
+                                    <i class="fas fa-exclamation-triangle"></i> 
+                                    <strong>¡ALERTA SOS ACTIVADA!</strong>
+                                </div>
+                                <div class="alert alert-warning" id="impacto-alert" style="display: none;">
+                                    <i class="fas fa-bolt"></i> 
+                                    <strong>¡IMPACTO DETECTADO!</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ============================================ -->
+        <!-- FIN SECCIÓN ARDUINO -->
+        <!-- ============================================ -->
 
         <!-- Fila 2: Sensores en Tiempo Real -->
         <div class="row mb-4">
@@ -522,6 +710,7 @@
         let graficoPie;
         let audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
         let ultimaAlerta = 0;
+        let arduinoInterval;
 
         // Reloj en tiempo real
         function actualizarReloj() {
@@ -541,9 +730,139 @@
             }).addTo(mapa);
         }
 
-        // Actualizar datos del acelerómetro (simulado)
+        // ============================================
+        // FUNCIONES PARA EL ARDUINO CON API
+        // ============================================
+        
+        function reproducirAlerta() {
+            try {
+                audio.play();
+            } catch(e) {
+                console.log('Error al reproducir audio:', e);
+            }
+        }
+
+        // Simular datos del Arduino desde la API
+        function simularArduino() {
+            fetch('/api/arduino/simular')
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Error en la respuesta: ' + res.status);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.sensores) {
+                        const sensores = data.sensores;
+                        
+                        // Actualizar estado del Arduino
+                        const statusIndicator = document.getElementById('arduino-status-indicator');
+                        const statusText = document.getElementById('arduino-status-text');
+                        const statusBadge = document.getElementById('arduino-status');
+                        
+                        statusIndicator.className = 'arduino-status-indicator online';
+                        statusText.textContent = 'Conectado';
+                        statusBadge.className = 'badge bg-light text-success';
+                        
+                        // Actualizar valores
+                        if (sensores.temperatura !== undefined) {
+                            document.getElementById('arduino-temp').textContent = sensores.temperatura.toFixed(1);
+                        }
+                        if (sensores.humedad !== undefined) {
+                            document.getElementById('arduino-hum').textContent = sensores.humedad.toFixed(1);
+                        }
+                        if (sensores.distancia !== undefined) {
+                            document.getElementById('arduino-dist').textContent = sensores.distancia;
+                        }
+                        if (sensores.luz !== undefined) {
+                            document.getElementById('arduino-luz').textContent = sensores.luz;
+                        }
+                        
+                        // Actualizar acelerómetro
+                        if (sensores.acelerometro) {
+                            const accel = sensores.acelerometro;
+                            const xPercent = ((accel.x || 0) + 1) * 50;
+                            const yPercent = ((accel.y || 0) + 1) * 50;
+                            const zPercent = (accel.z || 0) * 50;
+                            
+                            document.getElementById('accel-x-bar').style.width = Math.min(Math.max(xPercent, 0), 100) + '%';
+                            document.getElementById('accel-x-bar').textContent = Math.round(Math.min(Math.max(xPercent, 0), 100)) + '%';
+                            
+                            document.getElementById('accel-y-bar').style.width = Math.min(Math.max(yPercent, 0), 100) + '%';
+                            document.getElementById('accel-y-bar').textContent = Math.round(Math.min(Math.max(yPercent, 0), 100)) + '%';
+                            
+                            document.getElementById('accel-z-bar').style.width = Math.min(Math.max(zPercent, 0), 100) + '%';
+                            document.getElementById('accel-z-bar').textContent = Math.round(Math.min(Math.max(zPercent, 0), 100)) + '%';
+                        }
+                        
+                        // Actualizar alertas
+                        const sosAlert = document.getElementById('sos-alert');
+                        const impactoAlert = document.getElementById('impacto-alert');
+                        
+                        if (sensores.sos) {
+                            sosAlert.style.display = 'block';
+                            reproducirAlerta();
+                            
+                            // Notificación SweetAlert
+                            Swal.fire({
+                                icon: 'error',
+                                title: '🚨 ALERTA SOS',
+                                text: '¡Botón de pánico activado desde el Arduino!',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true
+                            });
+                        } else {
+                            sosAlert.style.display = 'none';
+                        }
+                        
+                        if (sensores.impacto) {
+                            impactoAlert.style.display = 'block';
+                            
+                            Swal.fire({
+                                icon: 'warning',
+                                title: '💥 IMPACTO DETECTADO',
+                                text: '¡Posible caída detectada por el acelerómetro!',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true
+                            });
+                        } else {
+                            impactoAlert.style.display = 'none';
+                        }
+                        
+                        // Actualizar timestamp
+                        const ultimoSOS = document.getElementById('ultimo-sos');
+                        if (sensores.sos || sensores.impacto) {
+                            const ahora = new Date();
+                            ultimoSOS.innerHTML = `<small class="text-danger">Última alerta: ${ahora.toLocaleTimeString()}</small>`;
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Error Arduino:', err);
+                    
+                    // Actualizar estado a error
+                    const statusIndicator = document.getElementById('arduino-status-indicator');
+                    const statusText = document.getElementById('arduino-status-text');
+                    const statusBadge = document.getElementById('arduino-status');
+                    
+                    statusIndicator.className = 'arduino-status-indicator error';
+                    statusText.textContent = 'Error de conexión';
+                    statusBadge.className = 'badge bg-light text-warning';
+                });
+        }
+
+        // ============================================
+        // FUNCIONES PARA LOS SENSORES SIMULADOS (BACKUP)
+        // ============================================
+        
+        // Actualizar datos del acelerómetro (simulado local)
         function actualizarAcelerometro() {
-            // En producción, esto vendría del ESP32
             const fuerzaG = (Math.random() * 2).toFixed(2);
             const accelX = (Math.random() * 1 - 0.5).toFixed(2);
             const accelY = (Math.random() * 1 - 0.5).toFixed(2);
@@ -571,13 +890,11 @@
             document.getElementById('temperatura').textContent = temp;
             document.getElementById('humedad').textContent = hum;
             
-            // Calcular sensación térmica
             let sensacion = temp;
             if (hum > 70) sensacion = (temp - 2).toFixed(1);
             if (hum < 40) sensacion = (temp + 1).toFixed(1);
             document.getElementById('sensacion-termica').textContent = sensacion;
             
-            // Calcular punto de rocío
             const puntoRocio = (temp - ((100 - hum) / 5)).toFixed(1);
             document.getElementById('punto-rocio').textContent = puntoRocio;
         }
@@ -616,31 +933,31 @@
             let mensaje = 'Oscuro';
             let badge = 'badge bg-secondary';
             let recomendacion = '💡 Encender luces';
-            let icono = '🌙';
             
             if (luz > 200) {
                 mensaje = 'Poca luz';
                 badge = 'badge bg-warning';
                 recomendacion = '💡 Luces recomendadas';
-                icono = '🌓';
             }
             if (luz > 500) {
                 mensaje = 'Ambiente iluminado';
                 badge = 'badge bg-success';
                 recomendacion = '✅ Luz adecuada';
-                icono = '☀️';
             }
             if (luz > 800) {
                 mensaje = 'Muy brillante';
                 badge = 'badge bg-info';
                 recomendacion = '🕶️ Reducir exposición';
-                icono = '😎';
             }
             
             document.getElementById('luz-badge').className = badge;
             document.getElementById('luz-badge').textContent = mensaje;
             document.getElementById('luz-recomendacion').innerHTML = recomendacion;
         }
+
+        // ============================================
+        // FUNCIONES DE CARGA DE DATOS
+        // ============================================
 
         // Cargar resumen
         async function cargarResumen() {
@@ -787,6 +1104,10 @@
             }
         }
 
+        // ============================================
+        // FUNCIONES DE UTILIDAD
+        // ============================================
+
         function verDetalles(id) {
             window.location.href = `/iot/paciente/${id}`;
         }
@@ -800,7 +1121,10 @@
             Swal.fire({ icon: 'success', title: 'Actualizado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
         }
 
-        // Inicializar todo
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+
         document.addEventListener('DOMContentLoaded', () => {
             initMapa();
             cargarResumen();
@@ -808,19 +1132,39 @@
             cargarPacientes();
             cargarGraficos();
             
-            // Sensores en tiempo real
+            // Sensores en tiempo real (simulados localmente como backup)
             setInterval(actualizarAcelerometro, 2000);
             setInterval(actualizarAmbiente, 3000);
             setInterval(actualizarDistancia, 2000);
             setInterval(actualizarLuz, 3000);
             
-            // Actualizar cada 5 segundos
-            setInterval(() => { cargarAlertas(); cargarResumen(); }, 5000);
+            // Arduino - Simulación desde la API (cada 2 segundos)
+            arduinoInterval = setInterval(simularArduino, 2000);
+            
+            // Actualizar datos generales cada 5 segundos
+            setInterval(() => { 
+                cargarAlertas(); 
+                cargarResumen(); 
+            }, 5000);
             
             // Botón SOS demo
             document.getElementById('sos-button')?.addEventListener('click', () => {
                 Swal.fire('🚨 SOS Enviado', 'Se ha enviado una alerta de emergencia', 'error');
+                
+                // También activar alerta en Arduino
+                document.getElementById('sos-alert').style.display = 'block';
+                try { audio.play(); } catch(e) {}
+                setTimeout(() => {
+                    document.getElementById('sos-alert').style.display = 'none';
+                }, 5000);
+                
+                // Actualizar timestamp
+                const ahora = new Date();
+                document.getElementById('ultimo-sos').innerHTML = `<small class="text-danger">Última alerta: ${ahora.toLocaleTimeString()}</small>`;
             });
+            
+            console.log('🚀 Sistema IoT Iniciado correctamente');
+            console.log('📡 Monitoreando Arduino en: /api/arduino/simular');
         });
     </script>
 </body>

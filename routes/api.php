@@ -14,3 +14,4 @@ Route::get('/iot/ubicaciones', [IoTController::class, 'ubicacionesPacientes']);
 Route::get('/iot/exportar-excel', [IoTController::class, 'exportarExcel']);
 Route::get('/iot/datos-sensores', [IoTController::class, 'datosSensores']);
 Route::get('/iot/estadisticas-alertas', [IoTController::class, 'estadisticasAlertas']);
+Route::get('/arduino/simular', [IoTController::class, 'simularArduino']);
