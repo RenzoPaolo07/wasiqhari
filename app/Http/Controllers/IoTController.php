@@ -139,7 +139,7 @@ class IoTController extends Controller
         }
         
         $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
-            ->where('adulto_mayor_id', $paciente->id) // ✅ Mejor usar el ID directamente
+            ->where('adulto_mayor_id', $paciente->id)
             ->latest()
             ->take(10)
             ->get();
@@ -168,7 +168,7 @@ class IoTController extends Controller
             ->limit(20)
             ->get()
             ->map(function($log) {
-                $detalles = json_decode($log->detalles, true); // ✅ Corregido
+                $detalles = json_decode($log->detalles, true);
                 $datos = $detalles['datos'] ?? [];
                 
                 return [
@@ -187,14 +187,13 @@ class IoTController extends Controller
 
     public function pacientesConDispositivos()
     {
-        $pacientes = AdultoMayor::whereNotNull('codigo') // ✅ Cambiado a 'codigo'
+        $pacientes = AdultoMayor::whereNotNull('codigo')
             ->orderBy('created_at', 'desc')
             ->get();
         
         return response()->json($pacientes);
     }
 
-    // ✅ Método estadisticasAlertas unificado y corregido
     public function estadisticasAlertas()
     {
         $alertasPorDia = ActivityLog::where('accion', 'EMERGENCIA_IOT')
@@ -308,5 +307,69 @@ class IoTController extends Controller
         ];
         
         return response()->json($datos);
+    }
+
+    /**
+     * Recibe datos de sensores del dispositivo IoT
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function recibirDatosSensores(Request $request)
+    {
+        $request->validate([
+            'paciente_id' => 'required|string',
+            'temperatura' => 'nullable|numeric',
+            'humedad' => 'nullable|numeric',
+            'distancia' => 'nullable|numeric',
+            'luz' => 'nullable|numeric',
+            'fuerza_g' => 'nullable|numeric',
+            'accel_x' => 'nullable|numeric',
+            'accel_y' => 'nullable|numeric',
+            'accel_z' => 'nullable|numeric'
+        ]);
+        
+        // Buscar el paciente por DNI o código
+        $paciente = AdultoMayor::where('dni', $request->paciente_id)
+            ->orWhere('codigo', $request->paciente_id)
+            ->first();
+        
+        if (!$paciente) {
+            return response()->json(['error' => 'Paciente no encontrado'], 404);
+        }
+        
+        // Actualizar los datos del paciente
+        $paciente->ultima_lectura_iot = json_encode([
+            'temperatura' => $request->temperatura,
+            'humedad' => $request->humedad,
+            'distancia' => $request->distancia,
+            'luz' => $request->luz,
+            'fuerza_g' => $request->fuerza_g,
+            'acelerometro' => [
+                'x' => $request->accel_x,
+                'y' => $request->accel_y,
+                'z' => $request->accel_z
+            ],
+            'timestamp' => now()->toISOString()
+        ]);
+        $paciente->ultimo_contacto_iot = now();
+        $paciente->save();
+        
+        // Registrar en activity_logs
+        ActivityLog::create([
+            'user_id' => null,
+            'adulto_mayor_id' => $paciente->id,
+            'accion' => 'LECTURA_SENSORES',
+            'detalles' => json_encode([
+                'paciente_id' => $paciente->id,
+                'paciente' => $paciente->nombres . ' ' . $paciente->apellidos,
+                'sensores' => $request->all()
+            ])
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Datos recibidos correctamente'
+        ]);
     }
 }
