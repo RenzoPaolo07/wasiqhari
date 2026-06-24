@@ -22,6 +22,7 @@ Route::post('/contact', [ContactController::class, 'submit'])->name('contact.sub
 // NUEVO ESP32
 Route::get('/iot/paciente/{dni}', [IoTController::class, 'mostrarPaciente']);
 Route::get('/iot/paciente/{id}', [IoTController::class, 'mostrarPaciente']);
+Route::post('/alerta-iot', [IoTController::class, 'recibirAlerta']);
 
 // --- RUTAS DE AUTENTICACIÓN ---
 Route::get('/login', [UserController::class, 'login'])->name('login');
