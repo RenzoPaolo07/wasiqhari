@@ -6,14 +6,22 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AdultoMayor;
 use App\Models\ActivityLog;
+use App\Models\Visita;
+use App\Notifications\NuevaEmergencia;
+use Illuminate\Support\Facades\Notification;
+use App\Models\User;
 
 class IoTController extends Controller
 {
+    /**
+     * Obtener estado del paciente (para ESP32)
+     */
     public function obtenerEstado($pacienteId)
     {
-        // Buscar por DNI (cédula) o por ID
+        // Buscar por DNI (cédula) o por ID o código
         $paciente = AdultoMayor::where('dni', $pacienteId)
             ->orWhere('id', $pacienteId)
+            ->orWhere('codigo', $pacienteId)
             ->first();
 
         if (!$paciente) {
@@ -28,60 +36,153 @@ class IoTController extends Controller
             'success' => true,
             'data' => [
                 'id' => $paciente->id,
+                'paciente_id' => $paciente->codigo ?? $paciente->id,
                 'nombres' => $paciente->nombres,
                 'apellidos' => $paciente->apellidos,
+                'nombre' => $paciente->nombre ?? $paciente->nombres . ' ' . $paciente->apellidos,
                 'dni' => $paciente->dni,
                 'telefono' => $paciente->telefono,
                 'direccion' => $paciente->direccion,
-                'nivel_riesgo' => $paciente->nivel_riesgo ?? 'No definido'
+                'nivel_riesgo' => $paciente->nivel_riesgo ?? 'desconocido',
+                'alertas_activas' => $paciente->alertas_activas ?? false,
+                'ultima_visita' => $paciente->visitas()->latest()->first()?->created_at
             ]
         ]);
     }
 
+    /**
+     * Recibir alerta del ESP32 (unificado con lógica de emergencia)
+     */
     public function recibirAlerta(Request $request)
     {
-        // Validar datos
-        $request->validate([
+        // Validar datos del ESP32 (unificando validaciones)
+        $datos = $request->validate([
             'paciente_id' => 'required|string',
-            'tipo_alerta' => 'required|string',
-            'fuerza_g' => 'nullable|numeric'
+            'tipo_alerta' => 'nullable|string',
+            'pulso' => 'nullable|integer',
+            'oxigeno' => 'nullable|integer',
+            'temperatura' => 'nullable|numeric',
+            'sos' => 'boolean',
+            'caida' => 'boolean',
+            'ubicacion' => 'nullable|string',
+            'timestamp' => 'nullable|date',
+            'fuerza_g' => 'nullable|numeric',
+            'accel_x' => 'nullable|numeric',
+            'accel_y' => 'nullable|numeric',
+            'accel_z' => 'nullable|numeric'
         ]);
 
-        // Buscar por DNI o ID
-        $paciente = AdultoMayor::where('dni', $request->paciente_id)
-            ->orWhere('id', $request->paciente_id)
+        // Buscar por DNI o ID o código
+        $paciente = AdultoMayor::where('dni', $datos['paciente_id'])
+            ->orWhere('id', $datos['paciente_id'])
+            ->orWhere('codigo', $datos['paciente_id'])
             ->first();
 
         if (!$paciente) {
             return response()->json([
                 'success' => false,
                 'error' => 'Paciente no encontrado',
-                'dni_buscado' => $request->paciente_id
+                'dni_buscado' => $datos['paciente_id']
             ], 404);
         }
 
-        // Registrar en activity_logs usando las columnas correctas
-        ActivityLog::create([
+        // Detectar emergencia
+        $esEmergencia = false;
+        $motivo = [];
+
+        // Verificar SOS
+        if (isset($datos['sos']) && $datos['sos'] === true) {
+            $esEmergencia = true;
+            $motivo[] = 'Botón SOS presionado';
+        }
+
+        // Verificar caída
+        if (isset($datos['caida']) && $datos['caida'] === true) {
+            $esEmergencia = true;
+            $motivo[] = 'Detección de caída';
+        }
+
+        // Verificar pulso anómalo
+        if (isset($datos['pulso']) && ($datos['pulso'] > 120 || $datos['pulso'] < 50)) {
+            $esEmergencia = true;
+            $motivo[] = 'Pulso anómalo: ' . $datos['pulso'] . ' bpm';
+        }
+
+        // Verificar oxígeno bajo
+        if (isset($datos['oxigeno']) && $datos['oxigeno'] < 90) {
+            $esEmergencia = true;
+            $motivo[] = 'Oxígeno bajo: ' . $datos['oxigeno'] . '%';
+        }
+
+        // Si hay tipo_alerta, también consideramos emergencia
+        if (isset($datos['tipo_alerta']) && in_array($datos['tipo_alerta'], ['caida', 'panico', 'sos', 'emergencia'])) {
+            $esEmergencia = true;
+            if (empty($motivo)) {
+                $motivo[] = 'Alerta tipo: ' . $datos['tipo_alerta'];
+            }
+        }
+
+        // Registrar en Activity Log (usando estructura unificada)
+        $log = ActivityLog::create([
             'user_id' => null,
-            'accion' => 'EMERGENCIA_IOT',
+            'adulto_mayor_id' => $paciente->id,
+            'accion' => $esEmergencia ? 'EMERGENCIA_IOT' : 'LECTURA_SENSOR',
             'modulo' => 'IoT',
             'descripcion' => json_encode([
                 'paciente_id' => $paciente->id,
                 'paciente_nombre' => $paciente->nombres . ' ' . $paciente->apellidos,
-                'tipo_alerta' => $request->tipo_alerta,
-                'fuerza_g' => $request->fuerza_g,
+                'datos' => $datos,
+                'motivo_emergencia' => $motivo,
+                'tipo_alerta' => $datos['tipo_alerta'] ?? null,
+                'fuerza_g' => $datos['fuerza_g'] ?? null,
+                'fuente' => 'ESP32/Wokwi',
                 'timestamp' => now()->toISOString()
-            ])
+            ]),
+            'ip' => $request->ip(),
+            'created_at' => now()
         ]);
 
+        // Si es emergencia, enviar notificaciones y crear visita
+        if ($esEmergencia) {
+            // Obtener usuarios a notificar
+            $usuariosNotificar = User::whereIn('role', ['admin', 'voluntario', 'medico'])->get();
+
+            // Enviar notificación
+            Notification::send($usuariosNotificar, new NuevaEmergencia($paciente, $motivo, $datos));
+
+            // Crear visita de emergencia automática
+            $visita = Visita::create([
+                'adulto_mayor_id' => $paciente->id,
+                'voluntario_id' => null,
+                'tipo' => 'emergencia',
+                'fecha_programada' => now(),
+                'estado' => 'pendiente',
+                'notas' => 'Emergencia IoT: ' . implode(', ', $motivo),
+                'ubicacion' => $datos['ubicacion'] ?? $paciente->direccion
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'status' => 'emergencia',
+                'mensaje' => 'Alerta de emergencia registrada',
+                'motivos' => $motivo,
+                'paciente' => $paciente->nombres . ' ' . $paciente->apellidos,
+                'visita_id' => $visita->id
+            ], 201);
+        }
+
+        // Si no es emergencia, solo guardar lectura
         return response()->json([
             'success' => true,
-            'message' => 'Alerta registrada exitosamente',
-            'paciente' => $paciente->nombres . ' ' . $paciente->apellidos,
-            'tipo_alerta' => $request->tipo_alerta
+            'status' => 'ok',
+            'mensaje' => 'Lectura registrada exitosamente',
+            'paciente' => $paciente->nombres . ' ' . $paciente->apellidos
         ], 200);
     }
 
+    /**
+     * Recibir datos de sensores del dispositivo IoT
+     */
     public function recibirDatosSensores(Request $request)
     {
         $request->validate([
@@ -96,8 +197,10 @@ class IoTController extends Controller
             'accel_z' => 'nullable|numeric'
         ]);
         
-        // Buscar el paciente
-        $paciente = AdultoMayor::where('dni', $request->paciente_id)->first();
+        // Buscar el paciente por DNI o código
+        $paciente = AdultoMayor::where('dni', $request->paciente_id)
+            ->orWhere('codigo', $request->paciente_id)
+            ->first();
         
         if (!$paciente) {
             return response()->json(['error' => 'Paciente no encontrado'], 404);
@@ -114,7 +217,8 @@ class IoTController extends Controller
                 'x' => $request->accel_x,
                 'y' => $request->accel_y,
                 'z' => $request->accel_z
-            ]
+            ],
+            'timestamp' => now()->toISOString()
         ]);
         $paciente->ultimo_contacto_iot = now();
         $paciente->save();
@@ -122,6 +226,7 @@ class IoTController extends Controller
         // Registrar en activity_logs
         ActivityLog::create([
             'user_id' => null,
+            'adulto_mayor_id' => $paciente->id,
             'accion' => 'LECTURA_SENSORES',
             'modulo' => 'IoT',
             'descripcion' => json_encode([
@@ -137,6 +242,9 @@ class IoTController extends Controller
         ]);
     }
 
+    /**
+     * Obtener últimas alertas
+     */
     public function ultimasAlertas()
     {
         $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
@@ -149,8 +257,8 @@ class IoTController extends Controller
                 
                 return [
                     'id' => $log->id,
-                    'tipo_alerta' => $detalles['tipo_alerta'] ?? 'Desconocido',
-                    'fuerza_g' => $detalles['fuerza_g'] ?? 0,
+                    'tipo_alerta' => $detalles['tipo_alerta'] ?? ($detalles['datos']['sos'] ?? false ? 'SOS' : ($detalles['datos']['caida'] ?? false ? 'CAÍDA' : 'SENSOR')),
+                    'fuerza_g' => $detalles['fuerza_g'] ?? $detalles['datos']['fuerza_g'] ?? 0,
                     'paciente' => $paciente ? $paciente->nombres . ' ' . $paciente->apellidos : 'Desconocido',
                     'timestamp' => $log->created_at
                 ];
@@ -159,6 +267,9 @@ class IoTController extends Controller
         return response()->json($alertas);
     }
 
+    /**
+     * Resumen IoT
+     */
     public function resumenIoT()
     {
         $hoy = now()->startOfDay();
@@ -172,6 +283,9 @@ class IoTController extends Controller
         ]);
     }
 
+    /**
+     * Alertas recientes (con datos completos)
+     */
     public function alertasRecientes()
     {
         $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
@@ -181,12 +295,16 @@ class IoTController extends Controller
             ->get()
             ->map(function($log) {
                 $detalles = json_decode($log->descripcion, true);
+                $datos = $detalles['datos'] ?? [];
+                $motivo = $detalles['motivo_emergencia'] ?? [];
+                
                 return [
                     'id' => $log->id,
-                    'tipo_alerta' => $detalles['tipo_alerta'] ?? 'Desconocido',
-                    'fuerza_g' => $detalles['fuerza_g'] ?? 0,
+                    'tipo_alerta' => $datos['sos'] ?? false ? 'SOS' : ($datos['caida'] ?? false ? 'CAÍDA' : ($detalles['tipo_alerta'] ?? 'SENSOR')),
+                    'fuerza_g' => $datos['fuerza_g'] ?? $detalles['fuerza_g'] ?? 0,
+                    'motivos' => $motivo,
                     'paciente' => $log->adultoMayor ? $log->adultoMayor->nombres . ' ' . $log->adultoMayor->apellidos : 'Desconocido',
-                    'dispositivo_id' => $log->adultoMayor ? $log->adultoMayor->dispositivo_id : 'N/A',
+                    'dispositivo_id' => $log->adultoMayor ? ($log->adultoMayor->codigo ?? $log->adultoMayor->id) : 'N/A',
                     'timestamp' => $log->created_at,
                     'es_nueva' => $log->created_at > now()->subMinutes(1)
                 ];
@@ -195,16 +313,22 @@ class IoTController extends Controller
         return response()->json($alertas);
     }
 
+    /**
+     * Pacientes con dispositivos
+     */
     public function pacientesConDispositivos()
     {
-        $pacientes = AdultoMayor::whereNotNull('dispositivo_id')
+        $pacientes = AdultoMayor::whereNotNull('codigo')
+            ->orWhereNotNull('dispositivo_id')
             ->orderBy('created_at', 'desc')
             ->get();
         
         return response()->json($pacientes);
     }
 
-    // Método unificado de estadisticasAlertas
+    /**
+     * Estadísticas de alertas (última semana)
+     */
     public function estadisticasAlertas()
     {
         $alertasPorDia = ActivityLog::where('accion', 'EMERGENCIA_IOT')
@@ -219,9 +343,32 @@ class IoTController extends Controller
             ->where('created_at', '>=', now()->subDays(7))
             ->get();
         
-        $caidas = $alertas->filter(fn($a) => str_contains($a->descripcion, 'caida'))->count();
-        $sos = $alertas->filter(fn($a) => str_contains($a->descripcion, 'panico'))->count();
-        $detecciones = $alertas->count() - $caidas - $sos;
+        // Contar tipos de alertas
+        $caidas = 0;
+        $sos = 0;
+        $detecciones = 0;
+        
+        foreach ($alertas as $alerta) {
+            $detalles = json_decode($alerta->descripcion, true);
+            $datos = $detalles['datos'] ?? [];
+            
+            if (isset($datos['caida']) && $datos['caida'] === true) {
+                $caidas++;
+            } elseif (isset($datos['sos']) && $datos['sos'] === true) {
+                $sos++;
+            } elseif (isset($detalles['tipo_alerta']) && $detalles['tipo_alerta'] === 'caida') {
+                $caidas++;
+            } elseif (isset($detalles['tipo_alerta']) && in_array($detalles['tipo_alerta'], ['panico', 'sos'])) {
+                $sos++;
+            } else {
+                $detecciones++;
+            }
+        }
+        
+        // Si no hay categorías específicas, distribuir equitativamente
+        if ($caidas == 0 && $sos == 0 && $detecciones > 0) {
+            $detecciones = $alertas->count();
+        }
         
         $labels = [];
         $valores = [];
@@ -237,34 +384,47 @@ class IoTController extends Controller
             'valores' => $valores,
             'caidas' => $caidas,
             'sos' => $sos,
-            'detecciones' => $detecciones
+            'detecciones' => $detecciones,
+            'total_semana' => $alertas->count()
         ]);
     }
 
+    /**
+     * Ubicaciones de pacientes
+     */
     public function ubicacionesPacientes()
     {
+        // Si no tienes columnas 'lat' y 'lon', usa dirección
         $pacientes = AdultoMayor::whereNotNull('lat')
             ->whereNotNull('lon')
-            ->get(['id', 'nombres', 'apellidos', 'dni', 'lat', 'lon', 'nivel_riesgo']);
+            ->get(['id', 'nombres', 'apellidos', 'dni', 'lat', 'lon', 'nivel_riesgo', 'direccion']);
         
         return response()->json($pacientes);
     }
 
+    /**
+     * Mostrar paciente en vista web
+     */
     public function mostrarPaciente($id)
     {
         $paciente = AdultoMayor::findOrFail($id);
         $alertas = ActivityLog::where('accion', 'EMERGENCIA_IOT')
-            ->where('descripcion', 'LIKE', '%' . $paciente->id . '%')
-            ->orderBy('created_at', 'desc')
+            ->where('adulto_mayor_id', $paciente->id)
+            ->latest()
+            ->take(10)
             ->get();
         
         return view('iot.paciente', compact('paciente', 'alertas'));
     }
 
+    /**
+     * Dashboard IoT
+     */
     public function dashboard()
     {
-        // Obtener estadísticas para mostrar en el dashboard IoT
-        $totalDispositivos = AdultoMayor::whereNotNull('dispositivo_id')->count();
+        $totalDispositivos = AdultoMayor::whereNotNull('codigo')
+            ->orWhereNotNull('dispositivo_id')
+            ->count();
         $alertasHoy = ActivityLog::where('accion', 'EMERGENCIA_IOT')
             ->whereDate('created_at', today())->count();
         $alertasTotales = ActivityLog::where('accion', 'EMERGENCIA_IOT')->count();
@@ -272,13 +432,18 @@ class IoTController extends Controller
         return view('dashboard.iot-dashboard', compact('totalDispositivos', 'alertasHoy', 'alertasTotales'));
     }
 
+    /**
+     * Exportar a Excel (CSV)
+     */
     public function exportarExcel()
     {
-        $pacientes = AdultoMayor::whereNotNull('dispositivo_id')->get();
+        $pacientes = AdultoMayor::whereNotNull('codigo')
+            ->orWhereNotNull('dispositivo_id')
+            ->get();
         
         $csv = "ID,Nombre Completo,DNI,Dispositivo,Estado,Riesgo,Último Contacto\n";
         foreach ($pacientes as $p) {
-            $csv .= "{$p->id},{$p->nombres} {$p->apellidos},{$p->dni},{$p->dispositivo_id},{$p->alertas_activas},{$p->nivel_riesgo},{$p->ultimo_contacto_iot}\n";
+            $csv .= "{$p->id},{$p->nombres} {$p->apellidos},{$p->dni},{$p->codigo ?? $p->dispositivo_id},{$p->alertas_activas},{$p->nivel_riesgo},{$p->ultimo_contacto_iot ?? $p->updated_at}\n";
         }
         
         return response($csv)
@@ -286,9 +451,11 @@ class IoTController extends Controller
             ->header('Content-Disposition', 'attachment; filename="pacientes_iot.csv"');
     }
 
+    /**
+     * Datos de sensores en tiempo real (simulación)
+     */
     public function datosSensores()
     {
-        // Aquí se recibirán los datos reales del ESP32
         return response()->json([
             'acelerometro' => ['x' => 0.1, 'y' => 0.2, 'z' => 0.95, 'fuerza' => 1.0],
             'temperatura' => 24.5,
@@ -299,6 +466,9 @@ class IoTController extends Controller
         ]);
     }
 
+    /**
+     * Simular datos del Arduino
+     */
     public function simularArduino()
     {
         // Datos simulados como si vinieran del Arduino
