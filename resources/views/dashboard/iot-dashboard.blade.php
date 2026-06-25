@@ -408,7 +408,7 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
                             <i class="fas fa-microchip"></i> 
-                            <strong>Arduino Uno - Monitoreo en Tiempo Real</strong>
+                            <strong>ESP32 DevKitC V4 - Monitoreo en Tiempo Real</strong>
                         </div>
                         <div>
                             <span class="badge bg-light text-success" id="arduino-status">
@@ -813,7 +813,8 @@
                 })
                 .catch(err => {
                     console.error('Error cargando datos del ESP32:', err);
-                    // Mostrar estado de error
+                    
+                    // Actualizar estado a error
                     const statusIndicator = document.getElementById('arduino-status-indicator');
                     const statusText = document.getElementById('arduino-status-text');
                     const statusBadge = document.getElementById('arduino-status');
