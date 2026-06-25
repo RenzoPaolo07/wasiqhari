@@ -10,6 +10,7 @@ use App\Models\Visita;
 use App\Notifications\NuevaEmergencia;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
+use Illuminate\Support\Facades\Log; // ✅ IMPORTANTE: Agregar esta línea para corregir el error "Undefined type 'Log'"
 
 class IoTController extends Controller
 {
@@ -17,63 +18,184 @@ class IoTController extends Controller
      * Obtener estado del paciente (para ESP32)
      */
     public function obtenerEstado($pacienteId)
-        {
-            // Buscar por DNI (cédula) o por ID o código
-            $paciente = AdultoMayor::where('dni', $pacienteId)
-                ->orWhere('id', $pacienteId)
-                ->orWhere('codigo', $pacienteId)
+    {
+        // Buscar por DNI (cédula) o por ID o código
+        $paciente = AdultoMayor::where('dni', $pacienteId)
+            ->orWhere('id', $pacienteId)
+            ->orWhere('codigo', $pacienteId)
+            ->first();
+
+        if (!$paciente) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Paciente no encontrado',
+                'dni_buscado' => $pacienteId
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $paciente->id,
+                'paciente_id' => $paciente->codigo ?? $paciente->id,
+                'nombres' => $paciente->nombres,
+                'apellidos' => $paciente->apellidos,
+                'nombre' => $paciente->nombre ?: $paciente->nombres . ' ' . $paciente->apellidos,
+                'dni' => $paciente->dni,
+                'telefono' => $paciente->telefono,
+                'direccion' => $paciente->direccion,
+                'nivel_riesgo' => $paciente->nivel_riesgo ?? 'desconocido',
+                'alertas_activas' => $paciente->alertas_activas ?? false,
+                'ultima_visita' => $paciente->visitas()->latest()->first()?->created_at
+            ]
+        ]);
+    }
+
+    /**
+     * Recibir alerta del ESP32 (unificado con lógica de emergencia)
+     */
+    public function recibirAlerta(Request $request)
+    {
+        try {
+            // Validar los datos recibidos
+            $datos = $request->validate([
+                'paciente_id' => 'required|string',
+                'tipo_alerta' => 'nullable|string',
+                'pulso' => 'nullable|integer',
+                'oxigeno' => 'nullable|integer',
+                'temperatura' => 'nullable|numeric',
+                'sos' => 'boolean',
+                'caida' => 'boolean',
+                'ubicacion' => 'nullable|string',
+                'timestamp' => 'nullable|date',
+                'fuerza_g' => 'nullable|numeric',
+                'accel_x' => 'nullable|numeric',
+                'accel_y' => 'nullable|numeric',
+                'accel_z' => 'nullable|numeric',
+                'humedad' => 'nullable|numeric',
+                'distancia' => 'nullable|numeric',
+                'luz' => 'nullable|numeric'
+            ]);
+
+            // 🔍 LOG: Registrar en el archivo de Laravel para depuración
+            Log::info('📡 Petición recibida en /alerta-iot', $datos);
+
+            // Buscar el paciente
+            $paciente = AdultoMayor::where('dni', $datos['paciente_id'])
+                ->orWhere('id', $datos['paciente_id'])
+                ->orWhere('codigo', $datos['paciente_id'])
                 ->first();
 
             if (!$paciente) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Paciente no encontrado',
-                    'dni_buscado' => $pacienteId
+                    'dni_buscado' => $datos['paciente_id']
                 ], 404);
             }
 
+            // Evaluar si es una emergencia
+            $esEmergencia = false;
+            $motivo = [];
+
+            // Verificar botón SOS
+            if (isset($datos['sos']) && $datos['sos'] === true) {
+                $esEmergencia = true;
+                $motivo[] = 'Botón SOS presionado';
+            }
+
+            // Verificar caída
+            if (isset($datos['caida']) && $datos['caida'] === true) {
+                $esEmergencia = true;
+                $motivo[] = 'Detección de caída';
+            }
+
+            // Verificar pulso anómalo
+            if (isset($datos['pulso']) && ($datos['pulso'] > 120 || $datos['pulso'] < 50)) {
+                $esEmergencia = true;
+                $motivo[] = 'Pulso anómalo: ' . $datos['pulso'] . ' bpm';
+            }
+
+            // Verificar oxígeno bajo
+            if (isset($datos['oxigeno']) && $datos['oxigeno'] < 90) {
+                $esEmergencia = true;
+                $motivo[] = 'Oxígeno bajo: ' . $datos['oxigeno'] . '%';
+            }
+
+            // Verificar tipo de alerta
+            if (isset($datos['tipo_alerta']) && in_array($datos['tipo_alerta'], ['caida', 'panico', 'sos', 'emergencia'])) {
+                $esEmergencia = true;
+                if (empty($motivo)) {
+                    $motivo[] = 'Alerta tipo: ' . $datos['tipo_alerta'];
+                }
+            }
+
+            // Verificar fuerza G (impacto)
+            if (isset($datos['fuerza_g']) && $datos['fuerza_g'] > 2.5) {
+                $esEmergencia = true;
+                if (!in_array('Detección de caída', $motivo)) {
+                    $motivo[] = 'Impacto detectado (fuerza G: ' . $datos['fuerza_g'] . 'g)';
+                }
+            }
+
+            // Registrar en activity_logs
+            ActivityLog::create([
+                'user_id' => null,
+                'adulto_mayor_id' => $paciente->id,
+                'accion' => $esEmergencia ? 'EMERGENCIA_IOT' : 'LECTURA_SENSOR',
+                'modulo' => 'IoT',
+                'descripcion' => json_encode([
+                    'paciente_id' => $paciente->id,
+                    'paciente_nombre' => $paciente->nombres . ' ' . $paciente->apellidos,
+                    'datos' => $datos,
+                    'motivo_emergencia' => $motivo,
+                    'tipo_alerta' => $datos['tipo_alerta'] ?? null,
+                    'fuerza_g' => $datos['fuerza_g'] ?? null,
+                    'fuente' => 'ESP32',
+                    'timestamp' => now()->toISOString()
+                ]),
+                'ip' => $request->ip(),
+                'created_at' => now()
+            ]);
+
+            // Si es emergencia, notificar y crear visita
+            if ($esEmergencia) {
+                // Notificar a los usuarios
+                $usuariosNotificar = User::whereIn('role', ['admin', 'voluntario', 'medico'])->get();
+                Notification::send($usuariosNotificar, new NuevaEmergencia($paciente, $motivo, $datos));
+
+                // Crear visita de emergencia
+                $visita = Visita::create([
+                    'adulto_mayor_id' => $paciente->id,
+                    'voluntario_id' => null,
+                    'tipo' => 'emergencia',
+                    'fecha_programada' => now(),
+                    'estado' => 'pendiente',
+                    'notas' => 'Emergencia IoT: ' . implode(', ', $motivo),
+                    'ubicacion' => $datos['ubicacion'] ?? $paciente->direccion
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'status' => 'emergencia',
+                    'mensaje' => 'Alerta de emergencia registrada',
+                    'motivos' => $motivo,
+                    'paciente' => $paciente->nombres . ' ' . $paciente->apellidos,
+                    'visita_id' => $visita->id
+                ], 201);
+            }
+
+            // Si no es emergencia, solo registrar lectura
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'id' => $paciente->id,
-                    'paciente_id' => $paciente->codigo ?? $paciente->id,
-                    'nombres' => $paciente->nombres,
-                    'apellidos' => $paciente->apellidos,
-                    'nombre' => $paciente->nombre ?: $paciente->nombres . ' ' . $paciente->apellidos,
-                    'dni' => $paciente->dni,
-                    'telefono' => $paciente->telefono,
-                    'direccion' => $paciente->direccion,
-                    'nivel_riesgo' => $paciente->nivel_riesgo ?? 'desconocido',
-                    'alertas_activas' => $paciente->alertas_activas ?? false,
-                    'ultima_visita' => $paciente->visitas()->latest()->first()?->created_at
-                ]
-            ]);
-        }
-
-        /**
-         * Recibir alerta del ESP32 (unificado con lógica de emergencia)
-         */
-        public function recibirAlerta(Request $request)
-    {
-        try {
-            // Solo intentar validar y responder
-            $datos = $request->validate([
-                'paciente_id' => 'required|string',
-                'tipo_alerta' => 'nullable|string',
-                'fuerza_g' => 'nullable|numeric'
-            ]);
-
-            // 🔍 LOG: Registrar en el archivo de Laravel para depuración
-            \Log::info('📡 Petición recibida en /alerta-iot', $datos);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Prueba exitosa desde IoTController',
+                'status' => 'ok',
+                'mensaje' => 'Lectura registrada exitosamente',
+                'paciente' => $paciente->nombres . ' ' . $paciente->apellidos,
                 'data_recibida' => $datos
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('❌ Error en recibirAlerta: ' . $e->getMessage(), [
+            Log::error('❌ Error en recibirAlerta: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
@@ -91,61 +213,70 @@ class IoTController extends Controller
      */
     public function recibirDatosSensores(Request $request)
     {
-        $request->validate([
-            'paciente_id' => 'required|string',
-            'temperatura' => 'nullable|numeric',
-            'humedad' => 'nullable|numeric',
-            'distancia' => 'nullable|numeric',
-            'luz' => 'nullable|numeric',
-            'fuerza_g' => 'nullable|numeric',
-            'accel_x' => 'nullable|numeric',
-            'accel_y' => 'nullable|numeric',
-            'accel_z' => 'nullable|numeric'
-        ]);
-        
-        // Buscar el paciente por DNI o código
-        $paciente = AdultoMayor::where('dni', $request->paciente_id)
-            ->orWhere('codigo', $request->paciente_id)
-            ->first();
-        
-        if (!$paciente) {
-            return response()->json(['error' => 'Paciente no encontrado'], 404);
+        try {
+            $request->validate([
+                'paciente_id' => 'required|string',
+                'temperatura' => 'nullable|numeric',
+                'humedad' => 'nullable|numeric',
+                'distancia' => 'nullable|numeric',
+                'luz' => 'nullable|numeric',
+                'fuerza_g' => 'nullable|numeric',
+                'accel_x' => 'nullable|numeric',
+                'accel_y' => 'nullable|numeric',
+                'accel_z' => 'nullable|numeric'
+            ]);
+            
+            // Buscar el paciente por DNI o código
+            $paciente = AdultoMayor::where('dni', $request->paciente_id)
+                ->orWhere('codigo', $request->paciente_id)
+                ->first();
+            
+            if (!$paciente) {
+                return response()->json(['error' => 'Paciente no encontrado'], 404);
+            }
+            
+            // Actualizar los datos del paciente
+            $paciente->ultima_lectura_iot = json_encode([
+                'temperatura' => $request->temperatura,
+                'humedad' => $request->humedad,
+                'distancia' => $request->distancia,
+                'luz' => $request->luz,
+                'fuerza_g' => $request->fuerza_g,
+                'acelerometro' => [
+                    'x' => $request->accel_x,
+                    'y' => $request->accel_y,
+                    'z' => $request->accel_z
+                ],
+                'timestamp' => now()->toISOString()
+            ]);
+            $paciente->ultimo_contacto_iot = now();
+            $paciente->save();
+            
+            // Registrar en activity_logs
+            ActivityLog::create([
+                'user_id' => null,
+                'adulto_mayor_id' => $paciente->id,
+                'accion' => 'LECTURA_SENSORES',
+                'modulo' => 'IoT',
+                'descripcion' => json_encode([
+                    'paciente_id' => $paciente->id,
+                    'paciente' => $paciente->nombres . ' ' . $paciente->apellidos,
+                    'sensores' => $request->all()
+                ])
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Datos recibidos correctamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error en recibirDatosSensores: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
-        
-        // Actualizar los datos del paciente
-        $paciente->ultima_lectura_iot = json_encode([
-            'temperatura' => $request->temperatura,
-            'humedad' => $request->humedad,
-            'distancia' => $request->distancia,
-            'luz' => $request->luz,
-            'fuerza_g' => $request->fuerza_g,
-            'acelerometro' => [
-                'x' => $request->accel_x,
-                'y' => $request->accel_y,
-                'z' => $request->accel_z
-            ],
-            'timestamp' => now()->toISOString()
-        ]);
-        $paciente->ultimo_contacto_iot = now();
-        $paciente->save();
-        
-        // Registrar en activity_logs
-        ActivityLog::create([
-            'user_id' => null,
-            'adulto_mayor_id' => $paciente->id,
-            'accion' => 'LECTURA_SENSORES',
-            'modulo' => 'IoT',
-            'descripcion' => json_encode([
-                'paciente_id' => $paciente->id,
-                'paciente' => $paciente->nombres . ' ' . $paciente->apellidos,
-                'sensores' => $request->all()
-            ])
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Datos recibidos correctamente'
-        ]);
     }
 
     /**
@@ -339,25 +470,6 @@ class IoTController extends Controller
     }
 
     /**
-     * Exportar a Excel (CSV)
-     */
-    public function exportarExcel()
-    {
-        $pacientes = AdultoMayor::whereNotNull('codigo')
-            ->orWhereNotNull('dispositivo_id')
-            ->get();
-        
-        $csv = "ID,Nombre Completo,DNI,Dispositivo,Estado,Riesgo,Último Contacto\n";
-        foreach ($pacientes as $p) {
-            $csv .= "{$p->id},{$p->nombres} {$p->apellidos},{$p->dni},{$p->codigo ?: $p->dispositivo_id},{$p->alertas_activas},{$p->nivel_riesgo},{$p->ultimo_contacto_iot ?: $p->updated_at}\n";
-        }
-        
-        return response($csv)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="pacientes_iot.csv"');
-    }
-
-    /**
      * Datos de sensores en tiempo real (simulación)
      */
     public function datosSensores()
@@ -428,50 +540,84 @@ class IoTController extends Controller
             'timestamp' => now()->toISOString()
         ]);
     }
-
+    
     /**
-     * Obtener datos reales del ESP32 desde activity_logs
+     * Obtener los últimos datos reales del ESP32
      */
     public function datosReales()
     {
-        // Obtener el último registro de activity_logs del ESP32
-        $ultimoLog = ActivityLog::where('accion', 'LECTURA_SENSOR')
-            ->orWhere('accion', 'LECTURA_SENSORES')
-            ->latest()
-            ->first();
+        try {
+            // Buscar el último registro de actividad del ESP32
+            $ultimoLog = ActivityLog::where('accion', 'LECTURA_SENSOR')
+                ->orWhere('accion', 'LECTURA_SENSORES')
+                ->orderBy('created_at', 'desc')
+                ->first();
 
-        if (!$ultimoLog) {
+            // Si no hay datos, devolver un estado "sin datos"
+            if (!$ultimoLog) {
+                return response()->json([
+                    'estado' => 'sin_datos',
+                    'mensaje' => 'No hay datos del ESP32 aún. Esperando primera conexión...'
+                ]);
+            }
+
+            // Decodificar la descripción (JSON)
+            $descripcion = json_decode($ultimoLog->descripcion, true);
+
+            // Si no se pudo decodificar, usar un arreglo vacío
+            if (!is_array($descripcion)) {
+                $descripcion = [];
+            }
+
+            // Buscar el paciente
+            $paciente = null;
+            if (isset($descripcion['paciente_id'])) {
+                $paciente = AdultoMayor::find($descripcion['paciente_id']);
+            }
+
+            // Extraer datos del sensor (con valores por defecto)
+            $datos = $descripcion['datos'] ?? $descripcion;
+
+            // Construir respuesta
             return response()->json([
-                'estado' => 'sin_datos',
-                'mensaje' => 'No hay datos del ESP32 aún'
-            ]);
-        }
-
-        $descripcion = json_decode($ultimoLog->descripcion, true);
-        $paciente = AdultoMayor::find($descripcion['paciente_id'] ?? null);
-
-        // Extraer datos del JSON guardado
-        $datos = $descripcion['datos'] ?? $descripcion;
-
-        return response()->json([
-            'estado' => 'conectado',
-            'ultima_lectura' => $ultimoLog->created_at,
-            'paciente' => $paciente ? $paciente->nombres . ' ' . $paciente->apellidos : 'Desconocido',
-            'sensores' => [
-                'temperatura' => $datos['temperatura'] ?? null,
-                'humedad' => $datos['humedad'] ?? null,
-                'distancia' => $datos['distancia'] ?? null,
-                'luz' => $datos['luz'] ?? null,
-                'fuerza_g' => $datos['fuerza_g'] ?? null,
-                'acelerometro' => [
-                    'x' => $datos['accel_x'] ?? 0,
-                    'y' => $datos['accel_y'] ?? 0,
-                    'z' => $datos['accel_z'] ?? 0
+                'estado' => 'conectado',
+                'ultima_lectura' => $ultimoLog->created_at,
+                'paciente' => $paciente ? $paciente->nombres . ' ' . $paciente->apellidos : 'Desconocido',
+                'sensores' => [
+                    'temperatura' => isset($datos['temperatura']) ? (float)$datos['temperatura'] : null,
+                    'humedad' => isset($datos['humedad']) ? (float)$datos['humedad'] : null,
+                    'distancia' => isset($datos['distancia']) ? (int)$datos['distancia'] : null,
+                    'luz' => isset($datos['luz']) ? (int)$datos['luz'] : null,
+                    'fuerza_g' => isset($datos['fuerza_g']) ? (float)$datos['fuerza_g'] : null,
+                    'acelerometro' => [
+                        'x' => isset($datos['accel_x']) ? (float)$datos['accel_x'] : 0,
+                        'y' => isset($datos['accel_y']) ? (float)$datos['accel_y'] : 0,
+                        'z' => isset($datos['accel_z']) ? (float)$datos['accel_z'] : 0
+                    ],
+                    'sos' => isset($datos['tipo_alerta']) && 
+                            in_array($datos['tipo_alerta'], ['panico', 'sos', 'emergencia']) ? true : false,
+                    'impacto' => isset($datos['fuerza_g']) && $datos['fuerza_g'] > 2.5 ? true : false
                 ],
-                'sos' => str_contains($datos['tipo_alerta'] ?? '', 'panico') ? true : false,
-                'impacto' => ($datos['fuerza_g'] ?? 0) > 2.5 ? true : false
-            ],
-            'timestamp' => now()->toISOString()
-        ]);
+                'timestamp' => now()->toISOString(),
+                'debug' => [  // Esto te ayudará a depurar
+                    'log_id' => $ultimoLog->id,
+                    'descripcion_original' => $ultimoLog->descripcion
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            // Registrar el error en el log de Laravel
+            Log::error('❌ Error en datosReales: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'estado' => 'error',
+                'mensaje' => 'Error al procesar los datos',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
 }
