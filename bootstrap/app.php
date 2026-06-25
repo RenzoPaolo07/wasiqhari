@@ -12,10 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Excluir CSRF para rutas IoT
+        // Excluir CSRF para rutas API (temporal)
         $middleware->validateCsrfTokens(except: [
+            'api/*',
             'iot-alerta',
-            'api/*'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

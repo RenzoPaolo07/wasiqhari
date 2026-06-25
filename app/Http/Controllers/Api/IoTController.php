@@ -39,7 +39,7 @@ class IoTController extends Controller
                 'paciente_id' => $paciente->codigo ?? $paciente->id,
                 'nombres' => $paciente->nombres,
                 'apellidos' => $paciente->apellidos,
-                'nombre' => $paciente->nombre ?? $paciente->nombres . ' ' . $paciente->apellidos,
+                'nombre' => $paciente->nombre ?: $paciente->nombres . ' ' . $paciente->apellidos,
                 'dni' => $paciente->dni,
                 'telefono' => $paciente->telefono,
                 'direccion' => $paciente->direccion,
@@ -443,7 +443,7 @@ class IoTController extends Controller
         
         $csv = "ID,Nombre Completo,DNI,Dispositivo,Estado,Riesgo,Último Contacto\n";
         foreach ($pacientes as $p) {
-            $csv .= "{$p->id},{$p->nombres} {$p->apellidos},{$p->dni},{$p->codigo ?? $p->dispositivo_id},{$p->alertas_activas},{$p->nivel_riesgo},{$p->ultimo_contacto_iot ?? $p->updated_at}\n";
+            $csv .= "{$p->id},{$p->nombres} {$p->apellidos},{$p->dni},{$p->codigo ?: $p->dispositivo_id},{$p->alertas_activas},{$p->nivel_riesgo},{$p->ultimo_contacto_iot ?: $p->updated_at}\n";
         }
         
         return response($csv)
