@@ -16,3 +16,4 @@ Route::get('/iot/datos-sensores', [IoTController::class, 'datosSensores']);
 Route::post('/iot/datos-sensores', [IoTController::class, 'recibirDatosSensores']);
 Route::get('/iot/estadisticas-alertas', [IoTController::class, 'estadisticasAlertas']);
 Route::get('/arduino/simular', [IoTController::class, 'simularArduino']);
+Route::get('/iot/datos-reales', [IoTController::class, 'datosReales']);

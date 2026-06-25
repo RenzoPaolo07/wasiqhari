@@ -742,22 +742,86 @@
             }
         }
 
-        // Simular datos del Arduino desde la API
+        // Función mejorada para obtener datos reales del ESP32
         function simularArduino() {
-            // ✅ Usar datos reales del ESP32 guardados en la BD
-            fetch('/api/iot/alertas-recientes')
-                .then(res => res.json())
-                .then(alertas => {
-                    if (alertas && alertas.length > 0) {
-                        const ultima = alertas[0];
-                        // Actualizar valores con los datos reales
-                        document.getElementById('arduino-temp').textContent = ultima.temperatura || '--';
-                        document.getElementById('arduino-hum').textContent = ultima.humedad || '--';
-                        document.getElementById('arduino-dist').textContent = ultima.distancia || '--';
-                        document.getElementById('arduino-luz').textContent = ultima.luz || '--';
+            fetch('/api/iot/datos-reales')
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Error en la respuesta: ' + res.status);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.sensores) {
+                        const sensores = data.sensores;
+                        
+                        // Actualizar estado del Arduino
+                        const statusIndicator = document.getElementById('arduino-status-indicator');
+                        const statusText = document.getElementById('arduino-status-text');
+                        const statusBadge = document.getElementById('arduino-status');
+                        
+                        if (data.estado === 'conectado') {
+                            statusIndicator.className = 'arduino-status-indicator online';
+                            statusText.textContent = 'Conectado';
+                            statusBadge.className = 'badge bg-light text-success';
+                        } else {
+                            statusIndicator.className = 'arduino-status-indicator offline';
+                            statusText.textContent = 'Sin datos';
+                            statusBadge.className = 'badge bg-light text-danger';
+                        }
+                        
+                        // Actualizar valores de sensores
+                        document.getElementById('arduino-temp').textContent = sensores.temperatura !== null ? sensores.temperatura.toFixed(1) : '--';
+                        document.getElementById('arduino-hum').textContent = sensores.humedad !== null ? sensores.humedad.toFixed(1) : '--';
+                        document.getElementById('arduino-dist').textContent = sensores.distancia !== null ? sensores.distancia : '--';
+                        document.getElementById('arduino-luz').textContent = sensores.luz !== null ? sensores.luz : '--';
+                        
+                        // Actualizar acelerómetro
+                        if (sensores.acelerometro) {
+                            const accel = sensores.acelerometro;
+                            const xPercent = ((accel.x || 0) + 1) * 50;
+                            const yPercent = ((accel.y || 0) + 1) * 50;
+                            const zPercent = (accel.z || 0) * 50;
+                            
+                            document.getElementById('accel-x-bar').style.width = Math.min(Math.max(xPercent, 0), 100) + '%';
+                            document.getElementById('accel-x-bar').textContent = Math.round(Math.min(Math.max(xPercent, 0), 100)) + '%';
+                            
+                            document.getElementById('accel-y-bar').style.width = Math.min(Math.max(yPercent, 0), 100) + '%';
+                            document.getElementById('accel-y-bar').textContent = Math.round(Math.min(Math.max(yPercent, 0), 100)) + '%';
+                            
+                            document.getElementById('accel-z-bar').style.width = Math.min(Math.max(zPercent, 0), 100) + '%';
+                            document.getElementById('accel-z-bar').textContent = Math.round(Math.min(Math.max(zPercent, 0), 100)) + '%';
+                        }
+                        
+                        // Actualizar alertas
+                        const sosAlert = document.getElementById('sos-alert');
+                        const impactoAlert = document.getElementById('impacto-alert');
+                        
+                        if (sensores.sos) {
+                            sosAlert.style.display = 'block';
+                            try { audio.play(); } catch(e) {}
+                        } else {
+                            sosAlert.style.display = 'none';
+                        }
+                        
+                        if (sensores.impacto) {
+                            impactoAlert.style.display = 'block';
+                        } else {
+                            impactoAlert.style.display = 'none';
+                        }
                     }
                 })
-                .catch(err => console.error('Error:', err));
+                .catch(err => {
+                    console.error('Error cargando datos del ESP32:', err);
+                    // Mostrar estado de error
+                    const statusIndicator = document.getElementById('arduino-status-indicator');
+                    const statusText = document.getElementById('arduino-status-text');
+                    const statusBadge = document.getElementById('arduino-status');
+                    
+                    statusIndicator.className = 'arduino-status-indicator error';
+                    statusText.textContent = 'Error de conexión';
+                    statusBadge.className = 'badge bg-light text-warning';
+                });
         }
 
         // ============================================
@@ -1041,7 +1105,7 @@
             setInterval(actualizarDistancia, 2000);
             setInterval(actualizarLuz, 3000);
             
-            // Arduino - Simulación desde la API (cada 2 segundos)
+            // Arduino - Obtener datos reales del ESP32 (cada 2 segundos)
             arduinoInterval = setInterval(simularArduino, 2000);
             
             // Actualizar datos generales cada 5 segundos
@@ -1067,7 +1131,7 @@
             });
             
             console.log('🚀 Sistema IoT Iniciado correctamente');
-            console.log('📡 Monitoreando Arduino en: /api/arduino/simular');
+            console.log('📡 Monitoreando Arduino en: /api/iot/datos-reales');
         });
     </script>
 </body>

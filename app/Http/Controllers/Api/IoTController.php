@@ -372,8 +372,6 @@ class IoTController extends Controller
         ]);
     }
 
-
-
     /**
      * Simular datos del Arduino
      */
@@ -426,6 +424,52 @@ class IoTController extends Controller
                 ],
                 'sos' => false,
                 'impacto' => false
+            ],
+            'timestamp' => now()->toISOString()
+        ]);
+    }
+
+    /**
+     * Obtener datos reales del ESP32 desde activity_logs
+     */
+    public function datosReales()
+    {
+        // Obtener el último registro de activity_logs del ESP32
+        $ultimoLog = ActivityLog::where('accion', 'LECTURA_SENSOR')
+            ->orWhere('accion', 'LECTURA_SENSORES')
+            ->latest()
+            ->first();
+
+        if (!$ultimoLog) {
+            return response()->json([
+                'estado' => 'sin_datos',
+                'mensaje' => 'No hay datos del ESP32 aún'
+            ]);
+        }
+
+        $descripcion = json_decode($ultimoLog->descripcion, true);
+        $paciente = AdultoMayor::find($descripcion['paciente_id'] ?? null);
+
+        // Extraer datos del JSON guardado
+        $datos = $descripcion['datos'] ?? $descripcion;
+
+        return response()->json([
+            'estado' => 'conectado',
+            'ultima_lectura' => $ultimoLog->created_at,
+            'paciente' => $paciente ? $paciente->nombres . ' ' . $paciente->apellidos : 'Desconocido',
+            'sensores' => [
+                'temperatura' => $datos['temperatura'] ?? null,
+                'humedad' => $datos['humedad'] ?? null,
+                'distancia' => $datos['distancia'] ?? null,
+                'luz' => $datos['luz'] ?? null,
+                'fuerza_g' => $datos['fuerza_g'] ?? null,
+                'acelerometro' => [
+                    'x' => $datos['accel_x'] ?? 0,
+                    'y' => $datos['accel_y'] ?? 0,
+                    'z' => $datos['accel_z'] ?? 0
+                ],
+                'sos' => str_contains($datos['tipo_alerta'] ?? '', 'panico') ? true : false,
+                'impacto' => ($datos['fuerza_g'] ?? 0) > 2.5 ? true : false
             ],
             'timestamp' => now()->toISOString()
         ]);
