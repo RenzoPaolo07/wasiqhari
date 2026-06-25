@@ -23,6 +23,7 @@ Route::post('/contact', [ContactController::class, 'submit'])->name('contact.sub
 Route::get('/iot/paciente/{dni}', [IoTController::class, 'mostrarPaciente']);
 Route::get('/iot/paciente/{id}', [IoTController::class, 'mostrarPaciente']);
 Route::post('/alerta-iot', [IoTController::class, 'recibirAlerta']);
+Route::post('/alerta-iot', [IoTController::class, 'recibirAlerta'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 // --- RUTAS DE AUTENTICACIÓN ---
 Route::get('/login', [UserController::class, 'login'])->name('login');
