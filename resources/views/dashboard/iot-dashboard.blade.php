@@ -744,117 +744,20 @@
 
         // Simular datos del Arduino desde la API
         function simularArduino() {
-            fetch('/api/arduino/simular')
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error('Error en la respuesta: ' + res.status);
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (data && data.sensores) {
-                        const sensores = data.sensores;
-                        
-                        // Actualizar estado del Arduino
-                        const statusIndicator = document.getElementById('arduino-status-indicator');
-                        const statusText = document.getElementById('arduino-status-text');
-                        const statusBadge = document.getElementById('arduino-status');
-                        
-                        statusIndicator.className = 'arduino-status-indicator online';
-                        statusText.textContent = 'Conectado';
-                        statusBadge.className = 'badge bg-light text-success';
-                        
-                        // Actualizar valores
-                        if (sensores.temperatura !== undefined) {
-                            document.getElementById('arduino-temp').textContent = sensores.temperatura.toFixed(1);
-                        }
-                        if (sensores.humedad !== undefined) {
-                            document.getElementById('arduino-hum').textContent = sensores.humedad.toFixed(1);
-                        }
-                        if (sensores.distancia !== undefined) {
-                            document.getElementById('arduino-dist').textContent = sensores.distancia;
-                        }
-                        if (sensores.luz !== undefined) {
-                            document.getElementById('arduino-luz').textContent = sensores.luz;
-                        }
-                        
-                        // Actualizar acelerómetro
-                        if (sensores.acelerometro) {
-                            const accel = sensores.acelerometro;
-                            const xPercent = ((accel.x || 0) + 1) * 50;
-                            const yPercent = ((accel.y || 0) + 1) * 50;
-                            const zPercent = (accel.z || 0) * 50;
-                            
-                            document.getElementById('accel-x-bar').style.width = Math.min(Math.max(xPercent, 0), 100) + '%';
-                            document.getElementById('accel-x-bar').textContent = Math.round(Math.min(Math.max(xPercent, 0), 100)) + '%';
-                            
-                            document.getElementById('accel-y-bar').style.width = Math.min(Math.max(yPercent, 0), 100) + '%';
-                            document.getElementById('accel-y-bar').textContent = Math.round(Math.min(Math.max(yPercent, 0), 100)) + '%';
-                            
-                            document.getElementById('accel-z-bar').style.width = Math.min(Math.max(zPercent, 0), 100) + '%';
-                            document.getElementById('accel-z-bar').textContent = Math.round(Math.min(Math.max(zPercent, 0), 100)) + '%';
-                        }
-                        
-                        // Actualizar alertas
-                        const sosAlert = document.getElementById('sos-alert');
-                        const impactoAlert = document.getElementById('impacto-alert');
-                        
-                        if (sensores.sos) {
-                            sosAlert.style.display = 'block';
-                            reproducirAlerta();
-                            
-                            // Notificación SweetAlert
-                            Swal.fire({
-                                icon: 'error',
-                                title: '🚨 ALERTA SOS',
-                                text: '¡Botón de pánico activado desde el Arduino!',
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 5000,
-                                timerProgressBar: true
-                            });
-                        } else {
-                            sosAlert.style.display = 'none';
-                        }
-                        
-                        if (sensores.impacto) {
-                            impactoAlert.style.display = 'block';
-                            
-                            Swal.fire({
-                                icon: 'warning',
-                                title: '💥 IMPACTO DETECTADO',
-                                text: '¡Posible caída detectada por el acelerómetro!',
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 5000,
-                                timerProgressBar: true
-                            });
-                        } else {
-                            impactoAlert.style.display = 'none';
-                        }
-                        
-                        // Actualizar timestamp
-                        const ultimoSOS = document.getElementById('ultimo-sos');
-                        if (sensores.sos || sensores.impacto) {
-                            const ahora = new Date();
-                            ultimoSOS.innerHTML = `<small class="text-danger">Última alerta: ${ahora.toLocaleTimeString()}</small>`;
-                        }
+            // ✅ Usar datos reales del ESP32 guardados en la BD
+            fetch('/api/iot/alertas-recientes')
+                .then(res => res.json())
+                .then(alertas => {
+                    if (alertas && alertas.length > 0) {
+                        const ultima = alertas[0];
+                        // Actualizar valores con los datos reales
+                        document.getElementById('arduino-temp').textContent = ultima.temperatura || '--';
+                        document.getElementById('arduino-hum').textContent = ultima.humedad || '--';
+                        document.getElementById('arduino-dist').textContent = ultima.distancia || '--';
+                        document.getElementById('arduino-luz').textContent = ultima.luz || '--';
                     }
                 })
-                .catch(err => {
-                    console.error('Error Arduino:', err);
-                    
-                    // Actualizar estado a error
-                    const statusIndicator = document.getElementById('arduino-status-indicator');
-                    const statusText = document.getElementById('arduino-status-text');
-                    const statusBadge = document.getElementById('arduino-status');
-                    
-                    statusIndicator.className = 'arduino-status-indicator error';
-                    statusText.textContent = 'Error de conexión';
-                    statusBadge.className = 'badge bg-light text-warning';
-                });
+                .catch(err => console.error('Error:', err));
         }
 
         // ============================================

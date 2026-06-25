@@ -372,20 +372,53 @@ class IoTController extends Controller
         ]);
     }
 
+
+
     /**
      * Simular datos del Arduino
      */
     public function simularArduino()
     {
-        // Datos simulados como si vinieran del Arduino
-        $datos = [
+        // Obtener el último registro de activity_logs del ESP32
+        $ultimoLog = ActivityLog::where('accion', 'LECTURA_SENSOR')
+            ->orWhere('accion', 'LECTURA_SENSORES')
+            ->latest()
+            ->first();
+
+        if ($ultimoLog) {
+            $descripcion = json_decode($ultimoLog->descripcion, true);
+            $paciente = AdultoMayor::find($descripcion['paciente_id'] ?? null);
+
+            return response()->json([
+                'estado' => 'conectado',
+                'ultima_lectura' => $ultimoLog->created_at,
+                'sensores' => [
+                    'temperatura' => $descripcion['datos']['temperatura'] ?? $descripcion['temperatura'] ?? rand(200, 300) / 10,
+                    'humedad' => $descripcion['datos']['humedad'] ?? $descripcion['humedad'] ?? rand(400, 800) / 10,
+                    'distancia' => $descripcion['datos']['distancia'] ?? $descripcion['distancia'] ?? rand(10, 150),
+                    'luz' => $descripcion['datos']['luz'] ?? $descripcion['luz'] ?? rand(100, 900),
+                    'acelerometro' => [
+                        'x' => $descripcion['datos']['accel_x'] ?? $descripcion['accel_x'] ?? rand(-100, 100) / 100,
+                        'y' => $descripcion['datos']['accel_y'] ?? $descripcion['accel_y'] ?? rand(-100, 100) / 100,
+                        'z' => $descripcion['datos']['accel_z'] ?? $descripcion['accel_z'] ?? rand(80, 120) / 100
+                    ],
+                    'sos' => str_contains($descripcion['datos']['tipo_alerta'] ?? '', 'panico') ? true : false,
+                    'impacto' => ($descripcion['datos']['fuerza_g'] ?? 0) > 2.5 ? true : false,
+                    'paciente' => $paciente ? $paciente->nombres . ' ' . $paciente->apellidos : null
+                ],
+                'timestamp' => now()->toISOString()
+            ]);
+        }
+
+        // Si no hay datos, devolver simulación
+        return response()->json([
             'estado' => 'conectado',
             'ultima_lectura' => now(),
             'sensores' => [
-                'temperatura' => rand(200, 300) / 10, // 20-30°C
-                'humedad' => rand(400, 800) / 10, // 40-80%
-                'distancia' => rand(10, 150), // cm
-                'luz' => rand(100, 900), // LDR
+                'temperatura' => rand(200, 300) / 10,
+                'humedad' => rand(400, 800) / 10,
+                'distancia' => rand(10, 150),
+                'luz' => rand(100, 900),
                 'acelerometro' => [
                     'x' => rand(-100, 100) / 100,
                     'y' => rand(-100, 100) / 100,
@@ -395,8 +428,6 @@ class IoTController extends Controller
                 'impacto' => false
             ],
             'timestamp' => now()->toISOString()
-        ];
-        
-        return response()->json($datos);
+        ]);
     }
 }
